@@ -31,7 +31,7 @@ HALF = CELL_CM / 2
 WORLD_MIN, WORLD_MAX = -HALF, (GRID_W - 1) * CELL_CM + HALF          # -20 .. 460 cm
 ACCURACY_CM = 15                    # live position accuracy ring (docs/DESIGN.md: about +-10-15 cm)
 TRAIL_LEN = 40                      # last live positions kept per drone
-MIN_DRONE_PX = 28                   # a drone is never drawn narrower than this; true scale when zoomed in
+MIN_DRONE_PX = 46                  # a drone is never drawn narrower than this; true scale when zoomed in
 QR_MIN_CELL_PX = 26
 TARGET_TEXT_CELL_PX = 56
 COORD_TEXT_CELL_PX = 104
@@ -207,7 +207,7 @@ class MatMapView(QWidget):
         self._buttons_left = 10 ** 6
         self.extra_buttons = []     # more toolbar buttons placed next to "По размеру" (the window's side view)
         self.show_plan = True
-        self.show_qr = True
+        self.show_qr = False        # decoration only: off by default, the map is quieter without it
         self._plan = {}             # drone -> (QPainterPath in cm, QColor or None)
         self._targets = {}          # cell -> [drone numbers]
         self._press = None
@@ -615,21 +615,21 @@ class MatMapView(QWidget):
         for n, (path, col) in sorted(self._plan.items(), key=lambda kv: kv[0] == self.focus):
             col = col or theme.color("text2")
             strong = self.focus == n
-            pen = QPen(_alpha(col, 255 if strong else 110 if self.focus is None else 40))
+            pen = QPen(_alpha(col, 255 if strong else 80 if self.focus is None else 30))
             pen.setCosmetic(True)
             pen.setWidthF(1.6 if strong else 1.0)
             p.setPen(pen)
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawPath(path)
         p.restore()
-        for n, cell in self._current_targets().items():     # the cell each drone is flying to now
-            if self.focus not in (None, n):
+        for n, cell in self._current_targets().items():     # the cell the focused drone is flying to now
+            if self.focus != n:
                 continue
             col = self._plan[n][1] or theme.color("text2")
             p.setPen(QPen(_alpha(col, 230), 2))
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRect(tf.cell_rect(cell).adjusted(2, 2, -2, -2))
-        if tf.cell_px >= TARGET_TEXT_CELL_PX:
+        if tf.cell_px >= TARGET_TEXT_CELL_PX and self.focus is not None:
             p.setFont(self._font(11))
             p.setPen(theme.color("text"))
             for cell, drones in self._targets.items():
@@ -667,7 +667,7 @@ class MatMapView(QWidget):
             for n, path in self.paths.items():
                 col = _identity_color(show.drones[n]) or theme.color("text2")
                 strong = self.focus == n
-                pen = QPen(_alpha(col, 255 if strong else 150 if self.focus is None else 40), 2.0 if strong else 1.2)
+                pen = QPen(_alpha(col, 255 if strong else 100 if self.focus is None else 30), 2.0 if strong else 1.2)
                 pen.setStyle(Qt.PenStyle.DashLine)
                 p.setPen(pen)
                 pts = [tf.to_screen(seg[2][0], seg[2][1]) for seg in path if seg[0] < self.t]
@@ -695,7 +695,7 @@ class MatMapView(QWidget):
             off = QPointF(WIDTH_CM / 2 * s * 0.78, WIDTH_CM / 2 * s * 0.78)
             p.setOpacity(1.0 if self.focus in (None, n) else 0.5)
             r = paint_badge(p, c + off, str(n), rgb, outline="accent" if self.focus == n else "text2")
-            if self.tf.cell_px >= 30 and self.focus in (None, n):
+            if self.tf.cell_px >= 30 and self.focus == n:        # the height only for the drone in focus
                 paint_tag(p, QPointF(r.right() + 3, r.center().y()), f"{pos[n][2]:.0f} см")
         p.setOpacity(1.0)
 

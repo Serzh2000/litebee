@@ -323,6 +323,8 @@ def test_qr_glyphs_can_be_turned_off(mat):
     def ink(img):
         return sum(1 for x in range(int(r.center().x()), int(r.right() - 2))
                    for y in range(int(r.center().y()), int(r.bottom() - 2)) if img.pixel(x, y) == theme.color("qr").rgb())
+    assert not mat.show_qr and ink(mat.grab().toImage()) == 0            # off by default: a quieter map
+    mat.set_show_qr(True)
     assert ink(mat.grab().toImage()) > 10
     mat.set_show_qr(False)
     assert ink(mat.grab().toImage()) == 0
