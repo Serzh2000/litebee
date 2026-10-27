@@ -48,7 +48,7 @@ def win(qapp):
 def test_theme_has_all_tokens_and_no_unresolved_names():
     css = theme.stylesheet()
     assert "@" not in css.split("*/", 1)[1]            # every token substituted
-    assert theme.TOKENS["bg"] == "#12161C" and theme.TOKENS["danger"] == "#E5484D"
+    assert theme.TOKENS["bg"] == "#15181D" and theme.TOKENS["danger"] == "#F0524F"      # Tarmac, danger (UI_DESIGN v2)
 
 
 def test_ru_plural():

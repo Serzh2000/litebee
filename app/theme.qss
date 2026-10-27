@@ -1,23 +1,34 @@
-/* Litebee IDE "flight console" theme (docs/UI_DESIGN.md).
+/* Litebee IDE "stage manager's desk" theme (docs/UI_DESIGN.md).
    Every colour of the application lives in this file. Tokens are declared
    below as "@name value" lines inside this comment and substituted into the
    rules by app/theme.py; custom-painted widgets read the same tokens.
 
-@bg        #12161C
-@panel     #161B22
-@card      #1A2029
-@border    #2A3441
-@text      #E6EAF0
-@text2     #8B97A8
-@accent    #6AA9FF
-@on_accent #0B1220
-@danger    #E5484D
-@danger_dn #C93A3F
-@warn      #F5A524
-@ok        #3FB950
-@grid      #243040
-@sel       #263447
-@qr        #3A4C66
+   Surfaces
+@bg        #15181D
+@panel     #1E232B
+@card      #262C35
+@stage     #0F1215
+@border    #2C333D
+@grid      #2A313B
+@qr        #232A33
+   Text
+@text      #ECE9E2
+@text2     #99A2AD
+@cellnum   #78818B
+   Action, focus, selection: the only colour that means "this is yours to act on"
+@accent    #44D2E0
+@on_accent #0A1316
+@sel       #1F454B
+   Status: only for status
+@ok        #4CC38A
+@warn      #F0A93B
+@danger    #F0524F
+@danger_dn #D9423F
+   Code colouring (muted, the one place with more than one hue besides status)
+@syn_api   #9FD0D8
+@syn_num   #D8B26E
+@syn_str   #A9C79B
+   Drone model
 @drone_body  #E9EDF2
 @drone_grey  #9AA4B2
 @drone_dark  #4A5565
@@ -25,7 +36,7 @@
 */
 
 * {
-    font-family: "Segoe UI";
+    font-family: "Bahnschrift", "Segoe UI";
     font-size: 13px;
     color: @text;
 }
@@ -37,110 +48,157 @@ QToolTip {
     background: @card; color: @text; border: 1px solid @border; padding: 4px 6px;
 }
 
-/* panels and cards */
-QFrame#panel, QWidget#panel { background: @panel; border: 1px solid @border; border-radius: 8px; }
-QFrame#card { background: @card; border: 1px solid @border; border-radius: 8px; }
-QFrame#card[selected="true"] { border: 1px solid @accent; }
-QWidget#header, QWidget#toolbar, QWidget#bottom { background: @bg; }
+/* zones: flat, separated by one pixel lines (no boxed cards, no shadows) */
+QWidget#header { background: @bg; }
+QWidget#zoneSide { background: @panel; border-left: 1px solid @border; }
+QWidget#zoneCue { background: @panel; border-top: 1px solid @border; border-bottom: 1px solid @border; }
+QWidget#zoneFleet { background: @bg; }
+QWidget#popover, QFrame#popover { background: @card; border: 1px solid @border; border-radius: 4px; }
+QFrame#chip { background: transparent; border: none; border-right: 1px solid @border; }
+QFrame#chip[selected="true"] { background: @panel; border-bottom: 2px solid @accent; }
 
 QLabel { background: transparent; }
 QLabel#secondary, QLabel[role="secondary"] { color: @text2; font-size: 12px; }
-QLabel#projectName { font-weight: 500; font-size: 14px; }
-QLabel#mono, QLabel[role="mono"] { font-family: "Cascadia Mono", "Consolas"; }
-QLabel#emptyTitle { font-size: 18px; font-weight: 500; }
+QLabel#projectName { font-weight: 600; font-size: 15px; }
+QLabel#panelTitle { font-weight: 600; font-size: 15px; }
+QLabel#mono, QLabel[role="mono"] { font-family: "Consolas"; }
+QLabel#emptyTitle { font-size: 18px; font-weight: 600; }
+QLabel#reason { color: @text2; font-size: 12px; }
+QLabel#stepWord { color: @text2; font-size: 11px; }
+QLabel#stepWord[state="current"] { color: @text; }
+QLabel#stepWord[state="done"] { color: @text2; }
+QLabel#stepWord[error="true"] { color: @danger; }
 
-/* buttons */
+/* buttons: outlined, 4 px corners; a filled button is always the current action */
 QPushButton, QToolButton {
-    background: @card; border: 1px solid @border; border-radius: 6px;
-    padding: 6px 14px; color: @text;
+    background: transparent; border: 1px solid @border; border-radius: 4px;
+    padding: 5px 12px; color: @text;
 }
-QPushButton:hover, QToolButton:hover { border-color: @text2; }
+QPushButton:hover, QToolButton:hover { background: @card; border-color: @text2; }
 QPushButton:pressed, QToolButton:pressed { background: @sel; }
-QPushButton:focus, QToolButton:focus, QCheckBox:focus, QComboBox:focus, QLineEdit:focus,
+QPushButton:focus, QToolButton:focus, QComboBox:focus, QLineEdit:focus,
 QSpinBox:focus, QPlainTextEdit:focus, QListWidget:focus, QSlider:focus {
     border: 2px solid @accent;
 }
-QPushButton:disabled, QToolButton:disabled { color: @text2; background: @panel; border-color: @border; }
-QToolButton:checked { background: @sel; border-color: @accent; }
+QPushButton:focus, QToolButton:focus { padding: 4px 11px; }
+QPushButton:disabled, QToolButton:disabled { color: @text2; background: transparent; border-color: @border; }
+QToolButton:checked, QPushButton:checked { background: @card; border-color: @accent; }
 QToolButton[compact="true"] { padding: 2px 8px; font-size: 12px; }
 
-QPushButton#primary { background: @accent; color: @on_accent; border: 1px solid @accent; font-weight: 500; }
-QPushButton#primary:hover { border-color: @text; }
-QPushButton#primary:disabled { background: @panel; color: @text2; border-color: @border; }
+/* quiet header buttons: text only until hovered */
+QPushButton[quiet="true"], QToolButton[quiet="true"] { border: 1px solid transparent; color: @text2; padding: 3px 10px; }
+QPushButton[quiet="true"]:hover, QToolButton[quiet="true"]:hover { color: @text; background: @card; border-color: transparent; }
+QPushButton[quiet="true"]:checked, QToolButton[quiet="true"]:checked { color: @text; background: @card; border: 1px solid @accent; }
+QPushButton[quiet="true"]:focus, QToolButton[quiet="true"]:focus { border: 2px solid @accent; padding: 2px 9px; }
+
+/* pre-flight steps: done / current (filled) / next (outlined in the accent) / blocked (dim outline) */
+QPushButton[step] { padding: 3px 12px 3px 8px; min-height: 18px; }
+QPushButton[step="done"] { color: @text; }
+QPushButton[step="current"] { background: @accent; border: 1px solid @accent; color: @on_accent; font-weight: 600; }
+QPushButton[step="current"]:hover { background: @accent; border-color: @text; }
+QPushButton[step="current"]:pressed { background: @text; border-color: @text; }
+QPushButton[step="current"]:focus { border: 2px solid @text; padding: 2px 11px 2px 7px; }
+QPushButton[step="next"] { border: 1px solid @accent; color: @text; }
+QPushButton[step="blocked"] { border: 1px solid @border; color: @text2; }
+QPushButton[step]:focus { padding: 2px 11px 2px 7px; }
+QPushButton[step="current"]:disabled { background: @accent; border: 1px solid @accent; color: @on_accent; }
+QPushButton[step="next"]:disabled { border: 1px solid @accent; color: @text; }
+QPushButton[step="done"]:disabled { color: @text; }
 
 QPushButton#emergency {
-    background: @danger; color: @on_accent; border: 1px solid @danger; border-radius: 8px;
-    font-size: 15px; font-weight: 500; padding: 12px 22px; min-height: 28px;
+    background: @danger; color: @on_accent; border: 1px solid @danger; border-radius: 4px;
+    font-size: 15px; font-weight: 600; padding: 6px 20px; min-height: 22px;
 }
-QPushButton#emergency:hover { border-color: @text; }
+QPushButton#emergency:hover { background: @danger; border-color: @text; }
 QPushButton#emergency:pressed { background: @danger_dn; }
-QPushButton#emergency:focus { border: 2px solid @text; }
+QPushButton#emergency:focus { border: 2px solid @text; padding: 5px 19px; }
+
+QPushButton#primary { background: @accent; color: @on_accent; border: 1px solid @accent; font-weight: 600; }
 
 /* inputs */
 QLineEdit, QSpinBox, QComboBox {
-    background: @panel; border: 1px solid @border; border-radius: 6px; padding: 4px 8px;
+    background: @bg; border: 1px solid @border; border-radius: 4px; padding: 3px 8px;
     selection-background-color: @sel;
 }
-QComboBox QAbstractItemView { background: @card; border: 1px solid @border; selection-background-color: @sel; }
+QLineEdit:focus, QSpinBox:focus, QComboBox:focus { padding: 2px 7px; }
+QComboBox QAbstractItemView { background: @card; border: 1px solid @border; selection-background-color: @sel; outline: 0; }
+QComboBox::drop-down { border: none; width: 16px; }
+QSpinBox::up-button, QSpinBox::down-button { width: 0; border: none; }
+
+/* toggle used instead of a checkbox: a track and a knob drawn by QSS */
 QCheckBox { spacing: 8px; background: transparent; }
-QCheckBox::indicator { width: 16px; height: 16px; border: 1px solid @text2; border-radius: 4px; background: @panel; }
-QCheckBox::indicator:checked { background: @accent; border-color: @accent; }
-QCheckBox#arm::indicator:checked { background: @warn; border-color: @warn; }
+QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid @text2; border-radius: 3px; background: @bg; }
+QCheckBox::indicator:checked { background: @accent; border-color: @accent; image: none; }
+QCheckBox:focus { color: @text; }
 QCheckBox:disabled { color: @text2; }
 
 /* editor and lists */
 QPlainTextEdit {
-    background: @panel; border: 1px solid @border; border-radius: 8px;
-    font-family: "Cascadia Mono", "Consolas"; font-size: 13px; selection-background-color: @sel;
+    background: @panel; border: none; border-radius: 0;
+    font-family: "Consolas"; font-size: 13px; selection-background-color: @sel;
 }
 QPlainTextEdit#log { font-size: 12px; color: @text2; }
+QPlainTextEdit:focus { border: none; }
+QPlainTextEdit#editor:focus { border: none; border-left: 2px solid @accent; }
 QListWidget {
-    background: @panel; border: 1px solid @border; border-radius: 8px; outline: 0;
+    background: @panel; border: none; outline: 0;
 }
-QListWidget::item { padding: 4px 8px; }
+QListWidget:focus { border: none; border-left: 2px solid @accent; }
+QListWidget::item { padding: 4px 8px; border-bottom: 1px solid @border; }
 QListWidget::item:selected { background: @sel; color: @text; }
 QListView { background: @card; border: 1px solid @border; selection-background-color: @sel; }
 
 /* tabs */
-QTabWidget::pane { border: 1px solid @border; border-radius: 8px; background: @panel; top: -1px; }
-QTabBar::tab { background: transparent; color: @text2; padding: 6px 14px; border: none; }
+QTabWidget::pane { border: none; border-top: 1px solid @border; background: @panel; top: 0; }
+QTabBar { background: transparent; }
+QTabBar::tab { background: transparent; color: @text2; padding: 7px 14px 6px 14px; border: none; border-bottom: 2px solid transparent; }
 QTabBar::tab:selected { color: @text; border-bottom: 2px solid @accent; }
 QTabBar::tab:hover { color: @text; }
+QTabBar::tab:focus { color: @text; }
 
 /* splitter, scroll, slider */
-QSplitter::handle { background: @bg; }
-QSplitter::handle:horizontal { width: 6px; }
-QSplitter::handle:vertical { height: 6px; }
+QSplitter::handle { background: transparent; }
+QSplitter::handle:horizontal { width: 5px; }
+QSplitter::handle:vertical { height: 5px; }
 QSplitter::handle:hover { background: @border; }
 QScrollArea { border: none; background: transparent; }
 QScrollArea > QWidget > QWidget#cards { background: transparent; }
-QScrollBar:horizontal { background: @bg; height: 10px; }
-QScrollBar:vertical { background: @bg; width: 10px; }
-QScrollBar::handle { background: @border; border-radius: 4px; min-width: 24px; min-height: 24px; }
+QScrollBar:horizontal { background: transparent; height: 8px; margin: 0; }
+QScrollBar:vertical { background: transparent; width: 8px; margin: 0; }
+QScrollBar::handle { background: @border; border-radius: 3px; min-width: 24px; min-height: 24px; }
+QScrollBar::handle:hover { background: @text2; }
 QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; }
-QSlider::groove:horizontal { height: 4px; background: @border; border-radius: 2px; }
-QSlider::sub-page:horizontal { background: @accent; border-radius: 2px; }
-QSlider::handle:horizontal { background: @text; width: 14px; margin: -6px 0; border-radius: 7px; }
+QScrollBar::add-page, QScrollBar::sub-page { background: transparent; }
+QSlider::groove:horizontal { height: 2px; background: @border; }
+QSlider::sub-page:horizontal { background: @accent; }
+QSlider::handle:horizontal { background: @text; width: 12px; margin: -5px 0; border-radius: 6px; }
+QSlider:focus { border: none; }
+QSlider::handle:horizontal:focus { background: @accent; border: 2px solid @text; }
 
-QMenu { background: @card; border: 1px solid @border; }
+QMenu { background: @card; border: 1px solid @border; padding: 4px; }
+QMenu::item { padding: 5px 18px; border-radius: 3px; }
 QMenu::item:selected { background: @sel; }
+QMenu::separator { height: 1px; background: @border; margin: 4px 6px; }
 
 /* reference panel (app/reference_panel.py) */
-QMainWindow::separator { background: @bg; width: 6px; height: 6px; }
+QMainWindow::separator { background: transparent; width: 5px; height: 5px; }
 QMainWindow::separator:hover { background: @border; }
+QWidget#referenceFrame { background: @panel; border-left: 1px solid @border; }
 QTreeWidget#referenceTree {
-    background: @panel; border: 1px solid @border; border-radius: 8px; outline: 0;
+    background: @panel; border: none; outline: 0;
 }
 QTreeWidget#referenceTree::item { padding: 3px 6px; }
 QTreeWidget#referenceTree::item:selected { background: @sel; }
-QTreeWidget#referenceTree:focus, QTextBrowser#referenceBody:focus { border: 2px solid @accent; }
+QTreeWidget#referenceTree:focus, QTextBrowser#referenceBody:focus { border: none; border-left: 2px solid @accent; }
 QTextBrowser#referenceBody, QPlainTextEdit#referenceExample {
-    background: @panel; border: 1px solid @border; border-radius: 8px; selection-background-color: @sel;
+    background: @panel; border: none; selection-background-color: @sel;
 }
-QPlainTextEdit#referenceExample { background: @card; font-size: 12px; }
-QLabel#statusBadge { border: 1px solid @text2; border-radius: 6px; padding: 2px 8px; color: @text2; }
+QPlainTextEdit#referenceExample { background: @card; font-size: 12px; border-radius: 4px; }
+QPlainTextEdit#referenceExample:focus { border: none; border-left: 2px solid @accent; }
+QLabel#refTitle { font-weight: 600; font-size: 15px; }
+QLabel#statusBadge { border: 1px solid @text2; border-radius: 4px; padding: 2px 8px; color: @text2; }
 QLabel#statusBadge[status="verified"] { border-color: @ok; color: @ok; }
 QLabel#statusBadge[status="sim"] { border-color: @warn; color: @warn; }
 QLabel#statusBadge[status="helper"], QLabel#statusBadge[status="absent"] { border-color: @text2; color: @text2; }
-QToolButton#reference:checked, QPushButton#reference:checked { background: @sel; border-color: @accent; }
+QToolButton#reference:checked, QPushButton#reference:checked { background: @card; border-color: @accent; }
 QToolButton#refClose { padding: 2px 10px; }

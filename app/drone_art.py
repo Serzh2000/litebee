@@ -1,8 +1,9 @@
 """Our own vector model of the LiteBee Wing, drawn with QPainter (no photos, no downloaded assets).
 
-Real size 209 x 184 x 56 mm, wheelbase 148 mm (docs/REFERENCES.md): a white body with a round camera
-lens at the nose, a grey top block with a stud grid, four grey X-shaped arms with a motor and a white
-two-blade propeller at each end, grey guard rings joined by arcs, short landing legs.
+Real size 209 x 184 x 56 mm, wheelbase 148 mm (docs/REFERENCES.md): a white body with a dark camera
+lens at the nose, a white square lid over a grey battery block, four grey X-shaped building-block arms
+with holes, a silver motor and a translucent two-blade propeller at each end, short landing legs.
+No guard rings: the real LiteBee Wing has none.
 
 `paint_drone` draws it to true scale: `scale_cm_to_px` is pixels per centimetre of the mat.
 All colours come from theme tokens (app/theme.qss).
@@ -82,6 +83,16 @@ def paint_drone(painter: QPainter, center, scale_cm_to_px, heading_deg=0.0, led_
 
 # ---- top view (local frame in cm, nose towards -y of the screen) ---------------------------------------
 
+def _blade(r):
+    """One tapered propeller blade lying along +x from the hub."""
+    b = QPainterPath()
+    b.moveTo(0, 0.25)
+    b.cubicTo(r * 0.25, 0.95, r * 0.75, 0.85, r, 0.15)
+    b.cubicTo(r * 0.8, -0.35, r * 0.35, -0.5, 0, -0.25)
+    b.closeSubpath()
+    return b
+
+
 def _top(p, s, led, selected, glow):
     none = Qt.BrushStyle.NoBrush
     p.setBrush(none)
@@ -92,72 +103,74 @@ def _top(p, s, led, selected, glow):
             p.setPen(Qt.PenStyle.NoPen)
             p.setBrush(c)
             p.drawEllipse(QPointF(0, 0), r, r)
-    # guards: a ring around every motor, joined by the outer arcs
-    guard = _pen(_col("drone_guard"), 0.55, s)
-    p.setPen(guard)
-    p.setBrush(none)
+    # arms: grey building-block bars with a darker edge and a row of holes
     for mx, my in MOTORS:
-        p.drawEllipse(QPointF(mx, my), GUARD_R, GUARD_R)
-    ex, ey = MOTOR_X, MOTOR_Y + GUARD_R
-    outer = QPainterPath()
-    outer.moveTo(-ex, -ey)
-    outer.quadTo(0, -ey - 0.3, ex, -ey)                    # front arc
-    outer.moveTo(ex + GUARD_R, -MOTOR_Y)
-    outer.lineTo(ex + GUARD_R, MOTOR_Y)      # right arc
-    outer.moveTo(ex, ey)
-    outer.quadTo(0, ey + 0.3, -ex, ey)                     # rear arc
-    outer.moveTo(-ex - GUARD_R, MOTOR_Y)
-    outer.lineTo(-ex - GUARD_R, -MOTOR_Y)   # left arc
-    p.drawPath(outer)
-    # propeller disc hint
-    for mx, my in MOTORS:
-        p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(_col("drone_body", 26))
-        p.drawEllipse(QPointF(mx, my), PROP_R, PROP_R)
-    # arms
-    p.setPen(_pen(_col("drone_grey"), 1.5, s, 1.5))
-    for mx, my in MOTORS:
+        p.setPen(_pen(_col("drone_dark"), 2.1, s, 2.1, Qt.PenCapStyle.FlatCap))
         p.drawLine(QPointF(0, 0), QPointF(mx, my))
-    # motors and two-blade propellers
-    for (mx, my), ang in zip(MOTORS, PROP_ANGLES):
+    for mx, my in MOTORS:
+        p.setPen(_pen(_col("drone_grey"), 1.6, s, 1.6, Qt.PenCapStyle.FlatCap))
+        p.drawLine(QPointF(0, 0), QPointF(mx, my))
+    if s * 6 >= 26:
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(_col("drone_dark"))
-        p.drawEllipse(QPointF(mx, my), 1.15, 1.15)
+        for mx, my in MOTORS:
+            for t in (0.45, 0.62, 0.79):
+                p.drawEllipse(QPointF(mx * t, my * t), 0.26, 0.26)
+    # feet: the arms continue outwards past the motors (the width of 20.9 cm is measured across them)
+    for mx, my in MOTORS:
+        end = QPointF(mx + (1 if mx > 0 else -1) * GUARD_R, my + (1 if my > 0 else -1) * 0.5)
+        p.setPen(_pen(_col("drone_dark"), 1.9, s, 1.9, Qt.PenCapStyle.FlatCap))
+        p.drawLine(QPointF(mx, my), end)
+        p.setPen(_pen(_col("drone_grey"), 1.4, s, 1.4, Qt.PenCapStyle.FlatCap))
+        p.drawLine(QPointF(mx, my), end)
+    # motors and translucent two-blade propellers
+    for (mx, my), ang in zip(MOTORS, PROP_ANGLES):
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(_col("drone_grey"))
+        p.drawEllipse(QPointF(mx, my), 1.35, 1.35)
+        p.setBrush(_col("drone_guard"))
+        p.drawEllipse(QPointF(mx, my), 0.95, 0.95)
         p.save()
         p.translate(mx, my)
         p.rotate(ang)
-        p.setBrush(_col("drone_body", 235))
-        p.drawEllipse(QPointF(0, 0), PROP_R, 0.62)         # one ellipse = both blades
+        p.setPen(_pen(_col("drone_guard", 170), 0.12, s, 0.8))
+        p.setBrush(_col("drone_body", 150))
+        for k in (0, 180):
+            p.save()
+            p.rotate(k)
+            p.drawPath(_blade(PROP_R))
+            p.restore()
         p.restore()
-        p.setBrush(_col("drone_grey"))
-        p.drawEllipse(QPointF(mx, my), 0.5, 0.5)
-    # body
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(_col("drone_body"))
+        p.drawEllipse(QPointF(mx, my), 0.42, 0.42)
+    # body: white shell, camera block in front, grey battery block at the back, white square lid
     p.setPen(_pen(_col("drone_grey"), 0.35, s, 0.8))
     p.setBrush(_col("drone_body"))
     p.drawRoundedRect(QRectF(-2.9, -4.4, 5.8, 8.6), 1.7, 1.7)
-    # top block with the stud grid
     p.setPen(_pen(_col("drone_dark"), 0.3, s, 0.6))
     p.setBrush(_col("drone_grey"))
-    p.drawRoundedRect(QRectF(-2.1, -1.9, 4.2, 5.1), 0.5, 0.5)
-    if s * 4.2 >= 26:                                      # studs only when they are big enough to see
+    p.drawRoundedRect(QRectF(-2.3, 0.6, 4.6, 3.3), 0.5, 0.5)
+    p.setBrush(_col("drone_body"))
+    p.drawRoundedRect(QRectF(-2.45, -1.9, 4.9, 4.2), 0.9, 0.9)
+    if s * 4.9 >= 26:                                      # studs on the camera block, only when visible
         p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(_col("drone_body", 200))
+        p.setBrush(_col("drone_grey", 120))
         for i in range(3):
-            for j in range(4):
-                p.drawEllipse(QPointF(-1.2 + i * 1.2, -0.95 + j * 1.2), 0.38, 0.38)
+            p.drawEllipse(QPointF(-1.0 + i * 1.0, -3.3), 0.3, 0.3)
     # LED ring around the body
     ring = _pen(QColor(*led) if led else _col("drone_dark"), 0.7 if led else 0.35, s, 1.4 if led else 0.8)
     p.setPen(ring)
     p.setBrush(none)
-    p.drawRoundedRect(QRectF(-2.55, -2.3, 5.1, 6.0), 1.4, 1.4)
-    # camera lens at the nose
+    p.drawRoundedRect(QRectF(-2.65, -2.2, 5.3, 6.2), 1.4, 1.4)
+    # camera lens at the nose: dark lens in a lighter ring
     p.setPen(_pen(_col("drone_grey"), 0.3, s, 0.8))
-    p.setBrush(_col("on_accent"))
-    p.drawEllipse(QPointF(0, -3.1), 1.15, 1.15)
+    p.setBrush(_col("drone_dark"))
+    p.drawEllipse(QPointF(0, -3.5), 0.95, 0.95)
     p.setPen(Qt.PenStyle.NoPen)
     p.setBrush(_col("drone_guard"))
-    p.drawEllipse(QPointF(-0.3, -3.4), 0.3, 0.3)
-    # nose mark: a small triangle in front of the guard
+    p.drawEllipse(QPointF(-0.3, -3.8), 0.25, 0.25)
+    # nose mark: a small triangle in front of the propellers
     tip = MOTOR_Y + GUARD_R + 1.0
     nose = QPainterPath()
     nose.moveTo(0, -tip - 2.2)
@@ -187,19 +200,19 @@ def _side(p, s, led, selected, glow):
             p.setBrush(c)
             p.drawEllipse(QPointF(0, -2.4), r, r * 0.7)
     # landing legs
-    p.setPen(_pen(_col("drone_grey"), 0.7, s, 1.2))
-    for x in (-5.4, 5.4):
-        p.drawLine(QPointF(x, 0), QPointF(x * 0.85, -1.5))
-    # guard seen from the side: a thin band
-    p.setPen(_pen(_col("drone_guard"), 0.45, s, 1.0))
-    p.drawLine(QPointF(-WIDTH_CM / 2, -2.4), QPointF(WIDTH_CM / 2, -2.4))
-    # arm bar, motors
-    p.setPen(_pen(_col("drone_grey"), 1.0, s, 1.4))
-    p.drawLine(QPointF(-WHEELBASE_CM / 2, -3.3), QPointF(WHEELBASE_CM / 2, -3.3))
+    p.setPen(_pen(_col("drone_grey"), 1.1, s, 1.4, Qt.PenCapStyle.FlatCap))
+    for x in (-5.8, 5.8):
+        p.drawLine(QPointF(x, 0), QPointF(x * 0.9, -1.8))
+    # arm bar with a darker edge
+    p.setPen(_pen(_col("drone_dark"), 1.5, s, 1.8, Qt.PenCapStyle.FlatCap))
+    p.drawLine(QPointF(-WHEELBASE_CM / 2, -3.0), QPointF(WHEELBASE_CM / 2, -3.0))
+    p.setPen(_pen(_col("drone_grey"), 1.1, s, 1.4, Qt.PenCapStyle.FlatCap))
+    p.drawLine(QPointF(-WHEELBASE_CM / 2, -3.0), QPointF(WHEELBASE_CM / 2, -3.0))
+    # silver motor cylinders
     p.setPen(Qt.PenStyle.NoPen)
-    p.setBrush(_col("drone_dark"))
+    p.setBrush(_col("drone_guard"))
     for x in (-WHEELBASE_CM / 2, WHEELBASE_CM / 2):
-        p.drawRect(QRectF(x - 0.8, -4.2, 1.6, 2.0))
+        p.drawRoundedRect(QRectF(x - 0.9, -4.3, 1.8, 2.2), 0.3, 0.3)
     # propeller discs (thin ellipses), left one a little dimmer
     p.setBrush(_col("drone_body", 220))
     for x in (-WHEELBASE_CM / 2, WHEELBASE_CM / 2):
@@ -221,7 +234,7 @@ def _side(p, s, led, selected, glow):
     p.drawRoundedRect(QRectF(-2.8, -2.2, 5.6, 0.7), 0.35, 0.35)
     # camera lens at the nose (right)
     p.setPen(_pen(_col("drone_grey"), 0.3, s, 0.8))
-    p.setBrush(_col("on_accent"))
+    p.setBrush(_col("drone_dark"))
     p.drawEllipse(QPointF(4.3, -2.9), 0.95, 0.95)
     # nose mark
     p.setPen(Qt.PenStyle.NoPen)
@@ -248,22 +261,20 @@ def text_on(c: QColor) -> QColor:
 
 
 def paint_badge(painter: QPainter, center, text, rgb=None, px=12, outline="text2", filled=True):
-    """A pill with the drone number, readable on any LED colour. Returns its rectangle."""
+    """A small plate with the drone number: neutral fill, Chalk digits, the LED colour as its outline, so the
+    plate is readable on any LED colour and the only saturated pixel is the LED itself. Returns its rectangle."""
     text = str(text)
     painter.save()
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    f = QFont(painter.font())
-    f.setPixelSize(px)
-    f.setWeight(QFont.Weight.Medium)
+    f = theme.ui_font(px, True)
     painter.setFont(f)
     w = painter.fontMetrics().horizontalAdvance(text) + 10
     r = QRectF(center.x() - max(w, px + 6) / 2, center.y() - (px + 6) / 2, max(w, px + 6), px + 6)
     led = QColor(*rgb) if rgb and any(rgb) else None
-    fill = led if (led and filled) else theme.color("card")
-    painter.setPen(QPen(theme.color(outline) if not led else led.lighter(130), 1.4))
-    painter.setBrush(fill)
-    painter.drawRoundedRect(r, r.height() / 2, r.height() / 2)
-    painter.setPen(text_on(fill))
+    painter.setPen(QPen(led.lighter(125) if (led and outline != "accent") else theme.color(outline), 1.4))
+    painter.setBrush(theme.color("card") if filled else theme.color("stage"))
+    painter.drawRoundedRect(r, 4, 4)
+    painter.setPen(theme.color("text"))
     painter.drawText(r, Qt.AlignmentFlag.AlignCenter, text)
     painter.restore()
     return r
@@ -273,13 +284,11 @@ def paint_tag(painter: QPainter, left_mid, text, px=11):
     """Small secondary text (height, x) on a card-coloured plate, so it stays readable over the grid.
     `left_mid` is the middle of its left edge."""
     painter.save()
-    f = QFont(painter.font())
-    f.setPixelSize(px)
-    painter.setFont(f)
+    painter.setFont(theme.mono_font(px))
     w = painter.fontMetrics().horizontalAdvance(text) + 8
     r = QRectF(left_mid.x(), left_mid.y() - (px + 4) / 2, w, px + 4)
     painter.setPen(Qt.PenStyle.NoPen)
-    c = theme.color("card")
+    c = theme.color("stage")
     c.setAlpha(225)
     painter.setBrush(c)
     painter.drawRoundedRect(r, 4, 4)
@@ -318,7 +327,7 @@ class DroneArt(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.led = (106, 169, 255)
+        self.led = led_rgb("accent")                 # Beacon
         self.setMinimumSize(520, 220)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self.setAccessibleName("Рисунок дрона LiteBee Wing: вид сверху и сбоку, 209 на 184 на 56 мм")
@@ -335,10 +344,8 @@ class DroneArt(QWidget):
         paint_drone(p, top_c, s, 0, self.led, "top")
         side_c = QPointF(w * 0.74, (h - 24) / 2 + HEIGHT_CM * s / 2)
         paint_drone(p, side_c, s, 0, self.led, "side")
-        f = QFont(self.font())
-        f.setPixelSize(12)
-        p.setFont(f)
+        p.setFont(theme.ui_font(12))
         p.setPen(theme.color("text2"))
         p.drawText(QRectF(0, h - 22, w, 20), Qt.AlignmentFlag.AlignCenter,
-                   "LiteBee Wing: 209 × 184 × 56 мм, колёсная база 148 мм. Нос — синий треугольник")
+                   "LiteBee Wing: 209 × 184 × 56 мм, колёсная база 148 мм. Нос — бирюзовый треугольник")
         p.end()

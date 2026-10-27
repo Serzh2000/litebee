@@ -4,13 +4,12 @@ import sys
 import threading
 import time
 
-from PySide6.QtCore import QEventLoop, QSettings, QStandardPaths, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QEventLoop, QPoint, QSettings, QStandardPaths, Qt, QTimer, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QFileDialog, QFormLayout,
+from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QFileDialog, QFormLayout,
                                QFrame, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem,
                                QMainWindow, QMessageBox, QPlainTextEdit, QPushButton, QSlider,
-                               QSpinBox, QSplitter, QStackedWidget, QTabWidget, QToolButton,
-                               QVBoxLayout, QWidget)
+                               QSpinBox, QSplitter, QStackedWidget, QTabWidget, QVBoxLayout, QWidget)
 
 from litebee import protocol as proto
 from litebee.lbg import LbgError, lbg_to_source
@@ -23,7 +22,9 @@ from litebee.show import UploadUnsupported, drone_to_mission
 from . import theme
 from .drone_art import DroneArt
 from .drones_panel import DronesPanel
+from .cue_sheet import LABEL_W, TIME_W
 from .editor import CodeEditor
+from .preflight import PreflightStrip
 from .preview import PreviewWidget, TimelineWidget
 from .reference_panel import ReferenceDock
 from .session import FlightController
@@ -41,8 +42,9 @@ d.rgb('black')
 d.land()
 """
 
-DISCLAIMER = ("Модель приблизительная: стартовое положение берётся с первой клетки, посадка занимает 3 с, "
-              "направление кругов угадано.")
+DISCLAIMER = "Модель приблизительная: старт с первой клетки, посадка 3 с, направление кругов угадано"
+TAB_CODE, TAB_CHECKS, TAB_LOG = 0, 1, 2
+SPLIT_MAP_SHARE = 0.60                      # the map takes this much of the width while the code column is shown
 
 
 def ru_plural(n, forms=("дрон", "дрона", "дронов")):
@@ -118,8 +120,15 @@ class MainWindow(QMainWindow):
         self._check_run = None
         self.max_height_cm = self._stored_max_height()
         self.checked_limit = None               # height limit used by the last check
+        self.focus = None                       # drone of the show in focus mode
+        self._split_user = False                # the user dragged the map / code divider
+        self._shown_once = False
+        self._activated_once = False
         self._build()
-        self.reference_dock = ReferenceDock(self, self.editor, self.reference_button)     # F1, docs/UI_DESIGN.md
+        self.reference_dock = ReferenceDock(self, self.editor, self.reference_button,         # F1, docs/UI_DESIGN.md
+                                            document_open=lambda: self.stack.currentIndex() == 1,
+                                            reveal_editor=self.reveal_editor)
+        self.stack.currentChanged.connect(lambda _: self.reference_dock.refresh_insert_state())
         self._check_done.connect(self._on_check_done)
         self.controller.set_max_height(self.max_height_cm)
         self.controller.log.connect(self.append_log)
@@ -134,6 +143,7 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence(Qt.Key.Key_Escape), self, activated=self._on_escape)
         QShortcut(QKeySequence.StandardKey.Save, self, activated=self.save)
         QShortcut(QKeySequence("Ctrl+O"), self, activated=self.open_dialog)
+        QShortcut(QKeySequence("Ctrl+E"), self, activated=self.toggle_code)
         self._restore_layout()
         self.refresh()
 
@@ -152,40 +162,109 @@ class MainWindow(QMainWindow):
         root.setObjectName("root")
         self.setCentralWidget(root)
         outer = QVBoxLayout(root)
-        outer.setContentsMargins(12, 10, 12, 10)
-        outer.setSpacing(8)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
 
-        # 1. header
+        # 1. header: the show on the first row, the pre-flight sequence on the second
+        header = QWidget()
+        header.setObjectName("header")
+        header.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        hl = QVBoxLayout(header)
+        hl.setContentsMargins(14, 6, 14, 2)
+        hl.setSpacing(4)
         head = QHBoxLayout()
+        head.setSpacing(2)
         self.project_label = QLabel("Litebee IDE")
         self.project_label.setObjectName("projectName")
         self.file_label = QLabel("")
         self.file_label.setProperty("role", "secondary")
+        self.file_label.setContentsMargins(8, 2, 0, 0)
         self.link_label = QLabel()
+        self.link_label.setContentsMargins(0, 0, 10, 0)
+        self.open_button = self._btn("Открыть", "open", "Открыть шоу (Ctrl+O)")
+        self.save_button = self._btn("Сохранить", "save", "Сохранить шоу (Ctrl+S)")
+        self.link_button = self._btn("Связь…", "link", "Подключить дроны по Wi-Fi")
+        self.reference_button = self._btn("Справочник", "reference")
+        self.code_button = self._btn("Код", "code", "Показать или скрыть колонку кода (Ctrl+E)")
+        self.code_button.setCheckable(True)
+        self.code_button.setChecked(True)
+        self.code_button.setAccessibleName("Колонка кода")
+        for b in (self.open_button, self.save_button, self.link_button, self.reference_button, self.code_button):
+            b.setProperty("quiet", True)
         head.addWidget(self.project_label)
         head.addWidget(self.file_label)
         head.addStretch()
         head.addWidget(self.link_label)
-        outer.addLayout(head)
+        for b in (self.open_button, self.save_button, self.link_button, self.reference_button, self.code_button):
+            head.addWidget(b)
+        hl.addLayout(head)
 
-        # 2. toolbar
-        bar = QHBoxLayout()
-        self.open_button = self._btn("Открыть", "open")
-        self.save_button = self._btn("Сохранить", "save")
-        self.check_button = self._btn("Проверить", "primary", "Симуляция и проверки безопасности")
+        # 2. pre-flight sequence (the buttons keep their names; tests and the flow rely on them)
+        self.check_button = self._btn("Проверить", "check", "Симуляция и проверки безопасности")
         self.upload_button = self._btn("Загрузить", "upload")
-        self.arm_box = QCheckBox("Взвести")
-        self.arm_box.setObjectName("arm")
-        self.arm_box.setToolTip("Разрешает старт. Сбрасывается после каждого полёта и при потере связи")
+        self.arm_box = self._btn("Взвести", "arm", "Разрешает старт. Сбрасывается после каждого полёта и при потере связи")
+        self.arm_box.setCheckable(True)
         self.start_button = self._btn("Старт", "start")
-        self.link_button = self._btn("Связь…", "link", "Подключить дроны по Wi-Fi")
-        self.check_button.setObjectName("primary")
-        for w in (self.open_button, self.save_button, self.check_button, self.upload_button, self.arm_box,
-                  self.start_button):
-            bar.addWidget(w)
-        bar.addStretch()
-        limit_label = QLabel("Лимит высоты")
-        limit_label.setProperty("role", "secondary")
+        self.preflight = PreflightStrip([self.check_button, self.upload_button, self.arm_box, self.start_button])
+        bar = QHBoxLayout()
+        bar.setSpacing(12)
+        bar.addWidget(self.preflight, 1)
+        self.limits_button = self._btn("Ограничения", "limits")
+        self.limits_button.setProperty("quiet", True)
+        self.limits_button.setAccessibleName("Ограничения полёта")
+        self.limits_button.setToolTip("Предельная высота для проверки, загрузки и старта")
+        bar.addWidget(self.limits_button, 0, Qt.AlignmentFlag.AlignTop)
+        hl.addLayout(bar)
+        self._build_limits_popover()
+        outer.addWidget(header)
+        self.open_button.clicked.connect(self.open_dialog)
+        self.save_button.clicked.connect(self.save)
+        self.check_button.clicked.connect(self.start_check)
+        self.upload_button.clicked.connect(self.upload)
+        self.arm_box.toggled.connect(self._on_arm_toggled)
+        self.start_button.clicked.connect(self.start)
+        self.link_button.clicked.connect(self.connect_dialog)
+        self.code_button.toggled.connect(self.set_code_visible)
+
+        # 3. content: empty state or workspace
+        self.stack = QStackedWidget()
+        outer.addWidget(self.stack, 1)
+        self.stack.addWidget(self._build_empty())
+        self.stack.addWidget(self._build_workspace())
+        self.stack.currentChanged.connect(lambda _: QTimer.singleShot(0, self._apply_split))
+
+        # 5. fleet rail and the emergency button
+        bottom = QWidget()
+        bottom.setObjectName("zoneFleet")
+        bottom.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        bl = QHBoxLayout(bottom)
+        bl.setContentsMargins(14, 2, 14, 6)
+        bl.setSpacing(12)
+        self.drones_panel = DronesPanel()
+        self.drones_panel.selection_changed.connect(self.refresh)
+        self.drones_panel.drone_clicked.connect(self.set_focus)
+        bl.addWidget(self.drones_panel, 1)
+        self.emergency_button = QPushButton("Аварийная посадка")
+        self.emergency_button.setObjectName("emergency")
+        self.emergency_button.setToolTip("Посадить все дроны сейчас (Esc, если дрон взведён или летит)")
+        self.emergency_button.clicked.connect(self.emergency)
+        bl.addWidget(self.emergency_button, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
+        outer.addWidget(bottom)
+
+        root.setFocusPolicy(Qt.FocusPolicy.ClickFocus)      # the first Tab goes to the first button; no ring at start
+        self.setTabOrder(self.check_button, self.upload_button)
+        self.setTabOrder(self.upload_button, self.arm_box)
+        self.setTabOrder(self.arm_box, self.start_button)
+
+    def _build_limits_popover(self):
+        """The height limit lives in a small popover next to the sequence (same spin box and settings key)."""
+        pop = QFrame(self, Qt.WindowType.Popup)
+        pop.setObjectName("popover")
+        lay = QVBoxLayout(pop)
+        lay.setContentsMargins(12, 10, 12, 10)
+        lay.setSpacing(6)
+        row = QHBoxLayout()
+        label = QLabel("Лимит высоты")
         self.limit_spin = QSpinBox()
         self.limit_spin.setRange(MIN_TAKEOFF_CM, HARD_MAX_HEIGHT_CM)     # the ceiling cannot be exceeded here
         self.limit_spin.setSuffix(" см")
@@ -194,39 +273,30 @@ class MainWindow(QMainWindow):
         self.limit_spin.setToolTip(f"Предельная высота для проверки и загрузки, от {MIN_TAKEOFF_CM} до "
                                    f"{HARD_MAX_HEIGHT_CM} см. По умолчанию {DEFAULT_MAX_HEIGHT_CM} см")
         self.limit_spin.valueChanged.connect(self.set_max_height)
-        bar.addWidget(limit_label)
-        bar.addWidget(self.limit_spin)
-        bar.addWidget(self.link_button)
-        self.reference_button = self._btn("Справочник", "reference")
-        bar.addWidget(self.reference_button)
-        outer.addLayout(bar)
-        self.open_button.clicked.connect(self.open_dialog)
-        self.save_button.clicked.connect(self.save)
-        self.check_button.clicked.connect(self.start_check)
-        self.upload_button.clicked.connect(self.upload)
-        self.arm_box.toggled.connect(self._on_arm_toggled)
-        self.start_button.clicked.connect(self.start)
-        self.link_button.clicked.connect(self.connect_dialog)
+        self.limit_spin.setFixedWidth(90)
+        row.addWidget(label)
+        row.addWidget(self.limit_spin)
+        lay.addLayout(row)
+        hint = QLabel(f"От {MIN_TAKEOFF_CM} до {HARD_MAX_HEIGHT_CM} см. После смены нажмите «Проверить»")
+        hint.setProperty("role", "secondary")
+        hint.setWordWrap(True)
+        hint.setFixedWidth(250)
+        lay.addWidget(hint)
+        self.limits_popover = pop
+        self.limits_button.clicked.connect(self.show_limits)
+        self._update_limits_button()
 
-        # 3. content: empty state or workspace
-        self.stack = QStackedWidget()
-        outer.addWidget(self.stack, 1)
-        self.stack.addWidget(self._build_empty())
-        self.stack.addWidget(self._build_workspace())
+    def show_limits(self):
+        pop = self.limits_popover
+        pop.adjustSize()
+        b = self.limits_button
+        pop.move(b.mapToGlobal(QPoint(b.width() - pop.width(), b.height() + 2)))
+        pop.show()
+        self.limit_spin.setFocus()
+        self.limit_spin.selectAll()
 
-        # 5. bottom strip
-        bottom = QHBoxLayout()
-        self.drones_panel = DronesPanel()
-        self.drones_panel.selection_changed.connect(self.refresh)
-        bottom.addWidget(self.drones_panel, 1)
-        self.emergency_button = QPushButton("Аварийная посадка")
-        self.emergency_button.setObjectName("emergency")
-        self.emergency_button.setToolTip("Посадить все дроны сейчас (Esc, если дрон взведён или летит)")
-        self.emergency_button.clicked.connect(self.emergency)
-        bottom.addWidget(self.emergency_button, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
-        outer.addLayout(bottom)
-
-        self.setTabOrder(self.check_button, self.upload_button)
+    def _update_limits_button(self):
+        self.limits_button.setText(f"Ограничения: {self.max_height_cm} см")
 
     def _build_empty(self):
         page = QWidget()
@@ -258,109 +328,217 @@ class MainWindow(QMainWindow):
         ws = QWidget()
         lay = QVBoxLayout(ws)
         lay.setContentsMargins(0, 0, 0, 0)
-        lay.setSpacing(8)
+        lay.setSpacing(0)
         self.split_main = QSplitter(Qt.Orientation.Horizontal)
         self.split_main.setChildrenCollapsible(False)
 
-        # left: editor + tabs
-        self.split_left = QSplitter(Qt.Orientation.Vertical)
-        self.split_left.setChildrenCollapsible(False)
+        # left: the mat, the hero
+        self.preview = PreviewWidget()
+        self.preview.threshold = MIN_APPROACH_CM
+        self.preview.set_max_height(self.max_height_cm)
+        self.preview.set_note(DISCLAIMER)
+        self.preview.mat.drone_clicked.connect(self.set_focus)
+        self.side_button = self.preview.side_button
+        stage = QWidget()
+        sl = QVBoxLayout(stage)
+        sl.setContentsMargins(14, 0, 4, 0)
+        sl.addWidget(self.preview)
+        self.stage = stage
+
+        # right: code, checks, log
+        self.side = QWidget()
+        self.side.setObjectName("zoneSide")
+        self.side.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        side_lay = QVBoxLayout(self.side)
+        side_lay.setContentsMargins(0, 0, 0, 0)
+        side_lay.setSpacing(0)
         self.editor = CodeEditor()
         self.editor.setAccessibleName("Код шоу")
         self.editor.textChanged.connect(self._on_text_changed)
         self.tabs = QTabWidget()
+        self.tabs.setDocumentMode(True)
         self.problem_list = QListWidget()
         self.problem_list.setAccessibleName("Список проблем")
+        self.problem_list.setWordWrap(True)
+        self.problem_list.setTextElideMode(Qt.TextElideMode.ElideNone)
+        self.problem_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.problem_list.itemActivated.connect(self._problem_activated)
         self.problem_list.itemClicked.connect(self._problem_activated)
         self.report_view = QPlainTextEdit()
         self.report_view.setReadOnly(True)
         self.report_view.setAccessibleName("Отчёт проверки")
+        self.report_view.setObjectName("log")
+        checks = QSplitter(Qt.Orientation.Vertical)
+        checks.setChildrenCollapsible(False)
+        checks.addWidget(self.problem_list)
+        checks.addWidget(self.report_view)
+        checks.setSizes([260, 140])
         self.log_view = QPlainTextEdit()
         self.log_view.setObjectName("log")
         self.log_view.setReadOnly(True)
         self.log_view.setAccessibleName("Журнал")
-        self.tabs.addTab(self.problem_list, "Проверки")
-        self.tabs.addTab(self.report_view, "Отчёт")
+        self.tabs.addTab(self.editor, "Код")
+        self.tabs.addTab(checks, "Проверки")
         self.tabs.addTab(self.log_view, "Журнал")
-        self.split_left.addWidget(self.editor)
-        self.split_left.addWidget(self.tabs)
-        self.split_left.setSizes([420, 160])
+        side_lay.addWidget(self.tabs)
+        self.side.setMinimumWidth(340)
 
-        # right: preview
-        right = QWidget()
-        rl = QVBoxLayout(right)
-        rl.setContentsMargins(0, 0, 0, 0)
-        rl.setSpacing(4)
-        top = QHBoxLayout()
-        self.side_button = QToolButton()
-        self.side_button.setText("Вид сбоку")
-        self.side_button.setCheckable(True)
-        self.side_button.toggled.connect(lambda c: self.preview.set_side(c))
-        top.addWidget(QLabel("Превью"))
-        top.addStretch()
-        top.addWidget(self.side_button)
-        rl.addLayout(top)
-        self.preview = PreviewWidget()
-        self.preview.threshold = MIN_APPROACH_CM
-        self.preview.set_max_height(self.max_height_cm)
-        rl.addWidget(self.preview, 1)
-        self.disclaimer = QLabel(DISCLAIMER)
-        self.disclaimer.setProperty("role", "secondary")
-        self.disclaimer.setWordWrap(True)
-        rl.addWidget(self.disclaimer)
-
-        self.split_main.addWidget(self.split_left)
-        self.split_main.addWidget(right)
-        self.split_main.setSizes([560, 540])
+        self.split_main.addWidget(stage)
+        self.split_main.addWidget(self.side)
+        self.split_main.setStretchFactor(0, 62)
+        self.split_main.setStretchFactor(1, 38)
+        self.split_main.setCollapsible(0, False)
+        self.split_main.splitterMoved.connect(self._on_split_moved)
         lay.addWidget(self.split_main, 1)
 
-        # 4. timeline + playback
-        self.timeline = TimelineWidget()
-        self.timeline.time_selected.connect(self._seek)
-        self.timeline.step_clicked.connect(lambda n, line: self.editor.go_to_line(line))
-        lay.addWidget(self.timeline)
+        # 4. cue sheet with the transport row above it; the transport columns line up with the sheet's
+        cue = QWidget()
+        cue.setObjectName("zoneCue")
+        cue.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        cl = QVBoxLayout(cue)
+        cl.setContentsMargins(14, 4, 14, 4)
+        cl.setSpacing(2)
         play = QHBoxLayout()
+        play.setSpacing(0)
+        left = QWidget()
+        left.setFixedWidth(LABEL_W)
+        ll = QHBoxLayout(left)
+        ll.setContentsMargins(0, 0, 0, 0)
+        ll.setSpacing(6)
         self.play_button = self._btn("Играть")
+        self.play_button.setProperty("compact", True)
         self.play_button.clicked.connect(self.toggle_play)
         self.speed = QComboBox()
         for label, v in (("1×", 1), ("4×", 4), ("10×", 10)):
             self.speed.addItem(label, v)
         self.speed.setAccessibleName("Скорость симуляции")
+        ll.addWidget(self.play_button)
+        ll.addWidget(self.speed)
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(0, 0)
         self.slider.setAccessibleName("Время")
         self.slider.valueChanged.connect(self._on_slider)
         self.time_label = QLabel("0,0 / 0,0 с")
         self.time_label.setProperty("role", "mono")
-        play.addWidget(self.play_button)
-        play.addWidget(self.speed)
+        self.time_label.setFixedWidth(TIME_W)
+        self.time_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        play.addWidget(left)
         play.addWidget(self.slider, 1)
         play.addWidget(self.time_label)
-        lay.addLayout(play)
+        cl.addLayout(play)
+        self.timeline = TimelineWidget()
+        self.timeline.time_selected.connect(self._seek)
+        self.timeline.step_clicked.connect(lambda n, line: self.editor.go_to_line(line))
+        self.timeline.drone_selected.connect(self.set_focus)
+        cl.addWidget(self.timeline)
+        lay.addWidget(cue)
+        self.cue_zone = cue
         return ws
 
-    # ---- layout persistence --------------------------------------------------
+    # ---- code column, focus mode -----------------------------------------------------------------
+
+    def set_code_visible(self, on):
+        """Show or hide the code column so the map can take the full width (Ctrl+E); remembered."""
+        on = bool(on)
+        self.side.setVisible(on)
+        if self.code_button.isChecked() != on:
+            self.code_button.blockSignals(True)
+            self.code_button.setChecked(on)
+            self.code_button.blockSignals(False)
+        if on:
+            self._apply_split()
+        if self.settings:
+            self.settings.setValue("ui/code_column", on)
+            self.settings.sync()
+
+    def reveal_editor(self):
+        """Bring the editor into view: the code column and its tab."""
+        self.set_code_visible(True)
+        self.tabs.setCurrentIndex(TAB_CODE)
+
+    def toggle_code(self):
+        self.set_code_visible(not self.code_button.isChecked())
+
+    @property
+    def code_visible(self):
+        return self.code_button.isChecked()
+
+    def set_focus(self, n):
+        """Focus mode: the drone n of the show is drawn at full strength on the map and the cue sheet, the others
+        are dimmed. None clears it. Reachable from the map, a lane header and a fleet chip."""
+        if n is not None and not (self.show_obj and n in self.show_obj.drones):
+            n = None
+        self.focus = n
+        self.preview.set_focus(n)
+        self.timeline.set_focus(n)
+        self.drones_panel.set_focus(n)
+
+    # ---- layout persistence --------------------------------------------------------------------------
+
+    def _on_split_moved(self, *_):
+        if self.side.isVisible():
+            self._split_user = True
+
+    def _apply_split(self):
+        """Map : code = 62 : 38 unless the user has dragged the divider (then their sizes stay)."""
+        if self._split_user or not self.side.isVisibleTo(self) or not self.split_main.isVisible():
+            return
+        w = self.split_main.width()
+        if w > 100:
+            a = int(w * SPLIT_MAP_SHARE)
+            self.split_main.setSizes([a, w - a])
+
+    def _apply_density(self):
+        """Lanes of the cue sheet are 11 to 16 px high depending on the window height: the map keeps the rest."""
+        h = self.height()
+        self.timeline.set_lane_height(11 if h <= 760 else 12 if h <= 800 else 14 if h <= 940 else 16)
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        self._apply_split()
+        if not self._shown_once:
+            self._shown_once = True
+            self._clear_start_focus()
+
+    def _clear_start_focus(self):
+        """No focus ring at start: Qt puts the focus on the first button once the window is active; the first Tab
+        brings the ring back."""
+        w = self.focusWidget()
+        if w is self.open_button:               # only the focus Qt gave at start, never one the user moved
+            w.clearFocus()
+
+    def changeEvent(self, e):
+        super().changeEvent(e)
+        if e.type() == QEvent.Type.ActivationChange and self.isActiveWindow() and not self._activated_once:
+            self._activated_once = True
+            QTimer.singleShot(0, self._clear_start_focus)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._apply_density()
+        self._apply_split()
 
     def _restore_layout(self):
         if not self.settings:
             return
-        for name, split in (("main", self.split_main), ("left", self.split_left)):
-            raw = self.settings.value(f"splitter/{name}")
-            if raw:
-                try:
-                    split.setSizes([int(v) for v in raw])
-                except (TypeError, ValueError):
-                    pass
+        raw = self.settings.value("splitter/main")
+        if raw:
+            try:
+                self.split_main.setSizes([int(v) for v in raw])
+                self._split_user = True
+            except (TypeError, ValueError):
+                pass
         geo = self.settings.value("window/geometry")
         if geo:
             self.restoreGeometry(geo)
+        shown = self.settings.value("ui/code_column", True)
+        self.set_code_visible(str(shown).lower() not in ("false", "0"))
 
     def closeEvent(self, e):
         self._cancel_check()
         if self.settings:
-            self.settings.setValue("splitter/main", self.split_main.sizes())
-            self.settings.setValue("splitter/left", self.split_left.sizes())
+            if self.side.isVisibleTo(self) and self._split_user:
+                self.settings.setValue("splitter/main", self.split_main.sizes())
             self.settings.setValue("window/geometry", self.saveGeometry())
             self.settings.sync()
         self.play_timer.stop()
@@ -407,6 +585,7 @@ class MainWindow(QMainWindow):
         self.preview.set_show(None)
         self.timeline.set_show(None)
         self._set_duration(0)
+        self.set_focus(None)
         self.stack.setCurrentIndex(1)
         self.refresh()
 
@@ -466,6 +645,7 @@ class MainWindow(QMainWindow):
             return True
         changed = cm != self.max_height_cm
         self.max_height_cm = cm
+        self._update_limits_button()
         self.preview.set_max_height(cm)
         self.controller.set_max_height(cm)
         if self.settings:
@@ -558,11 +738,16 @@ class MainWindow(QMainWindow):
             self._set_duration(show.duration)
             self.drones_panel.set_roles(sorted(show.drones))
             self.project_label.setText(show.name)
+            self.set_focus(self.focus)          # stays only while that drone is still in the show
         self.checked_text = text
         self.checked_limit = self.max_height_cm
         self.report_view.setPlainText(self.last_report)
         self._show_problems()
-        self.tabs.setCurrentIndex(0 if self.problems else 1)
+        if self.problems:
+            self.tabs.setCurrentIndex(TAB_CHECKS)
+        if self.has_errors and not self.code_visible:
+            self.set_code_visible(True)         # the errors are in the column that was hidden: show it
+            self.code_button.setChecked(True)
         self.append_log("Проверка: " + ("есть ошибки" if self.has_errors else "ошибок нет"))
         self.refresh()
 
@@ -573,6 +758,7 @@ class MainWindow(QMainWindow):
             where = f"строка {line}: " if line else ""
             item = QListWidgetItem(f"{marks[level]}{where}{msg}")
             item.setData(Qt.ItemDataRole.UserRole, (line, t))
+            item.setToolTip(msg)
             color = {"error": "danger", "warn": "warn", "info": "text2"}[level]
             item.setForeground(theme.color(color))
             self.problem_list.addItem(item)
@@ -710,6 +896,54 @@ class MainWindow(QMainWindow):
             self.arm_box.blockSignals(True)
             self.arm_box.setChecked(c.armed)
             self.arm_box.blockSignals(False)
+        self._update_preflight(why_up, why_go)
+
+    def preflight_states(self, why_up, why_go):
+        """[(state, word[, error])] of the four steps and the reason the next one is not possible.
+
+        A step is done, current (the next thing to do, possible now: filled), next (the next thing to do but
+        blocked: outlined in the accent colour) or blocked (later: dim). Words say the same as the icons."""
+        c = self.controller
+        if self.stack.currentIndex() != 1:
+            return [("blocked", "позже")] * 4, "Откройте шоу или создайте новое"
+        checked = self.checked_text is not None and not self.dirty
+        check_ok = checked and not self.has_errors
+        target = self._target()
+        loaded = target is not None and target[0] in c.loaded
+        if c.flying:
+            states = [("done", "пройдена"), ("done", "загружена"), ("done", "взведён"), ("next", "летит")]
+            return states, "Идёт полёт. Esc — аварийная посадка"
+        if self._checking:
+            check = ("current", "идёт проверка")
+        elif check_ok:
+            check = ("done", "пройдена")
+        elif checked:
+            check = ("current", "есть ошибки", True)
+        elif self.checked_text is not None:
+            check = ("current", "устарела")
+        else:
+            check = ("current", "нужна")
+        if not check_ok:
+            upload = ("blocked", "позже")
+        elif loaded:
+            upload = ("done", "загружена")
+        else:
+            upload = ("current", "можно") if why_up is None else ("next", "недоступно")
+        if not (check_ok and loaded):
+            arm = ("blocked", "позже")
+        elif c.armed:
+            arm = ("done", "взведён")
+        else:
+            arm = ("current", "можно") if self.arm_box.isEnabled() else ("next", "недоступно")
+        if not (check_ok and loaded and c.armed):
+            start = ("blocked", "позже")
+        else:
+            start = ("current", "можно") if why_go is None else ("next", "недоступно")
+        return [check, upload, arm, start], (why_go or "Всё готово: можно стартовать")
+
+    def _update_preflight(self, why_up, why_go):
+        states, reason = self.preflight_states(why_up, why_go)
+        self.preflight.set_states(states, reason)
 
     def _on_arm_toggled(self, on):
         self.controller.set_armed(on)
@@ -758,7 +992,7 @@ class MainWindow(QMainWindow):
             self.append_log(f"Загрузка невозможна. {e}")
             self.problems.append(("info", f"Загрузка невозможна. {e}", None, None))
             self._show_problems()
-            self.tabs.setCurrentIndex(0)
+            self.tabs.setCurrentIndex(TAB_CHECKS)
             return
         self.append_log(f"Дрон {ip}: загружаю миссию дрона шоу {number} ({len(mission.steps)} шагов, "
                         f"~{mission.total_seconds:.0f} с)")

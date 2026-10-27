@@ -7,7 +7,7 @@ the editor focused on a DSL word, opens it at that function).
 from html import escape
 
 from PySide6.QtCore import QEvent, QObject, Qt, Signal
-from PySide6.QtGui import QFont, QFontDatabase, QKeySequence, QShortcut, QTextCursor
+from PySide6.QtGui import QFont, QKeySequence, QShortcut, QTextCursor
 from PySide6.QtWidgets import (QDockWidget, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QPushButton,
                                QSplitter, QTextBrowser, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
                                QWidget)
@@ -23,7 +23,7 @@ NO_EDITOR = "Откройте шоу или создайте новое, тог�
 READ_ONLY = "Редактор только для чтения, пока дрон взведён или летит"
 CONTEXT_NOTE = {"drone": "В примерах d — дрон: d = show.drone(1)",
                 "show": "В примерах show — шоу: show = Show('имя')", "full": ""}
-MONO = "'Cascadia Mono','Consolas'"
+MONO = "'Consolas','Cascadia Mono'"
 
 
 # ---- content -> HTML (pure functions, tested without a window) ----------------------------------
@@ -61,7 +61,7 @@ def _table(header, rows, mono_cols=(), widths=None):
 
 
 def _heading(text):
-    return f"<p style=\"margin-top:12px; margin-bottom:2px; color:{_t()['accent']}\"><b>{escape(text)}</b></p>"
+    return f"<p style=\"margin-top:12px; margin-bottom:2px; color:{_t()['text']}\"><b>{escape(text)}</b></p>"
 
 
 def entry_html(entry):
@@ -253,10 +253,7 @@ class ReferencePanel(QWidget):
 
     @staticmethod
     def _mono(size=12):
-        fams = QFontDatabase.families()
-        f = QFont(next((x for x in theme.MONO_FAMILIES if x in fams), "monospace"))
-        f.setPixelSize(size)
-        return f
+        return theme.mono_font(size)
 
     # ---- list ----
 
@@ -273,7 +270,7 @@ class ReferencePanel(QWidget):
         self.tree.blockSignals(True)
         self.tree.clear()
         header_font = QFont(self.tree.font())
-        header_font.setWeight(QFont.Weight.Medium)
+        header_font.setWeight(theme.EMPHASIS)
         first_leaf, wanted = None, None
         for tid, ttitle in ref.TOPICS:
             group = [it for it in found if it.topic == tid]
@@ -324,7 +321,7 @@ class ReferencePanel(QWidget):
         article = item.article
         self.title.setText(item.title if article else item.signature)
         self.title.setFont(self._mono(14) if not article else self.font())
-        self.title.setStyleSheet("font-weight: 500; font-size: 15px;" if article else "")
+        self.title.setStyleSheet("font-weight: 600; font-size: 15px;" if article else "")
         self.title.show()
         self.badge.setVisible(not article)
         self.command.setVisible(not article)
@@ -421,17 +418,22 @@ class _TitleBar(QWidget):
 class ReferenceDock(QDockWidget):
     """Right-hand dock with the reference. F1 toggles it, or opens it at the DSL word under the editor cursor."""
 
-    def __init__(self, window, editor, button=None, width=380):
+    def __init__(self, window, editor, button=None, width=380, document_open=None, reveal_editor=None):
+        """`document_open()` says whether a show is open (default: the editor is visible); `reveal_editor()` brings
+        the editor into view (the code column and its tab) before an example is inserted."""
         super().__init__("Справочник", window)
         self.setObjectName("referenceDock")
         self.editor, self.button, self.window_ = editor, button, window
+        self._document_open = document_open or editor.isVisible
+        self._reveal_editor = reveal_editor
         self._width, self._grown = width, 0
         self.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
         self.panel = ReferencePanel()
         frame = QWidget()
+        frame.setObjectName("referenceFrame")
         fl = QVBoxLayout(frame)
-        fl.setContentsMargins(6, 6, 0, 10)
+        fl.setContentsMargins(12, 10, 12, 10)
         self.title_bar = _TitleBar()
         self.title_bar.closed.connect(self.toggle)
         fl.addWidget(self.title_bar)
@@ -526,7 +528,7 @@ class ReferenceDock(QDockWidget):
     # ---- inserting ----
 
     def insert_problem(self):
-        if not self.editor.isVisible():
+        if not self._document_open():
             return NO_EDITOR
         if self.editor.isReadOnly():
             return READ_ONLY
@@ -539,6 +541,8 @@ class ReferenceDock(QDockWidget):
         self.refresh_insert_state()
         if self.insert_problem():
             return False
+        if self._reveal_editor is not None:
+            self._reveal_editor()
         insert_snippet(self.editor, text)
         self.editor.setFocus()
         return True

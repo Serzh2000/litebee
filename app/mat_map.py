@@ -16,14 +16,15 @@ from math import ceil, dist, floor
 from random import Random
 from typing import Optional
 
-from PySide6.QtCore import QPointF, QRectF, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QGuiApplication, QPainter, QPainterPath, QPen
+from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, Signal
+from PySide6.QtGui import QColor, QFontMetrics, QGuiApplication, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QMenu, QToolButton, QToolTip, QWidget
 
 from litebee.mission import CELL_CM, GRID_CELLS, GRID_W
 from litebee.safety import MIN_APPROACH_CM
 
 from . import theme
+from .cue_sheet import step_text
 from .drone_art import WIDTH_CM, paint_badge, paint_drone, paint_tag
 
 HALF = CELL_CM / 2
@@ -179,10 +180,15 @@ def _identity_color(drone):
 
 
 class MatMapView(QWidget):
-    """The mat from above. Wheel zooms around the cursor, dragging pans, double click or the button fits it."""
+    """The mat from above, the hero of the window. Wheel zooms around the cursor, dragging pans, double
+    click or the button fits it. A click on a drone focuses it (its path at full strength, the rest dimmed),
+    a click on empty space clears the focus."""
     cell_clicked = Signal(int)
+    drone_clicked = Signal(object)          # show drone number, or None for empty space
 
-    ML, MT, MR, MB = 42, 6, 10, 38          # margins: row labels, top, right, column labels + status line
+    ML, MT, MR, MB = 26, 4, 8, 36           # margins: row labels, top, right, column labels + the model note
+    ASIDE_MIN = 190                         # free width beside the plane that is used for the text column
+    DIM = 0.28                              # strength of everything that is not the focused drone
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -196,6 +202,10 @@ class MatMapView(QWidget):
         self.auto_fit = True
         self.hover_cell = None
         self.selected_cell = None
+        self.focus = None
+        self.note = ""
+        self._buttons_left = 10 ** 6
+        self.extra_buttons = []     # more toolbar buttons placed next to "По размеру" (the window's side view)
         self.show_plan = True
         self.show_qr = True
         self._plan = {}             # drone -> (QPainterPath in cm, QColor or None)
@@ -206,6 +216,7 @@ class MatMapView(QWidget):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setMinimumSize(320, 200)
         self.setAccessibleName("Карта коврика")
+        self.setAccessibleDescription(HINT)
         self.fit_button = QToolButton(self)
         self.fit_button.setText("По размеру")
         self.fit_button.setProperty("compact", True)
@@ -233,10 +244,24 @@ class MatMapView(QWidget):
                         lst = self._targets.setdefault(s.args["cell"], [])
                         if n not in lst:
                             lst.append(n)
+        if self.focus not in self.paths:
+            self.focus = None
         self.update()
 
     def set_time(self, t):
         self.t = t
+        self.update()
+
+    def set_focus(self, n):
+        """Focus mode: the path and the drone n at full strength, everything else dimmed. None clears it."""
+        n = n if n in self.paths else None
+        if n != self.focus:
+            self.focus = n
+            self.update()
+
+    def set_note(self, text):
+        self.note = text
+        self.setToolTip("")
         self.update()
 
     def set_live(self, drones):
@@ -259,15 +284,25 @@ class MatMapView(QWidget):
         """Live drones that have a position and are therefore drawn."""
         return [d for d in self.live if d.drawn]
 
+    def _strength(self, n):
+        """1.0 for the focused drone (or when nothing is focused), DIM for the others."""
+        return 1.0 if self.focus in (None, n) else self.DIM
+
     # ---- geometry ---------------------------------------------------------------------------------------
 
     def data_rect(self):
         return QRectF(self.ML, self.MT, max(self.width() - self.ML - self.MR, 10),
                       max(self.height() - self.MT - self.MB, 10))
 
+    def _fit_to(self, tf):
+        """Fit the mat in the data rectangle, flush left: the free width is used by the text column."""
+        r = self.data_rect()
+        tf.fit(r)
+        tf.ox -= (r.width() - (WORLD_MAX - WORLD_MIN) * tf.s) / 2
+
     def fit(self):
         self.auto_fit = True
-        self.tf.fit(self.data_rect())
+        self._fit_to(self.tf)
         self.update()
 
     def _fit_scale(self):
@@ -277,16 +312,52 @@ class MatMapView(QWidget):
 
     def resizeEvent(self, e):
         r = self.data_rect()
-        self.fit_button.adjustSize()
-        self.fit_button.move(int(r.right() - self.fit_button.width() - 4), int(r.top() + 4))
         if self.auto_fit:
-            self.tf.fit(r)
+            self._fit_to(self.tf)
         else:
             self.tf.clamp(r)
+        self._place_buttons()
+
+    def set_toolbar(self, buttons):
+        """Other buttons that sit next to 'По размеру' (children of the same parent)."""
+        self.extra_buttons = list(buttons)
+        self._place_buttons()
+
+    def _place_buttons(self):
+        """The buttons go to the top of the free column beside the mat; with no such column, to the bottom right."""
+        btns = [self.fit_button] + self.extra_buttons
+        for b in btns:
+            b.adjustSize()
+        total = sum(b.width() for b in btns) + 6 * (len(btns) - 1)
+        aside = self.aside_rect()
+        if aside is not None:
+            x, y = aside.left(), self.MT + 2
+        else:
+            x, y = self.width() - self.MR - total, self.height() - btns[0].height() - 2
+        for b in btns:
+            if b.pos() != QPoint(int(x), int(y)):
+                b.move(int(x), int(y))
+            b.raise_()
+            x += b.width() + 6
+        self._buttons_left = int(self.width() - self.MR - total) if aside is None else self.width()
 
     def showEvent(self, e):
         if self.auto_fit:
-            self.tf.fit(self.data_rect())
+            self._fit_to(self.tf)
+
+    def plane_rect(self):
+        """The mat on the screen (the whole 12 x 12 plane)."""
+        return QRectF(self.tf.to_screen(WORLD_MIN, WORLD_MAX), self.tf.to_screen(WORLD_MAX, WORLD_MIN))
+
+    def aside_rect(self):
+        """Free column to the right of the mat when the whole mat is in view and there is room; else None."""
+        if not self.auto_fit:
+            return None
+        left = self.plane_rect().right() + 18
+        width = self.width() - self.MR - left
+        if width < self.ASIDE_MIN:
+            return None
+        return QRectF(left, self.MT + 30, width, max(self.height() - self.MT - self.MB - 30, 40))
 
     def cell_at(self, pos):
         if not self.data_rect().contains(pos):
@@ -300,6 +371,24 @@ class MatMapView(QWidget):
         self.tf.clamp(r)
         self.auto_fit = False
         self.update()
+
+    def show_positions(self):
+        """{drone: (x, y, z)} of the show drones at the current time."""
+        if not (self.show_obj and self.paths):
+            return {}
+        return self.show_obj.positions_at(self.t, self.paths)
+
+    def drone_at(self, pos):
+        """The show drone drawn under a screen point, else None (the nearest one when several overlap)."""
+        s = self._scale_for_drone()
+        reach = max(WIDTH_CM / 2 * s, 14.0)
+        best, best_d = None, None
+        for n, xyz in self.show_positions().items():
+            c = self.tf.to_screen(xyz[0], xyz[1])
+            d = dist((c.x(), c.y()), (pos.x(), pos.y()))
+            if d <= reach and (best_d is None or d < best_d):
+                best, best_d = n, d
+        return best
 
     # ---- status text -----------------------------------------------------------------------------------
 
@@ -347,11 +436,13 @@ class MatMapView(QWidget):
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.MouseButton.LeftButton and self._press is not None:
             if not self._moved:
+                drone = self.drone_at(e.position())
                 cell = self.cell_at(e.position())
                 if cell is not None:
                     self.selected_cell = cell
                     self.cell_clicked.emit(cell)
-                    self.update()
+                self.drone_clicked.emit(drone)       # None on empty space: the window clears the focus
+                self.update()
             self._press, self._moved = None, False
             self.unsetCursor()
 
@@ -407,19 +498,18 @@ class MatMapView(QWidget):
 
     # ---- painting ---------------------------------------------------------------------------------------
 
-    def _font(self, px, medium=False):
-        f = QFont(self.font())
-        f.setPixelSize(int(px))
-        f.setWeight(QFont.Weight.Medium if medium else QFont.Weight.Normal)
-        return f
+    def _font(self, px, emphasis=False):
+        return theme.ui_font(int(px), emphasis)
 
     def paintEvent(self, e):
+        self._place_buttons()
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.fillRect(self.rect(), theme.color("panel"))
+        p.fillRect(self.rect(), theme.color("bg"))
         rect = self.data_rect()
         p.save()
         p.setClipRect(rect)
+        p.fillRect(self.plane_rect(), theme.color("stage"))
         self._paint_cells(p)
         if self.show_obj and self.paths:
             if self.show_plan:
@@ -429,7 +519,9 @@ class MatMapView(QWidget):
         self._paint_hover(p)
         p.restore()
         self._paint_axes(p)
-        self._paint_overlay(p, rect)
+        self._paint_text(p, rect)
+        if self.hasFocus():                          # keyboard focus: a 2 px accent bar on the left edge of the plane
+            p.fillRect(QRectF(max(self.plane_rect().left() - 3, 0), self.MT, 2, rect.height()), theme.color("accent"))
         p.end()
 
     def _visible_cells(self):
@@ -444,51 +536,66 @@ class MatMapView(QWidget):
         """Smallest cell (px) in which every three-digit number fits at 11 px."""
         return QFontMetrics(self._font(11)).horizontalAdvance("000") + 7
 
+    def _bright_cells(self):
+        """Cells whose number is brightened: the cells the show drones are flying to now (only the focused drone's
+        when one is focused), cells under a show drone or a live drone, the hovered and the selected cell."""
+        cells = set()
+        if self.show_obj and self.show_plan:
+            cells.update(c for n, c in self._current_targets().items() if self.focus in (None, n))
+        for n, xyz in self.show_positions().items():
+            if self.focus in (None, n):
+                c = cm_to_cell(xyz[0], xyz[1])
+                if c is not None:
+                    cells.add(c)
+        cells.update(d.cell for d in self.drawn_live() if d.cell is not None)
+        cells.update(c for c in (self.hover_cell, self.selected_cell) if c is not None)
+        return cells
+
     def _paint_cells(self, p):
         tf, cp = self.tf, self.tf.cell_px
         rows, cols = self._visible_cells()
-        # targets of the show: a tinted cell under everything else
-        if self.show_plan:
+        if self.show_plan and self.focus is not None:     # targets of the focused drone: a tint under everything else
             for cell, drones in self._targets.items():
-                r = tf.cell_rect(cell)
-                col = self._plan.get(drones[0], (None, None))[1] or theme.color("text2")
-                p.fillRect(r, _alpha(col, 40))
+                if self.focus in drones:
+                    col = self._plan.get(self.focus, (None, None))[1] or theme.color("text2")
+                    p.fillRect(tf.cell_rect(cell), _alpha(col, 70))
         grid = QPen(theme.color("grid"))
         grid.setWidthF(1)
         p.setPen(grid)
-        a, b = tf.to_screen(WORLD_MIN, WORLD_MIN), tf.to_screen(WORLD_MAX, WORLD_MAX)
         for i in range(GRID_W + 1):
             v = WORLD_MIN + i * CELL_CM
             p.drawLine(tf.to_screen(v, WORLD_MIN), tf.to_screen(v, WORLD_MAX))
             p.drawLine(tf.to_screen(WORLD_MIN, v), tf.to_screen(WORLD_MAX, v))
         edge = QPen(theme.color("border"))
-        edge.setWidthF(1.5)
+        edge.setWidthF(1)
         p.setPen(edge)
         p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawRect(QRectF(QPointF(a.x(), b.y()), QPointF(b.x(), a.y())))
+        p.drawRect(self.plane_rect())
         if cp < 12:
             return
         num_px = int(min(30, max(11, cp * 0.22)))
-        p.setFont(self._font(num_px))
+        p.setFont(theme.mono_font(num_px))
         need = p.fontMetrics().horizontalAdvance("000") + 7
         step = 1 if cp >= need else ceil(need / cp)
+        bright = self._bright_cells()
         for row in rows:
             for col in cols:
                 cell = col + GRID_W * row
                 r = tf.cell_rect(cell)
                 if cp >= QR_MIN_CELL_PX and self.show_qr:
                     self._paint_qr(p, r, cell)
-                if col % step or row % step:
+                if (col % step or row % step) and cell not in bright:
                     continue
-                p.setPen(theme.color("text2"))
+                p.setPen(theme.color("text") if cell in bright else theme.color("cellnum"))
                 p.drawText(QRectF(r.left() + 3, r.top() + 1, r.width() * step - 4, num_px + 6),
                            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, str(cell))
                 if cp >= COORD_TEXT_CELL_PX:
                     x, y = cell_center_cm(cell)
-                    p.setFont(self._font(11))
+                    p.setFont(theme.mono_font(11))
+                    p.setPen(theme.color("text2") if cell in bright else theme.color("cellnum"))
                     p.drawText(QRectF(r.left() + 3, r.top() + num_px + 5, r.width() - 4, 16),
                                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, f"y {y}, x {x} см")
-                    p.setFont(self._font(num_px))
+                    p.setFont(theme.mono_font(num_px))
 
     def _paint_qr(self, p, r, cell):
         g = min(r.width() * 0.4, 90)
@@ -500,25 +607,26 @@ class MatMapView(QWidget):
             p.fillRect(QRectF(x0 + i * mod, y0 + j * mod, mod + 0.3, mod + 0.3), col)
 
     def _paint_plan(self, p):
-        """Planned path of every drone and, once zoomed in, the drones that visit a cell."""
+        """Planned path of every drone (thin; the focused one at full strength) and its current target cell."""
         tf = self.tf
         p.save()
         p.translate(tf.ox, tf.oy)
         p.scale(tf.s, -tf.s)
-        for n, (path, col) in self._plan.items():
+        for n, (path, col) in sorted(self._plan.items(), key=lambda kv: kv[0] == self.focus):
             col = col or theme.color("text2")
-            pen = QPen(_alpha(col, 48))
+            strong = self.focus == n
+            pen = QPen(_alpha(col, 255 if strong else 40 if self.focus is None else 20))
             pen.setCosmetic(True)
-            pen.setWidthF(1.2)
+            pen.setWidthF(1.6 if strong else 1.0)
             p.setPen(pen)
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawPath(path)
         p.restore()
-        # current target of every drone (the cell of the code step it executes now)
-        for n, cell in self._current_targets().items():
+        for n, cell in self._current_targets().items():     # the cell each drone is flying to now
+            if self.focus not in (None, n):
+                continue
             col = self._plan[n][1] or theme.color("text2")
-            pen = QPen(_alpha(col, 230), 2)
-            p.setPen(pen)
+            p.setPen(QPen(_alpha(col, 230), 2))
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRect(tf.cell_rect(cell).adjusted(2, 2, -2, -2))
         if tf.cell_px >= TARGET_TEXT_CELL_PX:
@@ -528,7 +636,10 @@ class MatMapView(QWidget):
                 r = tf.cell_rect(cell)
                 if not r.intersects(self.data_rect()):
                     continue
-                names = " ".join(f"д{n}" for n in drones[:3]) + (" …" if len(drones) > 3 else "")
+                shown = [n for n in drones if self.focus in (None, n)]
+                if not shown:
+                    continue
+                names = " ".join(f"д{n}" for n in shown[:3]) + (" …" if len(shown) > 3 else "")
                 p.drawText(QRectF(r.left() + 3, r.bottom() - 19, r.width() * 0.55, 16),
                            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "→ " + names)
 
@@ -555,14 +666,15 @@ class MatMapView(QWidget):
         if self.show_plan:                           # walked part of the path, dashed
             for n, path in self.paths.items():
                 col = _identity_color(show.drones[n]) or theme.color("text2")
-                pen = QPen(_alpha(col, 140), 1.2)
+                strong = self.focus == n
+                pen = QPen(_alpha(col, 255 if strong else 80 if self.focus is None else 26), 1.6 if strong else 1.0)
                 pen.setStyle(Qt.PenStyle.DashLine)
                 p.setPen(pen)
                 pts = [tf.to_screen(seg[2][0], seg[2][1]) for seg in path if seg[0] < self.t]
                 pts.append(tf.to_screen(pos[n][0], pos[n][1]))
                 for a, b in zip(pts, pts[1:]):
                     p.drawLine(a, b)
-        ring = QPen(theme.color("danger"), 2)         # drones closer than the threshold (3D distance)
+        ring = QPen(theme.color("danger"), 1.5)       # drones closer than the threshold (3D distance)
         for a, b in combinations(sorted(pos), 2):
             if dist(pos[a], pos[b]) < self.threshold:
                 p.setPen(ring)
@@ -571,17 +683,21 @@ class MatMapView(QWidget):
                 rad = (dist(pos[a][:2], pos[b][:2]) / 2 + WIDTH_CM / 2 + 4) * self._scale_for_drone()
                 p.drawEllipse(mid, rad, rad)
         s = self._scale_for_drone()
-        for n in sorted(pos):
+        for n in sorted(pos, key=lambda k: k == self.focus):         # the focused drone is drawn last
             rgb = show.drones[n].color_at(self.t)[1]
             c = tf.to_screen(pos[n][0], pos[n][1])
-            paint_drone(p, c, s, 0, rgb, "top")
-        for n in sorted(pos):                         # badges after all drones so they stay on top
+            p.setOpacity(self._strength(n) if self.focus is None or self.focus == n else 0.45)
+            paint_drone(p, c, s, 0, rgb, "top", selected=self.focus == n)
+        p.setOpacity(1.0)
+        for n in sorted(pos, key=lambda k: k == self.focus):         # number plates after all drones
             rgb = show.drones[n].color_at(self.t)[1]
             c = tf.to_screen(pos[n][0], pos[n][1])
             off = QPointF(WIDTH_CM / 2 * s * 0.78, WIDTH_CM / 2 * s * 0.78)
-            r = paint_badge(p, c + off, str(n), rgb)
-            if self.tf.cell_px >= 30:
+            p.setOpacity(1.0 if self.focus in (None, n) else 0.5)
+            r = paint_badge(p, c + off, str(n), rgb, outline="accent" if self.focus == n else "text2")
+            if self.tf.cell_px >= 30 and self.focus in (None, n):
                 paint_tag(p, QPointF(r.right() + 3, r.center().y()), f"{pos[n][2]:.0f} см")
+        p.setOpacity(1.0)
 
     def _paint_live(self, p):
         tf = self.tf
@@ -618,19 +734,20 @@ class MatMapView(QWidget):
                 continue
             r = self.tf.cell_rect(cell)
             if cell == self.hover_cell:
-                p.fillRect(r, _alpha(theme.color("accent"), 45))
+                p.fillRect(r, _alpha(theme.color("accent"), 38))
             p.setPen(QPen(theme.color("accent"), width))
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRect(r.adjusted(width / 2, width / 2, -width / 2, -width / 2))
 
     def _paint_axes(self, p):
-        """Row numbers hug the left edge of the mat, column numbers its bottom edge (both stay in view)."""
+        """Row numbers hug the left edge of the mat, column numbers its bottom edge (both stay in view);
+        the one-line note about the model sits below, in the bottom left corner."""
         tf, rect = self.tf, self.data_rect()
         cp = tf.cell_px
         left = max(tf.to_screen(WORLD_MIN, 0).x(), rect.left())
         bottom = min(tf.to_screen(0, WORLD_MIN).y(), rect.bottom())
-        p.setFont(self._font(11))
-        p.setPen(theme.color("text2"))
+        p.setFont(theme.mono_font(11))
+        p.setPen(theme.color("cellnum"))
         step = max(1, ceil(22 / cp))
         for i in range(GRID_W):
             x = tf.to_screen(i * CELL_CM, 0).x()
@@ -640,47 +757,100 @@ class MatMapView(QWidget):
             if rect.top() <= y <= rect.bottom() and i % step == 0:
                 p.drawText(QRectF(left - 25, y - 8, 21, 16),
                            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, str(i))
-        p.drawText(QRectF(left - 38, bottom + 2, 34, 15), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
-                   "x →")                              # column axis: x grows to the right
-        p.save()                                       # row axis title, rotated, along the left edge
-        p.translate(left - 28, rect.center().y())
-        p.rotate(-90)
-        p.drawText(QRectF(-60, -8, 120, 14), Qt.AlignmentFlag.AlignCenter, "строка, y ↑")
-        p.restore()
-        text = self.fontMetrics().elidedText(self.status_line(), Qt.TextElideMode.ElideRight, self.width() - 16)
-        p.setPen(theme.color("text") if self.hover_cell is not None or self.selected_cell is not None
-                 else theme.color("text2"))
-        p.drawText(QRectF(8, self.height() - 19, self.width() - 16, 17),
-                   Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, text)
+        if self.note:
+            p.setFont(theme.ui_font(12))
+            p.setPen(theme.color("text2"))
+            room = self._buttons_left - 2 * self.ML
+            text = QFontMetrics(p.font()).elidedText(self.note, Qt.TextElideMode.ElideRight, max(room, 60))
+            p.drawText(QRectF(self.ML - 14, self.height() - 19, self.width() - self.ML, 17),
+                       Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, text)
 
-    def _paint_overlay(self, p, rect):
-        """Text over the map: live drone positions (with the 'no position' cases) and the empty hint."""
+    # ---- text: the column beside the mat (or small plates over it when there is no room) -------------------
+
+    def info_lines(self):
+        """[(text, role)] shown beside the mat. role: 'title', 'text', 'dim', 'warn', 'mono'."""
         lines = []
+        cell = self.hover_cell if self.hover_cell is not None else self.selected_cell
+        if cell is not None:
+            row, col = cell_rc(cell)
+            x, y = cell_center_cm(cell)
+            lines += [(f"Клетка {cell}", "title"), (f"строка {row}, столбец {col}", "dim"), (f"y {y} см, x {x} см", "mono")]
+        if self.focus is not None and self.show_obj:
+            drone = self.show_obj.drones[self.focus]
+            step = drone.step_at(self.t)
+            pos = self.show_positions().get(self.focus)
+            lines += [("", "gap"), (f"Дрон {self.focus} выбран", "title")]
+            if step is not None:
+                lines.append((step_text(step.kind, step.args), "text"))
+            if pos is not None:
+                lines.append((f"высота {pos[2]:.0f} см", "mono"))
+            lines.append(("Щелчок по пустому месту снимает выбор", "dim"))
         for d in self.live:
+            lines.append(("", "gap"))
             if not d.drawn:
-                lines.append((f"▲ Дрон {d.label}: нет позиции", "warn"))
+                lines.append((f"Дрон {d.label}: нет позиции", "warn"))
             else:
                 where = f"клетка {d.cell}" if d.cell is not None else "вне коврика"
-                lines.append((f"● Дрон {d.label}: {where}, y={d.y} см, x={d.x} см", "text"))
-        p.setFont(self._font(12))
-        fm = p.fontMetrics()
-        y = rect.top() + 4
-        for text, tok in lines[:6]:
-            w = fm.horizontalAdvance(text) + 12
-            box = QRectF(rect.left() + 4, y, w, 20)
-            p.setPen(Qt.PenStyle.NoPen)
-            p.setBrush(_alpha(theme.color("card"), 235))
-            p.drawRoundedRect(box, 5, 5)
-            p.setPen(theme.color(tok))
-            p.drawText(box, Qt.AlignmentFlag.AlignCenter, text)
-            y += 23
+                lines.append((f"Дрон {d.label} в сети: {where}", "text"))
+                lines.append((f"y {d.y} см, x {d.x} см", "mono"))
+        if cell is None and self.focus is None and not self.live:
+            lines.append(("Колесо — масштаб, перетаскивание — сдвиг", "dim"))
+        while lines and lines[0][1] == "gap":
+            lines.pop(0)
+        return lines
+
+    def _paint_text(self, p, rect):
+        lines = self.info_lines()
+        aside = self.aside_rect()
+        if aside is not None:
+            self._paint_aside(p, aside, lines)
+        else:
+            self._paint_plates(p, rect, lines)
         if self.show_obj is None or not self.paths:
             text = "Нет шоу для показа"
             p.setFont(self._font(13))
             w = p.fontMetrics().horizontalAdvance(text) + 20
-            box = QRectF(rect.center().x() - w / 2, rect.bottom() - 30, w, 24)
+            plane = self.plane_rect().intersected(rect)
+            box = QRectF(plane.center().x() - w / 2, plane.center().y() - 14, w, 28)
             p.setPen(Qt.PenStyle.NoPen)
-            p.setBrush(_alpha(theme.color("card"), 235))
-            p.drawRoundedRect(box, 6, 6)
+            p.setBrush(_alpha(theme.color("stage"), 235))
+            p.drawRoundedRect(box, 4, 4)
             p.setPen(theme.color("text2"))
             p.drawText(box, Qt.AlignmentFlag.AlignCenter, text)
+
+    ROLE_STYLE = {"title": (15, True, "text"), "text": (13, False, "text"), "dim": (12, False, "text2"),
+                  "warn": (13, False, "warn"), "mono": (12, False, "text2")}
+
+    def _paint_aside(self, p, area, lines):
+        y = area.top()
+        for text, role in lines:
+            if role == "gap":
+                y += 12
+                continue
+            px, emphasis, tok = self.ROLE_STYLE[role]
+            p.setFont(theme.mono_font(px) if role == "mono" else theme.ui_font(px, emphasis))
+            p.setPen(theme.color(tok))
+            flags = int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap)
+            box = p.fontMetrics().boundingRect(QRectF(0, 0, area.width(), 400).toRect(), flags, text)
+            h = max(box.height(), px + 2) + 4
+            p.drawText(QRectF(area.left(), y, area.width(), h), flags, text)
+            y += h
+            if y > area.bottom():
+                break
+
+    def _paint_plates(self, p, rect, lines):
+        """No room beside the mat: the same facts on small plates in the top left corner of the plane."""
+        y = rect.top() + 4
+        p.setFont(self._font(12))
+        fm = p.fontMetrics()
+        texts = [(text, "warn" if role == "warn" else "text") for text, role in lines
+                 if text and role in ("title", "text", "warn")]
+        for text, tok in texts[:5]:
+            w = fm.horizontalAdvance(text) + 12
+            box = QRectF(rect.left() + 4, y, w, 20)
+            p.setPen(Qt.PenStyle.NoPen)
+            p.setBrush(_alpha(theme.color("card"), 235))
+            p.drawRoundedRect(box, 4, 4)
+            p.setPen(theme.color(tok))
+            p.drawText(box, Qt.AlignmentFlag.AlignCenter, text)
+            y += 23

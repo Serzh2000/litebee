@@ -3,7 +3,7 @@ import keyword
 import re
 
 from PySide6.QtCore import QEvent, QRect, QSize, Qt, Signal
-from PySide6.QtGui import (QColor, QFont, QFontDatabase, QPainter, QStandardItem, QStandardItemModel,
+from PySide6.QtGui import (QColor, QFont, QPainter, QStandardItem, QStandardItemModel,
                            QSyntaxHighlighter, QTextCharFormat, QTextCursor, QTextFormat)
 from PySide6.QtWidgets import QCompleter, QPlainTextEdit, QTextEdit, QToolTip, QWidget
 
@@ -28,16 +28,16 @@ class PythonHighlighter(QSyntaxHighlighter):
             f = QTextCharFormat()
             f.setForeground(QColor(theme.TOKENS[name]))
             if bold:
-                f.setFontWeight(QFont.Weight.Medium)
+                f.setFontWeight(theme.EMPHASIS)
             f.setFontItalic(italic)
             return f
 
         self.rules = [
-            (re.compile(r"\b(" + "|".join(keyword.kwlist) + r")\b"), fmt("accent")),
-            (re.compile(r"\b(" + "|".join(API) + r")(?=\()"), fmt("ok")),
-            (re.compile(r"\b\d+(\.\d+)?\b"), fmt("warn")),
+            (re.compile(r"\b(" + "|".join(keyword.kwlist) + r")\b"), fmt("text", bold=True)),
+            (re.compile(r"\b(" + "|".join(API) + r")(?=\()"), fmt("syn_api")),
+            (re.compile(r"\b\d+(\.\d+)?\b"), fmt("syn_num")),
         ]
-        self.string = (re.compile(r"'[^'\n]*'?|\"[^\"\n]*\"?"), fmt("text"))
+        self.string = (re.compile(r"'[^'\n]*'?|\"[^\"\n]*\"?"), fmt("syn_str"))
         self.comment = (re.compile(r"#[^\n]*"), fmt("text2", italic=True))
 
     def highlightBlock(self, text):
@@ -67,10 +67,8 @@ class CodeEditor(QPlainTextEdit):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        mono = next((f for f in theme.MONO_FAMILIES if f in QFontDatabase.families()), "monospace")
-        font = QFont(mono)
-        font.setPixelSize(13)
-        self.setFont(font)
+        self.setObjectName("editor")
+        self.setFont(theme.mono_font(13))
         self.setTabStopDistance(self.fontMetrics().horizontalAdvance(" ") * 4)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.highlighter = PythonHighlighter(self.document())

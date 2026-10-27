@@ -307,7 +307,7 @@ def test_cell_numbers_are_printed_in_every_cell_at_a_sensible_zoom(mat, qapp):
     qapp.processEvents()
     assert mat.tf.cell_px >= mat._number_cell_px()
     img = mat.grab().toImage()
-    bg = theme.color("panel").rgb()
+    bg = theme.color("stage").rgb()                                         # the plane of the mat (Carbon)
     for cell in (0, 11, 60, 96, 143):
         r = mat.tf.cell_rect(cell)
         ink = sum(1 for x in range(int(r.left() + 3), int(r.left() + 22)) for y in range(int(r.top() + 2), int(r.top() + 14))
