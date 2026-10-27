@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QSizePolicy, QToolTip, QWidget
 
 from . import theme
 
-LABEL_W = 132
+LABEL_W = 164
 TIME_W = 112
 MIN_LANES = 3                 # the sheet is never shorter than three lanes
 DIM = 0.28                    # opacity of the lanes that are not in focus
@@ -154,15 +154,15 @@ class TimelineWidget(QWidget):
             y = i * h
             p.setOpacity(1.0 if self.focus in (None, n) else DIM)
             lane = QRectF(strip.left(), y + 1, strip.width(), h - 2)
-            p.fillRect(lane, theme.color("stage"))
+            p.fillRect(lane, theme.color("lane"))
             for b in self.blocks:
                 if b[0] != n or b[2] <= b[1]:
                     continue
                 x0, x1 = self.x_of(b[1]), self.x_of(b[2])
                 if any(b[3]):
                     p.fillRect(QRectF(x0, y + h * 0.42, max(x1 - x0, 1.0), h * 0.5 - 1), QColor(*b[3]))
-            ink = theme.color("text")
-            ink.setAlpha(190)
+            ink = theme.color("on_accent")             # ticks sit on the dark lane
+            ink.setAlpha(200)
             p.setPen(QPen(ink, 1.0))
             for tn, t, kind, _line, _args in self.ticks:
                 if tn == n:
@@ -179,7 +179,9 @@ class TimelineWidget(QWidget):
                        f"Дрон {n}")
         p.setOpacity(1.0)
         x = self.x_of(self.t)
-        p.setPen(QPen(theme.color("text"), 1.5))
+        p.setPen(QPen(theme.color("accent"), 4))              # the time cursor: white core in an accent halo
+        p.drawLine(QPointF(x, 0), QPointF(x, self.height()))
+        p.setPen(QPen(theme.color("on_accent"), 1.5))
         p.drawLine(QPointF(x, 0), QPointF(x, self.height()))
         self._paint_focus_bar(p)
         p.end()

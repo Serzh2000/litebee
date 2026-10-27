@@ -82,6 +82,17 @@ def luminance(hex_color: str) -> float:
     return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]
 
 
+def readable(c: QColor, on: str = "stage", ratio: float = 3.0) -> QColor:
+    """`c` darkened until it has at least `ratio` contrast against the token `on`: a white or yellow LED colour
+    stays visible as a path or an outline on the light mat."""
+    out = QColor(c)
+    for _ in range(12):
+        if contrast(out.name(), TOKENS[on]) >= ratio:
+            break
+        out = out.darker(115)
+    return out
+
+
 def contrast(a: str, b: str) -> float:
     """WCAG contrast ratio of two #RRGGBB colours."""
     hi, lo = sorted((luminance(a), luminance(b)), reverse=True)

@@ -44,7 +44,8 @@ d.land()
 
 DISCLAIMER = "Модель приблизительная: старт с первой клетки, посадка 3 с, направление кругов угадано"
 TAB_CODE, TAB_CHECKS, TAB_LOG = 0, 1, 2
-SPLIT_MAP_SHARE = 0.60                      # the map takes this much of the width while the code column is shown
+SPLIT_MAP_MIN_SHARE = 0.48                  # the map column never gets narrower than this share of the width
+SPLIT_MAP_SHARE = 0.64                    # the map takes this much of the width while the code column is shown
 
 
 def ru_plural(n, forms=("дрон", "дрона", "дронов")):
@@ -170,8 +171,8 @@ class MainWindow(QMainWindow):
         header.setObjectName("header")
         header.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         hl = QVBoxLayout(header)
-        hl.setContentsMargins(14, 6, 14, 2)
-        hl.setSpacing(4)
+        hl.setContentsMargins(20, 12, 20, 12)
+        hl.setSpacing(10)
         head = QHBoxLayout()
         head.setSpacing(2)
         self.project_label = QLabel("Litebee IDE")
@@ -189,12 +190,17 @@ class MainWindow(QMainWindow):
         self.code_button.setCheckable(True)
         self.code_button.setChecked(True)
         self.code_button.setAccessibleName("Колонка кода")
+        self.limits_button = self._btn("Ограничения", "limits")
+        self.limits_button.setProperty("quiet", True)
+        self.limits_button.setAccessibleName("Ограничения полёта")
+        self.limits_button.setToolTip("Предельная высота для проверки, загрузки и старта")
         for b in (self.open_button, self.save_button, self.link_button, self.reference_button, self.code_button):
             b.setProperty("quiet", True)
         head.addWidget(self.project_label)
         head.addWidget(self.file_label)
         head.addStretch()
         head.addWidget(self.link_label)
+        head.addWidget(self.limits_button)
         for b in (self.open_button, self.save_button, self.link_button, self.reference_button, self.code_button):
             head.addWidget(b)
         hl.addLayout(head)
@@ -209,11 +215,6 @@ class MainWindow(QMainWindow):
         bar = QHBoxLayout()
         bar.setSpacing(12)
         bar.addWidget(self.preflight, 1)
-        self.limits_button = self._btn("Ограничения", "limits")
-        self.limits_button.setProperty("quiet", True)
-        self.limits_button.setAccessibleName("Ограничения полёта")
-        self.limits_button.setToolTip("Предельная высота для проверки, загрузки и старта")
-        bar.addWidget(self.limits_button, 0, Qt.AlignmentFlag.AlignTop)
         hl.addLayout(bar)
         self._build_limits_popover()
         outer.addWidget(header)
@@ -238,8 +239,8 @@ class MainWindow(QMainWindow):
         bottom.setObjectName("zoneFleet")
         bottom.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         bl = QHBoxLayout(bottom)
-        bl.setContentsMargins(14, 2, 14, 6)
-        bl.setSpacing(12)
+        bl.setContentsMargins(20, 8, 20, 10)
+        bl.setSpacing(16)
         self.drones_panel = DronesPanel()
         self.drones_panel.selection_changed.connect(self.refresh)
         self.drones_panel.drone_clicked.connect(self.set_focus)
@@ -341,9 +342,10 @@ class MainWindow(QMainWindow):
         self.side_button = self.preview.side_button
         stage = QWidget()
         sl = QVBoxLayout(stage)
-        sl.setContentsMargins(14, 0, 4, 0)
+        sl.setContentsMargins(20, 12, 8, 8)
         sl.addWidget(self.preview)
         self.stage = stage
+        stage.installEventFilter(self)
 
         # right: code, checks, log
         self.side = QWidget()
@@ -383,7 +385,12 @@ class MainWindow(QMainWindow):
         side_lay.addWidget(self.tabs)
         self.side.setMinimumWidth(340)
 
-        self.split_main.addWidget(stage)
+        self.left_col = QWidget()               # map on top, the cue sheet under it; the code column runs the full height
+        self.left_lay = QVBoxLayout(self.left_col)
+        self.left_lay.setContentsMargins(0, 0, 0, 0)
+        self.left_lay.setSpacing(0)
+        self.left_lay.addWidget(stage, 1)
+        self.split_main.addWidget(self.left_col)
         self.split_main.addWidget(self.side)
         self.split_main.setStretchFactor(0, 62)
         self.split_main.setStretchFactor(1, 38)
@@ -396,8 +403,8 @@ class MainWindow(QMainWindow):
         cue.setObjectName("zoneCue")
         cue.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         cl = QVBoxLayout(cue)
-        cl.setContentsMargins(14, 4, 14, 4)
-        cl.setSpacing(2)
+        cl.setContentsMargins(20, 10, 20, 10)
+        cl.setSpacing(6)
         play = QHBoxLayout()
         play.setSpacing(0)
         left = QWidget()
@@ -431,7 +438,7 @@ class MainWindow(QMainWindow):
         self.timeline.step_clicked.connect(lambda n, line: self.editor.go_to_line(line))
         self.timeline.drone_selected.connect(self.set_focus)
         cl.addWidget(self.timeline)
-        lay.addWidget(cue)
+        self.left_lay.addWidget(cue)
         self.cue_zone = cue
         return ws
 
@@ -485,13 +492,17 @@ class MainWindow(QMainWindow):
             return
         w = self.split_main.width()
         if w > 100:
-            a = int(w * SPLIT_MAP_SHARE)
+            # the map is square and limited by the height: give it its plane and a text column, the rest is code
+            mat = self.preview.mat
+            plane = max(self.stage.height() - 20 - mat.MT - mat.MB, 200)
+            want = plane + mat.ML + 18 + 215 + 28
+            a = int(min(max(want, w * SPLIT_MAP_MIN_SHARE), w * SPLIT_MAP_SHARE))
             self.split_main.setSizes([a, w - a])
-
+            self.problem_list.scheduleDelayedItemsLayout()      # wrapped rows are re-measured for the new width
     def _apply_density(self):
         """Lanes of the cue sheet are 11 to 16 px high depending on the window height: the map keeps the rest."""
         h = self.height()
-        self.timeline.set_lane_height(11 if h <= 760 else 12 if h <= 800 else 14 if h <= 940 else 16)
+        self.timeline.set_lane_height(12 if h <= 760 else 13 if h <= 800 else 15 if h <= 940 else 18)
 
     def showEvent(self, e):
         super().showEvent(e)
@@ -507,6 +518,12 @@ class MainWindow(QMainWindow):
         if w is self.open_button:               # only the focus Qt gave at start, never one the user moved
             w.clearFocus()
 
+    def eventFilter(self, obj, e):
+        """The map column is as wide as the square mat plus its text column, so it follows the height of the stage."""
+        if obj is self.stage and e.type() == QEvent.Type.Resize and e.oldSize().height() != e.size().height():
+            QTimer.singleShot(0, self._apply_split)
+        return super().eventFilter(obj, e)
+
     def changeEvent(self, e):
         super().changeEvent(e)
         if e.type() == QEvent.Type.ActivationChange and self.isActiveWindow() and not self._activated_once:
@@ -517,6 +534,7 @@ class MainWindow(QMainWindow):
         super().resizeEvent(e)
         self._apply_density()
         self._apply_split()
+        QTimer.singleShot(0, self._apply_split)         # once more after the layout knows the new heights
 
     def _restore_layout(self):
         if not self.settings:

@@ -97,7 +97,7 @@ def _top(p, s, led, selected, glow):
     none = Qt.BrushStyle.NoBrush
     p.setBrush(none)
     if led and glow:                                       # LED glow: steps of falling opacity, no gradient
-        for r, a in ((9.4, 26), (7.4, 44), (5.6, 70)):
+        for r, a in ((8.4, 20), (6.8, 34), (5.4, 56)):
             c = QColor(*led)
             c.setAlpha(a)
             p.setPen(Qt.PenStyle.NoPen)
@@ -271,7 +271,7 @@ def paint_badge(painter: QPainter, center, text, rgb=None, px=12, outline="text2
     w = painter.fontMetrics().horizontalAdvance(text) + 10
     r = QRectF(center.x() - max(w, px + 6) / 2, center.y() - (px + 6) / 2, max(w, px + 6), px + 6)
     led = QColor(*rgb) if rgb and any(rgb) else None
-    painter.setPen(QPen(led.lighter(125) if (led and outline != "accent") else theme.color(outline), 1.4))
+    painter.setPen(QPen(theme.readable(led, "card") if (led and outline != "accent") else theme.color(outline), 1.6))
     painter.setBrush(theme.color("card") if filled else theme.color("stage"))
     painter.drawRoundedRect(r, 4, 4)
     painter.setPen(theme.color("text"))

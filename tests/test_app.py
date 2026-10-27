@@ -48,7 +48,7 @@ def win(qapp):
 def test_theme_has_all_tokens_and_no_unresolved_names():
     css = theme.stylesheet()
     assert "@" not in css.split("*/", 1)[1]            # every token substituted
-    assert theme.TOKENS["bg"] == "#15181D" and theme.TOKENS["danger"] == "#F0524F"      # Tarmac, danger (UI_DESIGN v2)
+    assert theme.TOKENS["bg"] == "#F2F3F5" and theme.TOKENS["danger"] == "#C7372F"      # light theme (UI_DESIGN v3)
 
 
 def test_ru_plural():
@@ -137,7 +137,8 @@ def test_full_gui_flow_with_fake_drone(win, qapp):
         win.upload_button.click()
         assert pump(qapp, lambda: HOST in win.controller.loaded and not win.controller.busy)
         assert drone.checksum == win.controller.loaded[HOST].checksum
-        assert not win.start_button.isEnabled() and "Взвести" in win.start_button.toolTip()
+        assert pump(qapp, lambda: "Взвести" in win.start_button.toolTip())      # the window refreshes after busy_changed
+        assert not win.start_button.isEnabled()
         assert drone.starts == []
         win.arm_box.setChecked(True)
         assert win.controller.armed and win.start_button.isEnabled()
@@ -147,7 +148,7 @@ def test_full_gui_flow_with_fake_drone(win, qapp):
         assert asked == [([HOST], True)]
         assert pump(qapp, lambda: len(drone.starts) == 1)
         assert pump(qapp, lambda: not win.controller.flying, 30)
-        assert not win.controller.armed and not win.arm_box.isChecked()      # arming resets
+        assert pump(qapp, lambda: not win.controller.armed and not win.arm_box.isChecked())      # arming resets
         assert HOST not in win.controller.loaded
         assert drone.lands >= 3
 

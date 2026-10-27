@@ -175,7 +175,7 @@ def _identity_color(drone):
     """Stable colour of a show drone for paths: its first lit LED colour, else None."""
     for s in drone.steps:
         if s.kind == "rgb" and any(s.args["rgb"]):
-            return QColor(*s.args["rgb"])
+            return theme.readable(QColor(*s.args["rgb"]))
     return None
 
 
@@ -615,7 +615,7 @@ class MatMapView(QWidget):
         for n, (path, col) in sorted(self._plan.items(), key=lambda kv: kv[0] == self.focus):
             col = col or theme.color("text2")
             strong = self.focus == n
-            pen = QPen(_alpha(col, 255 if strong else 40 if self.focus is None else 20))
+            pen = QPen(_alpha(col, 255 if strong else 110 if self.focus is None else 40))
             pen.setCosmetic(True)
             pen.setWidthF(1.6 if strong else 1.0)
             p.setPen(pen)
@@ -667,7 +667,7 @@ class MatMapView(QWidget):
             for n, path in self.paths.items():
                 col = _identity_color(show.drones[n]) or theme.color("text2")
                 strong = self.focus == n
-                pen = QPen(_alpha(col, 255 if strong else 80 if self.focus is None else 26), 1.6 if strong else 1.0)
+                pen = QPen(_alpha(col, 255 if strong else 150 if self.focus is None else 40), 2.0 if strong else 1.2)
                 pen.setStyle(Qt.PenStyle.DashLine)
                 p.setPen(pen)
                 pts = [tf.to_screen(seg[2][0], seg[2][1]) for seg in path if seg[0] < self.t]
