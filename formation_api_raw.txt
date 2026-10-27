@@ -1,0 +1,77 @@
+#litebeeWingFormation_flightNum
+snippet litebeeWingFormation_flightNum 配置飞机编号
+	#p1:配置第几号飞机([1-16])
+	litebeeWingFormation_flightNum([1])
+#litebeeWingFormation_clear
+snippet litebeeWingFormation_clear 清除之前的配置
+	litebeeWingFormation_clear()
+#litebeeWingFormation_calibration
+snippet litebeeWingFormation_calibration 校准
+	#p1:执行时间(秒)
+	litebeeWingFormation_calibration([5])
+#litebeeWingFormation_takeOff
+snippet litebeeWingFormation_takeOff 起飞
+	#p1:起飞高度(厘米)
+	#p2:执行时间(秒)
+	litebeeWingFormation_takeOff([100, 5])
+#litebeeWingFormation_autoLand
+snippet litebeeWingFormation_autoLand 降落
+	litebeeWingFormation_autoLand()
+#litebeeWingFormation_allLand
+snippet litebeeWingFormation_allLand 紧急降落
+	litebeeWingFormation_allLand()
+#litebeeWingFormation_missionSend
+snippet litebeeWingFormation_missionSend 任务发送
+	litebeeWingFormation_missionSend()
+#litebeeWingFormation_missionStart
+snippet litebeeWingFormation_missionStart 开始执行
+	litebeeWingFormation_missionStart()
+#litebeeWingFormation_code
+snippet litebeeWingFormation_code 移动到二维码
+	#p1:要移动到的二维码编号
+	#p2:执行时间(秒)
+	litebeeWingFormation_code([66, 10])
+#litebeeWingFormation_codeS
+snippet litebeeWingFormation_codeS 连续移动
+	#p1:要连续移动到的二维码编号(输入字符串，空格作为间隔)
+	#p2:执行时间(秒)
+	litebeeWingFormation_codeS(['12 23 27', 15])
+#litebeeWingFormation_codeZ
+snippet litebeeWingFormation_codeZ 移动二维码和高度
+	#p1:要移动到的二维码编号
+	#p2:同时升高的高度(厘米)
+	#p3:执行时间(秒)
+	litebeeWingFormation_codeZ([66, 120, 10])
+#litebeeWingFormation_circle
+snippet litebeeWingFormation_circle 转圈
+	#p1:二维码编号1
+	#p2:二维码编号2
+	#p3:0-顺时针，1-逆时针
+	#p4:要旋转几个半圈
+	#p5:执行时间(秒)
+	#转圈的圆心为二维码号1和二维码号2的中点，2个半圈即回到原点
+	litebeeWingFormation_circle([66, 77, 0, 2, 15])
+#litebeeWingFormation_circleZ
+snippet litebeeWingFormation_circleZ 转半圈和高度
+	#p1:二维码编号1
+	#p2:二维码编号2
+	#p3:0-顺时针，1-逆时针
+	#p4:同时高度上升(厘米)
+	#p5:执行时间(秒)
+	#转圈的圆心为二维码号1和二维码号2的中点，旋转时高度同时上升，只转半圈
+	litebeeWingFormation_circleZ([66, 77, 0, 150, 15])
+#litebeeWingFormation_RGB
+snippet litebeeWingFormation_RGB 亮灯
+	#p1:设置灯的颜色(0-黑色 1-红色 2-绿色 3-黄色 4-蓝色 5-紫色 6-青色 7-白色)
+	litebeeWingFormation_RGB([1])
+#litebeeWingFormation_RGBValue
+snippet litebeeWingFormation_RGBValue 亮灯
+	#p1:R所占分量（0-255）
+	#p2:G所占分量（0-255）
+	#p3:B所占分量（0-255）
+	litebeeWingFormation_RGBValue([100, 0, 0])
+#litebeeWingFormation_setZ
+snippet litebeeWingFormation_setZ 控制高度
+	#p1:高度(厘米)
+	#p2:执行时间(秒)
+	litebeeWingFormation_setZ([100, 3])
