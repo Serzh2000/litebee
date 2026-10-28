@@ -69,6 +69,7 @@ python -m venv .venv
 .\.venv\Scripts\python -m litebee simulate shows\my_dream.py        # или проект .lbg
 .\.venv\Scripts\python -m litebee simulate shows\my_dream.py --max-height 170   # шоу со ступенями 160 см
 .\.venv\Scripts\python -m litebee import-lbg "Z:\FM10 sets-My Dream.lbg" shows\my_dream_new.py
+.\.venv\Scripts\python -m litebee wing-status --seconds 5           # USB-пульт Wing: версия, батарея, углы; дрон не двигается
 ```
 
 - `listen` только слушает телеметрию.
@@ -125,7 +126,7 @@ d.land()
 ## Структура
 
 ```
-litebee/   ядро: protocol, mission, link, flight, show, reference, lbg, loader, show_worker, safety, cli
+litebee/   ядро: protocol, mission, link, flight, show, reference, lbg, loader, show_worker, safety, cli, remote (USB-пульт Wing, только чтение), live (только построители «живых» кадров, не используются, не проверены на FM)
 app/       окно PySide6: main_window, preflight (порядок подготовки), preview, mat_map (карта коврика), cue_sheet (партитура света), drones_panel (фишки дронов), editor, reference_panel, drone_art (модель дрона), session, theme.qss и theme.py (единственное место цветов)
 tests/     тесты и FakeDrone
 shows/     шоу, конвертированные из .lbg

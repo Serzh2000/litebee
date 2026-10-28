@@ -1,4 +1,4 @@
-"""Command line: python -m litebee <listen|color|hop|simulate|import-lbg>.
+"""Command line: python -m litebee <listen|color|hop|simulate|import-lbg|wing-status|wing-fly>.
 
 Every subcommand accepts --port (TCP port override, default 18001; ignored by
 the offline subcommands). --udp-port overrides the drone announce port (13146).
@@ -67,6 +67,22 @@ def build_parser():
     p = sub.add_parser("import-lbg", parents=[common], help="превратить проект .lbg в файл шоу на Python")
     p.add_argument("src")
     p.add_argument("dst")
+
+    p = sub.add_parser("wing-status", parents=[common],
+                       help="USB-пульт Wing: приветствие, версия, пакет данных (только чтение, дрон не двигается)")
+    p.add_argument("--serial", default=None, help="COM-порт пульта (по умолчанию единственный CP210x/CH340)")
+    p.add_argument("--seconds", type=float, default=5, help="сколько секунд слушать поток данных")
+
+    p = sub.add_parser("wing-fly", parents=[common],
+                       help="Wing через USB-пульт: взлёт, сдвиг вперёд и вправо, посадка; без --go только проверки")
+    p.add_argument("--serial", default=None, help="COM-порт пульта (по умолчанию единственный CP210x/CH340)")
+    p.add_argument("--forward", type=int, default=30, help="сдвиг вперёд, см (0 = пропустить)")
+    p.add_argument("--right", type=int, default=30, help="сдвиг вправо, см (0 = пропустить)")
+    p.add_argument("--height", type=int, default=80, help="высота зависания после взлёта, см (30-120)")
+    p.add_argument("--speed", type=int, default=15, help="скорость сдвига, см/с (5-25): путь = скорость × время")
+    p.add_argument("--min-volts", type=float, default=7.4, help="минимум батареи для старта (ниже 7.0 нельзя)")
+    p.add_argument("--land-flag", default=LAND_FLAG, help="файл-флаг: если появился, дрон садится")
+    p.add_argument("--go", action="store_true", help="реально запустить моторы")
     return ap
 
 
@@ -169,6 +185,85 @@ def cmd_import_lbg(args):
     return 0
 
 
+def cmd_wing_status(args):
+    """Talk to the USB remote exactly like LiteBee Go does on connect; only read-only messages are written."""
+    from . import remote
+    try:
+        link = remote.open_link(args.serial)
+    except remote.RemoteError as e:
+        print(f"[wing] {e}")
+        return 1
+    with link:
+        if not link.handshake():
+            print("[wing] пульт не ответил на приветствие. Закройте LiteBee Go и проверьте кабель")
+            return 1
+        print("[wing] пульт ответил на приветствие")
+        v = link.request_version()
+        if v:
+            print(f"[wing] версии: пульт {v.rv_text}, дрон {v.fv_text or 'неизвестна (дрон не связан с пультом)'}")
+        else:
+            print("[wing] версию пульт не прислал")
+        link.request_data()
+        link.run(args.seconds)
+        if link.last_data is None:
+            print("[wing] пакетов данных нет")
+            return 1
+        print(f"[wing] пакетов данных за {args.seconds:g} с: {link.data_count}; последний: {link.last_data.raw.hex(' ')}")
+        if link.last_data.is_empty:
+            print("[wing] пакет нулевой: пульт на связи с компьютером, но не видит дрона")
+        else:
+            d = link.last_data
+            x, y, z = d.pos
+            print("[wing] пульт видит дрон")
+            print(f"[wing] батарея {d.voltage:.1f} В; положение x={x} y={y} z={z} см; углы: крен {d.roll_deg:.1f}°, "
+                  f"тангаж {d.pitch_deg:.1f}°, рыскание {d.yaw_deg:.1f}°; режим {d.mode}; скорость {d.speed}")
+    return 0
+
+
+def cmd_wing_fly(args):
+    """One test flight of a Wing through the USB remote. Without --go nothing but read-only messages is sent."""
+    import datetime
+    from . import remote, wing
+    log_path = os.path.join(os.path.dirname(LAND_FLAG), "flight_logs",
+                            datetime.datetime.now().strftime("wing_%Y%m%d_%H%M%S.txt"))
+
+    def log(m):
+        line = f"[wing] {m}"
+        print(line)
+        if args.go:
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(line + "\n")
+
+    moves = ([(0, args.forward)] if args.forward else []) + ([(args.right, 0)] if args.right else [])
+    try:
+        wing.check_plan(moves)
+        link = remote.open_link(args.serial, allow_commands=args.go)
+    except (SafetyError, remote.RemoteError) as e:
+        print(f"[wing] {e}")
+        return 1
+    with link:
+        try:
+            flight = wing.WingFlight(link, land_flag=args.land_flag, min_volts=args.min_volts,
+                                     hover_cm=args.height, speed_cm_s=args.speed, log=log)
+            plan = f"зависание на {args.height} см; " + "; ".join(f"вправо {r} см, вперёд {f} см" for r, f in moves)
+            if not args.go:
+                flight.preflight()
+                print(f"[wing] проверки пройдены. План: взлёт; {plan}; посадка. Команды НЕ отправлены (нужен --go)")
+                return 0
+            if os.path.exists(args.land_flag):
+                os.remove(args.land_flag)
+            print(f"[wing] ПОЛЁТ: калибровка, взлёт; {plan}; посадка. Остановить: Ctrl+C или файл {args.land_flag}")
+            flight.fly(moves)
+        except (SafetyError, wing.FlightAbort, remote.RemoteError) as e:
+            print(f"[wing] {e}")
+            return 1
+        except KeyboardInterrupt:
+            print("[wing] прервано, дрон посажен")
+            return 130
+    return 0
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         try:
@@ -176,8 +271,8 @@ def main(argv=None):
         except (AttributeError, ValueError):
             pass
     args = build_parser().parse_args(argv)
-    handler = {"listen": cmd_listen, "color": cmd_color, "hop": cmd_hop,
-               "simulate": cmd_simulate, "import-lbg": cmd_import_lbg}[args.cmd]
+    handler = {"listen": cmd_listen, "color": cmd_color, "hop": cmd_hop, "simulate": cmd_simulate,
+               "import-lbg": cmd_import_lbg, "wing-status": cmd_wing_status, "wing-fly": cmd_wing_fly}[args.cmd]
     try:
         return handler(args)
     except ShowLoadError as e:
