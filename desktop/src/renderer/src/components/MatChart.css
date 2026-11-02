@@ -1,0 +1,25 @@
+.mat {
+  display: block;
+  font-family: var(--font-ui);
+}
+
+.mat-drone {
+  cursor: pointer;
+}
+
+.mat-drone:hover {
+  filter: drop-shadow(0 1px 2px rgb(var(--shadow-rgb) / 0.28));
+}
+
+.mat[data-picking='true'] {
+  cursor: crosshair;
+}
+
+/* a drone can be taken and put on another cell */
+.mat-drone[data-draggable='true'] {
+  cursor: grab;
+}
+
+.mat[data-dragging='true'] .mat-drone {
+  cursor: grabbing;
+}

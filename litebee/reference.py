@@ -14,8 +14,10 @@ from typing import Optional, Tuple
 
 from .mission import (CELL_CM, CMD_AUTOLAND, CMD_CALIBRATE, CMD_CIRCLE, CMD_MOVEXY, CMD_MOVEXYZ, CMD_MOVEZ,
                       CMD_RGB, CMD_TAKEOFF, COLORS, DEFAULT_MAX_HEIGHT_CM, GRID_CELLS, GRID_W,
-                      HARD_MAX_HEIGHT_CM, MAX_HOVER_S, MIN_TAKEOFF_CM)
+                      HARD_MAX_HEIGHT_CM, MIN_TAKEOFF_CM)
 from .safety import MAX_LEG_SPEED_CM_S, MAX_START_DISTANCE_CM, MIN_APPROACH_CM, MIN_VOLTS, WARN_VOLTS
+
+MAX_HOVER_S = 60   # the limit of the Electron app (desktop/src/core/mission.ts); the old PySide app keeps 10 s
 
 STATUS_VERIFIED = "проверено на дроне"
 STATUS_SIM = "только симулятор"
@@ -44,7 +46,7 @@ COMMANDS = (
     (9, "jump", (), STATUS_ABSENT),
     (CMD_MOVEXYZ, "moveXYZ", ("code_z",), STATUS_SIM),
     (11, "atti", (), STATUS_ABSENT),
-    (CMD_CIRCLE, "circle", ("circle",), STATUS_SIM),
+    (CMD_CIRCLE, "circle", ("circle",), STATUS_VERIFIED),
     (13, "circleAlt", ("circle_z",), STATUS_SIM),
     (CMD_RGB, "RGB", ("rgb", "rgb_value"), STATUS_VERIFIED),
     (51, "int", (), STATUS_ABSENT),
@@ -201,6 +203,15 @@ ENTRIES = (
                  "после него дрон садится сам",
                  "Это шаг шоу. Аварийная посадка всех дронов — кнопка в окне и клавиша Esc, "
                  "а не функция шоу")),
+    Entry("Drone", "land_on", "method", "land_on(cell, seconds=2, low=35)",
+          "Посадка точно в клетку: подлететь, успокоиться, снизиться и сесть", "motion", STATUS_VERIFIED,
+          params=_p(("cell", _CELL, "Клетка, в центр которой садиться"),
+                    ("seconds", "с", "Время подлёта к клетке"),
+                    ("low", "см", "Высота, до которой дрон снижается над клеткой перед посадкой")),
+          example="d.takeoff(100, 5)\nd.code(25, 4)\nd.land_on(25)\n", command="moveXY",
+          notes=("Это четыре шага подряд: code к клетке, зависание 1,5 с на текущей высоте, снижение до low за 2,5 с и land. "
+                 "Все шаги проверены на живом дроне",
+                 "Точность позиции около ±10-15 см: зависание и медленное снижение над клеткой её уменьшают, но не отменяют")),
     Entry("Drone", "set_z", "method", "set_z(z, seconds)",
           "Перейти на высоту z. На той же высоте это зависание", "motion", STATUS_VERIFIED,
           params=_p(("z", "см", f"Новая высота. Не больше лимита высоты ({DEFAULT_MAX_HEIGHT_CM} см по умолчанию)"),
@@ -239,15 +250,16 @@ ENTRIES = (
                  "В симуляции z — итоговая высота. Шоу из LiteBee Go чередуют 130 и 80 см, значит это не прирост",
                  "Формулировка официального описания («升高的高度») двусмысленна")),
     Entry("Drone", "circle", "method", "circle(count, cell1, cell2, seconds, rotate='cw')",
-          "Круг вокруг середины между двумя клетками", "motion", STATUS_SIM,
+          "Круг вокруг середины между двумя клетками", "motion", STATUS_VERIFIED,
           params=_p(("count", "полукругов", "Сколько полукругов. 2 полукруга — полный круг, дрон вернётся на место"),
                     ("cell1", _CELL, "Первая клетка: вместе со второй задаёт центр"),
                     ("cell2", _CELL, "Вторая клетка. Центр — середина отрезка между клетками"),
-                    ("seconds", "с", "Время на весь круг"),
+                    ("seconds", "с", "Время одного полукруга: на дроне шаг длится count × seconds. Симуляция считает seconds за весь круг"),
                     ("rotate", "'cw' | 'ccw'", "Направление. Допустимы и числа: 0 — по часовой, 1 — против")),
-          example="d.circle(2, 66, 77, 15)   # полный круг за 15 с\n", command="circle",
+          example="d.circle(2, 66, 77, 15)   # полный круг: 2 полукруга по 15 с на дроне\n", command="circle",
           official="litebeeWingFormation_circle",
-          notes=("Загрузка в дрон отказывает: формат шага на проводе не проверен",
+          notes=("Шаг летал на живом дроне. Новое приложение его загружает, старое приложение на PySide пока отказывает",
+                 "Время круга на дроне и в симуляции разное: на дроне count × seconds, в симуляции seconds",
                  "Радиус — расстояние от текущей позиции дрона до центра",
                  "Куда на коврике поворачивает 'cw', в симуляции угадано")),
     Entry("Drone", "circle_z", "method", "circle_z(cell1, cell2, dz, seconds, rotate='cw')",

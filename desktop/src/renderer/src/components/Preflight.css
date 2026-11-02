@@ -1,0 +1,111 @@
+/* One joined control: four segments in a single frame, the current one filled. */
+.preflight {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--sheet);
+}
+
+.pf-item {
+  display: flex;
+}
+
+.pf-item + .pf-item {
+  border-left: 1px solid var(--rule);
+}
+
+.pf-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: background-color 0.18s var(--ease-out);
+}
+
+.pf-mark {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 11.5px;
+  font-weight: 700;
+  flex: none;
+}
+
+.pf-label {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.pf-step[data-state='done'] {
+  color: var(--ink);
+}
+
+.pf-step[data-state='done'] .pf-mark {
+  color: var(--ok);
+}
+
+.pf-step[data-state='current'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.pf-step[data-state='current']:enabled:hover {
+  background: var(--accent-hover);
+}
+
+.pf-step[data-state='current']:enabled:active {
+  transform: translateY(1px);
+}
+
+.pf-step[data-state='current'][data-error='true'] .pf-mark {
+  background: var(--accent-ink);
+  color: var(--danger);
+  border-color: var(--accent-ink);
+}
+
+.pf-step[data-state='next'] {
+  color: var(--ink);
+}
+
+.pf-step[data-state='next'] .pf-mark {
+  color: var(--accent);
+}
+
+.pf-step[data-state='blocked'] {
+  color: var(--ink-3);
+}
+
+.pf-step:focus-visible {
+  outline-color: var(--ink);
+  outline-offset: -3px;
+}
+
+/* a step that can be pressed says so: a pointer, and a tint under it before it is the current one */
+.pf-step:enabled {
+  cursor: pointer;
+}
+
+.pf-step[data-state='done']:enabled:hover {
+  background: var(--accent-tint);
+}

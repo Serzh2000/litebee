@@ -1,0 +1,46 @@
+# Для одной четверти коврика: клетки 0-5 по столбцам и строкам (2,4 x 2,4 м), клетка = столбец + 12 x строка.
+# Чтобы перенести шоу в другую четверть, нажмите «Перенести шоу» над картой.
+# Три дрона стоят через клетку и поднимаются на разную высоту: 80, 110 и 140 см. Только высота и цвет.
+from litebee_show import Show
+
+show = Show('Лесенка в четверти')
+
+d = show.drone(1)
+d.calibrate(5)
+d.takeoff(80, 5)
+d.rgb('green')
+d.code(13, 1)
+d.set_z(80, 2)
+d.set_z(80, 10)
+d.rgb('white')
+d.set_z(80, 3)
+d.rgb('black')
+d.land()
+
+d = show.drone(2)
+d.calibrate(5)
+d.takeoff(80, 5)
+d.rgb('blue')
+d.code(15, 1)
+d.set_z(80, 2)
+d.set_z(110, 3)
+d.set_z(110, 4)
+d.set_z(80, 3)
+d.rgb('white')
+d.set_z(80, 3)
+d.rgb('black')
+d.land()
+
+d = show.drone(3)
+d.calibrate(5)
+d.takeoff(80, 5)
+d.rgb('purple')
+d.code(17, 1)
+d.set_z(80, 2)
+d.set_z(140, 3)
+d.set_z(140, 4)
+d.set_z(80, 3)
+d.rgb('white')
+d.set_z(80, 3)
+d.rgb('black')
+d.land()

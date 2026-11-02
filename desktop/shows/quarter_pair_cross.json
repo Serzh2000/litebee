@@ -1,0 +1,181 @@
+{
+ "name": "Разминуться",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 13
+   },
+   {
+    "kind": "code",
+    "seconds": 7.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 14
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 15
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 16
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 80.0
+    },
+    "line": 16
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 16
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 16
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 19
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 20
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 21
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 22
+   },
+   {
+    "kind": "code",
+    "seconds": 7.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 23
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 24
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 25
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 150.0
+    },
+    "line": 25
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 25
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 25
+   }
+  ]
+ }
+}

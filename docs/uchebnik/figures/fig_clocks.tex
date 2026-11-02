@@ -1,0 +1,20 @@
+% Две ленты: у каждого дрона свои часы, длина шоу по самому долгому
+\begin{tikzpicture}[x=0.52cm, font=\sffamily\small]
+  \def\h{0.7}
+  \node[anchor=east] at (-0.2,1.55) {дрон 1};
+  \foreach \a/\b/\t/\f in {0/5/calibrate/paper, 5/10/takeoff/accentsoft, 10/11/{}/paper, 11/15/code/accentsoft, 15/18/land/paper}{
+    \draw[fill=\f, draw=ink!60, thick] (\a,1.2) rectangle (\b,1.2+\h);
+    \node[font=\scriptsize] at ({(\a+\b)/2},{1.2+\h/2}) {\t};
+  }
+  \node[anchor=east] at (-0.2,0.35) {дрон 2};
+  \foreach \a/\b/\t/\f in {0/5/calibrate/paper, 5/10/takeoff/accentsoft, 10/11/{}/paper, 11/17/{set\_z: ждёт}/warnfill, 17/21/code/accentsoft, 21/24/land/paper}{
+    \draw[fill=\f, draw=ink!60, thick] (\a,0) rectangle (\b,\h);
+    \node[font=\scriptsize] at ({(\a+\b)/2},{\h/2}) {\t};
+  }
+  \draw[dashed, inkgray] (18,1.0) -- (18,2.3);
+  \node[anchor=south, text=inkgray, font=\scriptsize] at (18,2.3) {дрон 1 сел, ждёт остальных};
+  \draw[dashed, accent, thick] (24,-0.2) -- (24,2.3);
+  \node[text=accent, font=\scriptsize\bfseries, anchor=south east] at (24.3,2.3) {конец шоу};
+  \draw[-{Stealth}, ink] (0,-0.55) -- (25.3,-0.55) node[right] {$t$, с};
+  \foreach \t in {0,5,10,15,20,24}{\draw[ink] (\t,-0.48) -- (\t,-0.62); \node[below, font=\scriptsize] at (\t,-0.62) {\t};}
+\end{tikzpicture}

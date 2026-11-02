@@ -1,0 +1,17 @@
+% Цепочка перед полётом
+\begin{tikzpicture}[font=\sffamily\small, node distance=6mm,
+  stp/.style={draw=accent, thick, rounded corners=2pt, fill=accentsoft, minimum height=9mm, minimum width=29mm, inner sep=3pt, align=center}]
+  \node[stp] (a) {1. Проверить};
+  \node[stp, right=of a] (b) {2. Загрузить};
+  \node[stp, right=of b] (c) {3. Взвести};
+  \node[stp, right=of c] (d) {4. Старт};
+  \draw[-{Stealth}, accent, thick] (a) -- (b);
+  \draw[-{Stealth}, accent, thick] (b) -- (c);
+  \draw[-{Stealth}, accent, thick] (c) -- (d);
+  \node[below=2mm of a, font=\scriptsize, text=inkgray, align=center] {симуляция,\\нет ошибок};
+  \node[below=2mm of b, font=\scriptsize, text=inkgray, align=center] {программа\\уходит в дрон};
+  \node[below=2mm of c, font=\scriptsize, text=inkgray, align=center] {разрешает\\старт};
+  \node[below=2mm of d, font=\scriptsize, text=inkgray, align=center] {после вашего\\подтверждения};
+  \node[draw=stopedge, thick, rounded corners=2pt, fill=stopfill, minimum height=9mm, inner sep=5pt, below=17mm of $(b)!0.5!(c)$, text=stopedge, font=\sffamily\small\bfseries] (r) {Аварийная посадка \;\klavisha{Esc}};
+  \node[font=\scriptsize, text=inkgray, right=3mm of r, align=left] {всегда на экране,\\работает в любой момент};
+\end{tikzpicture}

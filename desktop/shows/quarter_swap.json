@@ -1,0 +1,261 @@
+{
+ "name": "Обмен местами в четверти",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 25
+    },
+    "line": 13
+   },
+   {
+    "kind": "code",
+    "seconds": 6.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 14
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 15
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 16
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 19
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 20
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 21
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 22
+   },
+   {
+    "kind": "code",
+    "seconds": 6.0,
+    "args": {
+     "cell": 25
+    },
+    "line": 23
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 24
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 25
+   }
+  ],
+  "3": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 28
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 29
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 30
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 31
+   },
+   {
+    "kind": "code",
+    "seconds": 6.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 32
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 33
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 34
+   }
+  ],
+  "4": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 37
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 38
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 39
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 40
+   },
+   {
+    "kind": "code",
+    "seconds": 6.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 41
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 42
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 43
+   }
+  ]
+ }
+}

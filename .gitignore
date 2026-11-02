@@ -4,3 +4,21 @@ __pycache__/
 .pytest_cache/
 LAND_NOW
 flight_logs/
+
+# desktop (Electron)
+desktop/node_modules/
+desktop/out/
+desktop/*.log
+desktop/src/renderer/public/pyodide/
+
+# LaTeX build files
+docs/uchebnik/*.aux
+docs/uchebnik/*.log
+docs/uchebnik/*.xdv
+docs/uchebnik/*.fls
+docs/uchebnik/*.fdb_latexmk
+docs/uchebnik/*.toc
+docs/uchebnik/*.out
+
+# design tool state
+.impeccable/

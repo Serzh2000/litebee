@@ -1,0 +1,307 @@
+{
+ "name": "Лифт",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 60.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 13
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 14
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 15
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 60.0
+    },
+    "line": 16
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 17
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 18
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 19
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 60.0
+    },
+    "line": 20
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 21
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 22
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 60.0
+    },
+    "line": 22
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 22
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 22
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 25
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 26
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 27
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 28
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 60.0
+    },
+    "line": 29
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 30
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 31
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 32
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 60.0
+    },
+    "line": 33
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 34
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 35
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 36
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 37
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 150.0
+    },
+    "line": 37
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 37
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 37
+   }
+  ]
+ }
+}

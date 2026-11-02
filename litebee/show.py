@@ -137,6 +137,26 @@ class Drone:
     def land(self):
         return self._add("land", LAND_SECONDS)
 
+    def _height(self):
+        """Height the drone has after the steps so far (takeoff, set_z or code_z), None before the takeoff."""
+        for s in reversed(self.steps):
+            if s.kind in ("takeoff", "set_z", "code_z"):
+                return s.args["z"]
+        return None
+
+    def land_on(self, cell, seconds=2, low=35):
+        """Land on the centre of a cell: fly over it, hold still to settle, go down to `low` cm, then land.
+
+        A drone that lands where it happens to be ends up a few cm off the cell (its position is good to
+        about 10-15 cm). Settling and a slow descent over the cell keep the error small."""
+        z = self._height()
+        if z is None:
+            raise ValueError("land_on: сначала нужен взлёт")
+        self.code(cell, seconds)
+        self.set_z(z, 1.5)
+        self.set_z(low, 2.5)
+        return self.land()
+
     @property
     def duration(self):
         return sum(s.seconds for s in self.steps)

@@ -1,0 +1,213 @@
+{
+ "name": "Чехарда",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 70.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 12
+    },
+    "line": 13
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 14
+    },
+    "line": 14
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 15
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 17
+    },
+    "line": 16
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 17
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 17
+    },
+    "line": 18
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 70.0
+    },
+    "line": 18
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 18
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 18
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 21
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 150.0
+    },
+    "line": 22
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 23
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 14
+    },
+    "line": 24
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 15
+    },
+    "line": 25
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 14
+    },
+    "line": 26
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 14
+    },
+    "line": 27
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 28
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 14
+    },
+    "line": 29
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 150.0
+    },
+    "line": 29
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 29
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 29
+   }
+  ]
+ }
+}

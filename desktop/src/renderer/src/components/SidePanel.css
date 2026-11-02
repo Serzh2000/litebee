@@ -1,0 +1,189 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel-checks {
+  flex: 1;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 18px 8px;
+  flex: none;
+}
+
+.panel-head h2 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.panel-note {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.rows[data-stale='true'] {
+  opacity: 0.55;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 18px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  text-align: left;
+  color: var(--ink);
+  transition: background-color 0.18s var(--ease-out);
+}
+
+.row:hover {
+  background: var(--desk);
+}
+
+.row[data-selected='true'] {
+  background: var(--accent-tint);
+}
+
+.row-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.row-title {
+  font-weight: 600;
+}
+
+.row-sub {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.row-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  flex: none;
+}
+
+.badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-3);
+  background: var(--sheet);
+  font-weight: 700;
+  flex: none;
+}
+
+.badge i {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--sheet),
+    inset 0 0 0 1px rgb(var(--shadow-rgb) / 0.35);
+}
+
+.finding {
+  align-items: flex-start;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.finding svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.finding[data-level='error'] svg {
+  color: var(--danger);
+}
+
+.finding[data-level='warn'] svg {
+  color: var(--warn);
+}
+
+.finding[data-level='info'] svg {
+  color: var(--ink-2);
+}
+
+.finding-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  margin-top: 1px;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.finding-count svg {
+  margin: 0;
+  transition: transform 0.18s var(--ease-out);
+}
+
+.finding-count svg[data-open='true'] {
+  transform: rotate(180deg);
+}
+
+.finding-items {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 6px 46px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.finding-items button {
+  display: block;
+  width: 100%;
+  padding: 4px 18px 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.finding-items button:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.finding-text {
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.empty {
+  padding: 4px 18px 16px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  max-width: 46ch;
+}

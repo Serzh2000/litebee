@@ -1,0 +1,35 @@
+# Упражнение 12.2: три дрона зажигаются по очереди на две секунды.
+from litebee_show import Show
+
+show = Show('Огни по очереди')
+
+d = show.drone(1)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.code(13, 1)
+d.rgb('red')
+d.set_z(100, 2)
+d.rgb('black')
+d.set_z(100, 4)
+d.land()
+
+d = show.drone(2)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.code(15, 1)
+d.set_z(100, 2)
+d.rgb('red')
+d.set_z(100, 2)
+d.rgb('black')
+d.set_z(100, 2)
+d.land()
+
+d = show.drone(3)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.code(17, 1)
+d.set_z(100, 4)
+d.rgb('red')
+d.set_z(100, 2)
+d.rgb('black')
+d.land()

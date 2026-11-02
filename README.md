@@ -1,136 +1,83 @@
 # Litebee IDE
 
-Десктопное приложение для Windows (Python + PySide6) для программирования дронов LiteBee Wing из набора Makerfire FM-10. Заменяет Scratch-часть LiteBee Go и умеет импортировать его проекты `.lbg`. Архитектура и планы: `docs/DESIGN.md`, интерфейс: `docs/UI_DESIGN.md`.
+**English** · [Русский](README.ru.md)
 
-Всё, кроме явных команд связи, работает без дронов: можно писать шоу, смотреть симуляцию и отчёт проверок.
+A desktop environment for programming and flying **LiteBee Wing** drones (Makerfire FM-10 kit). You write a show in Python, watch it on a map of the classroom mat, check it, load it into the drones and start it. It replaces the Scratch part of LiteBee Go and imports its `.lbg` projects.
 
-## Установка
+Everything except the explicit link commands works without drones: write a show, watch the simulation, read the check report.
 
-Нужен Python 3.11 или новее. Всё ставится только внутрь проекта, в виртуальное окружение `.venv`:
+![Simulation: map of a quarter of the mat, code windows of the drones, cue sheet](docs/images/simulation-en.png)
 
-```powershell
-cd C:\Users\serzh\Documents\GitHub\Litebee
-python -m venv .venv
-.\.venv\Scripts\python -m pip install -r requirements.txt
+## What it does
+
+- **Map of the mat.** 12 × 12 cells of 40 cm, top view. Cell number = column + 12 × row. The drones are drawn after the real LiteBee Wing. A whole mat or one quarter (6 × 6 cells, a classroom mat folded in four) can be shown.
+- **Code and simulation tabs.** The code tab has one tab per drone. The simulation tab has the map, the cue sheet (light over time) and the transport; the cue sheet is always open, and the code of each drone pops up over the map while you move along it.
+- **Check.** Runs the show and reports errors, drones closer than 60 cm, height over the limit, speed over 100 cm/s and steps that cannot be loaded.
+- **Link to real drones.** Battery and position of every drone, roles by the cell a drone stands on, an archive of known drones. Order of work: Check, Load, Arm, Start. Start asks for confirmation.
+- **Emergency landing** is always visible (top right, key `Esc`).
+- **Starting positions.** Every drone starts from a cell of its own. Drag a drone on the map to another cell, or press **Place a drone** and then a cell; the **+** button adds one more drone at any moment. Both change the code, so `Ctrl+Z` takes them back.
+- **146 ready shows** for 2 to 10 drones, sorted by the number of drones, with a project wizard that filters them.
+- **Russian and English** interface, light and dark theme.
+- **Reference** of every show function with units, examples and the status “flown on a drone” or “simulator only” (`F1`).
+
+![The code tab](docs/images/code-en.png)
+
+![Dark theme, the whole mat](docs/images/simulation-dark-en.png)
+
+## Running the app
+
+Windows, Node.js 20 or newer.
+
+```bash
+cd desktop
+npm install
+npm run dev        # development
+npm run build      # production build into desktop/out
+npm test           # unit tests (they never touch real drones)
 ```
 
-## Тесты
+The show code runs in Python (Pyodide) inside the app, so no Python is needed to use it. The tests talk to a fake drone on `127.0.0.1`, never to the real ports 18001, 6000 and 13146.
 
-Тесты не касаются настоящих дронов и портов 18001, 6000, 13146. Вместо дрона они используют `FakeDrone` на `127.0.0.1` с портом, который выбирает система.
-
-```powershell
-.\.venv\Scripts\python -m pytest tests -q
-```
-
-Тесты окна идут без экрана (`QT_QPA_PLATFORM=offscreen`, ставится сам).
-
-## Запуск приложения
-
-```powershell
-.\.venv\Scripts\python -m app            # пустое окно
-.\.venv\Scripts\python -m app shows\my_dream.py
-```
-
-В окне главное — коврик: карта 12×12 клеток по 40 см с масштабом и сдвигом (дроны нарисованы собственной моделью LiteBee Wing) и вид сбоку. Справа колонка «Код | Проверки | Журнал» (скрывается кнопкой «Код» или Ctrl+E, состояние запоминается). Под картой партитура света: дорожка на дрона, цвет светодиода во времени, штрихи шагов, общее время с картой. Внизу фишки дронов в сети и красная кнопка «Аварийная посадка» (всегда справа внизу, горячая клавиша Esc, пока дрон взведён или летит). Вверху порядок подготовки: «Проверить», «Загрузить», «Взвести», «Старт»; текущий шаг залит цветом, у недоступного написана причина. Подробности и скриншоты: `docs/UI_DESIGN.md`, `docs/screenshots/`.
-
-![Главное окно, 1600×900: живой дрон на клетке 96, шоу my_dream](docs/screenshots/main_1600x900.png)
-
-- Режим внимания: щелчок по дрону на карте, по заголовку дорожки в партитуре или по фишке дрона выделяет его (путь и дорожка в полную силу, остальные тусклые); щелчок по пустому месту снимает выбор.
-
-- Карта коврика (превью, вид сверху): номера клеток растут вправо и вверх, клетка 0 внизу слева, 143 вверху справа. Колесо мыши масштабирует, перетаскивание двигает, двойной щелчок или кнопка «По размеру» показывают весь коврик. Щелчок по клетке пишет в строке состояния «клетка N, строка R, столбец C, y=… см, x=… см»; правая кнопка копирует номер клетки. На карте план шоу (пути, клетки-цели шагов `code`), а при подключённых дронах их живые позиции с хвостом и кольцом точности 15 см. Дрон без позиции (x = y = 0) не рисуется, об этом пишет строка в углу карты.
-- «Проверить» запускает код шоу, строит симуляцию и показывает отчёт: ошибки, сближение дронов меньше 60 см, высота выше лимита, шаги, которые нельзя загрузить. Код шоу выполняется в отдельном процессе не дольше 5 с: если он завис (например, бесконечный цикл), процесс убивается и появляется сообщение «Шоу выполняется дольше 5 с. Проверьте циклы в коде». Окно при этом не замирает: пока идёт проверка, кнопка называется «Проверяю…» и неактивна. Шоу, у которого больше 10000 шагов, тоже отклоняется.
-- «Ограничения» (кнопка рядом с порядком подготовки) открывают поле «Лимит высоты»: предельная высота для проверки, загрузки и старта. По умолчанию 150 см, можно от 20 до 200 см, значение запоминается между запусками. Выше 200 см нельзя ни в окне, ни из командной строки. После смены лимита нажмите «Проверить» ещё раз: пока проверка устарела, «Загрузить» и «Старт» неактивны. Другие проверки (зависание, сближение, доказанные шаги, батарея) лимит не отключает. Если в шоу есть шаги на 160 см, поставьте лимит 160 или больше.
-- «Связь…» запускает UDP-объявление и TCP-сервер (по умолчанию порт 18001). Без этого окно работает в режиме «Симуляция».
-- «Загрузить» отправляет программу выбранного дрона и сверяет контрольную сумму.
-- «Старт» неактивна, пока нет проверки, загруженной миссии и взвода («Взвести» — кнопка-переключатель в порядке подготовки). Причина написана текстом рядом с цепочкой шагов и в подсказке кнопки. Перед стартом появляется диалог «Взлететь, 1 дрон» с высотой миссии и действующим лимитом. «Взвести» сбрасывается после каждого полёта и при потере связи.
-- Движение по клеткам (`code`): фишка дрона внизу показывает его клетку («Клетка 96», «Нет позиции»). Если у дрона нет позиции или он стоит дальше 200 см от первой клетки шоу, «Загрузить» и «Старт» неактивны, подсказка говорит, что делать. Диалог перед стартом пишет «Дрон на клетке N».
-- «Справочник» (кнопка в шапке или F1): функции шоу с параметрами, единицами, примерами и статусом «проверено на дроне» или «только симулятор», а также темы про коврик, безопасность и порядок работы. «Вставить в редактор» кладёт пример под курсор. F1 на названии команды в редакторе открывает её описание, подсказка при наведении показывает сигнатуру и статус. Содержимое — `litebee/reference.py`, тест сверяет его с кодом.
-- Сейчас одновременно можно загрузить и запустить только один дрон: несколько дронов и общий старт не проверялись на живых дронах.
-
-## Порядок работы с движением по клеткам
-
-1. Свежая батарея (старт запрещён ниже 7,0 В).
-2. Поставьте дрон на коврик рядом с первой клеткой движения в шоу (не дальше 200 см; лучше на ней).
-3. Сделайте короткий взлёт на 50 см, чтобы дрон получил позицию: `python -m litebee hop --pc ... --drone ... --height 50 --hover 2 --go` или маленькое шоу из `calibrate`, `takeoff(50, 5)`, `land()`. Позиция остаётся после посадки. Одна калибровка позицию не даёт: без позиции дрон прерывает миссию через ~3 с, не взлетев.
-4. Убедитесь, что в фишке дрона появилась «Клетка N» и это нужная клетка. Нажмите «Проверить», «Загрузить», «Взвести», «Старт».
-5. Не переносите дрон между загрузкой и стартом: проверка позиции повторяется при старте.
-
-Скорость переходов выше 100 см/с даёт предупреждение в «Проверить»: дрон может перелететь клетку (точность ±10-15 см, перелёт до ~20 см).
-
-Оба настоящих шоу в `shows/` (`my_dream`, `my_people_my_country_5`) проходят проверку высоты при лимите 170 см, но в каждом у всех десяти дронов есть `circle` или `code_z`, поэтому загрузить их нельзя, а несколько дронов не проверялись: пока только один дрон.
-
-## Командная строка
-
-```powershell
-.\.venv\Scripts\python -m litebee listen --pc 192.168.13.100 --drone 192.168.13.108 --seconds 30
-.\.venv\Scripts\python -m litebee color  --pc 192.168.13.100 --drone 192.168.13.108 --color green
-.\.venv\Scripts\python -m litebee hop    --pc 192.168.13.100 --drone 192.168.13.109            # только загрузка и проверка
-.\.venv\Scripts\python -m litebee hop    --pc 192.168.13.100 --drone 192.168.13.109 --go       # моторы запустятся
-.\.venv\Scripts\python -m litebee simulate shows\my_dream.py        # или проект .lbg
-.\.venv\Scripts\python -m litebee simulate shows\my_dream.py --max-height 170   # шоу со ступенями 160 см
-.\.venv\Scripts\python -m litebee import-lbg "Z:\FM10 sets-My Dream.lbg" shows\my_dream_new.py
-.\.venv\Scripts\python -m litebee wing-status --seconds 5           # USB-пульт Wing: версия, батарея, углы; дрон не двигается
-```
-
-- `listen` только слушает телеметрию.
-- `color` зажигает светодиод миссией из одного RGB-шага, без взлёта.
-- `hop` без `--go` загружает миссию и проверяет контрольную сумму, моторы не запускает. С `--go` запускает и следит. Отказ при батарее ниже 7,0 В (порог нельзя снизить), высоте больше лимита (150 см по умолчанию, `--max-height` поднимает до 200 см, выше нельзя), зависании больше 10 с. На любую ошибку, потерю связи, Ctrl+C и появление файла `LAND_NOW` дрону уходит аварийная посадка.
-- `--max-height СМ` есть у `hop` и `simulate`: лимит высоты от 20 до 200 см, по умолчанию 150. Значение вне этих границ даёт отказ с кодом 1. `simulate` пишет действующий лимит в отчёте.
-- `simulate` читает файл шоу через тот же отдельный процесс с лимитом 5 с, что и «Проверить» в окне; `print` из кода шоу попадает в stderr.
-- Каждая подкоманда принимает `--port` (TCP-порт, по умолчанию 18001) и `--udp-port` (порт дронов, по умолчанию 13146). Для `simulate` и `import-lbg` они ничего не делают. На `127.0.0.1` реальные порты 18001/6000/13146 отвергаются.
-
-Файл шоу (Python):
+## A show looks like this
 
 ```python
-from litebee import Show
+from litebee_show import Show
 
-show = Show('Пример')
+show = Show('Square in a quarter')
+
 d = show.drone(1)
 d.calibrate(5)
-d.takeoff(100, 5)      # высота в см, время в с
+d.takeoff(100, 5)
 d.rgb('green')
-d.set_z(100, 3)
+d.code(13, 1)    # the start cell
+d.code(16, 4)    # fly to cell 16 in 4 seconds
+d.rgb('black')
 d.land()
 ```
 
-Старые файлы с `from litebee_show import Show` тоже работают.
+Before loading, every drone stands on the cell of its first `d.code(...)`.
 
-## Что проверено на живых дронах, что нет
+## Safety
 
-Что уже доказано на живых дронах:
+- Nothing in the app makes a drone fly without an explicit action: loading does not spin the motors, Start asks for confirmation.
+- Take off over a fresh battery (start is refused below 7.0 V).
+- Position steps need the drone to know where it is: do a short take-off first, and do not carry the drone between loading and starting.
+- Emergency landing: the red button or `Esc`.
 
-- Дрон подключается к ПК по TCP (порт 18001) после UDP-объявления адреса ПК (порт 13146, широковещательно).
-- Кадр: `0xFA` + `[len, 0, group, id, данные]` + CRC-16 (init 0xFFFF, отражённый 0x8408, без финального XOR, младший байт первым).
-- Телеметрия (21 байт): x, y, z, батарея, флаг, контрольная сумма миссии, номер, часы.
-- Миссия: очистка, шаги, старт. Цвет (RGB-шаг) работает без взлёта.
-- Взлёт, зависание и посадка работают (calibrate / takeOff / moveZ / autoLand), время в 0,1 с, высота в см.
-- Движение по клеткам коврика (шаг `code` = moveXY): 4 полёта на двух дронах, обе оси, любой курс носа.
+## Repository
 
-Что не доказано (ограничения):
+| Path | What is there |
+| --- | --- |
+| `desktop/` | the app: Electron, React, TypeScript, Pyodide |
+| `litebee/`, `app/` | the Python engine (show model, protocol) and the earlier PySide6 app, kept as a reference |
+| `shows/` | example shows, `shows/gallery/` the generated 146 |
+| `tools/` | generators of the gallery, translation and reference exporters |
+| `docs/` | protocol notes ([single drone](docs/PROTOCOL_SINGLE.md), [steps](docs/PROTOCOL_STEPS.md)), [design](docs/DESIGN.md), [manual notes](docs/WING_MANUAL_NOTES.md) |
+| `docs/uchebnik/` | a textbook in Russian (LaTeX, [PDF](docs/uchebnik/uchebnik.pdf)) |
+| `PRODUCT.md` | what the product is for and how it must look |
 
-- Дрон выполняет миссию с движением по клеткам, только если у него есть позиция по коврику. Только что включённый дрон сообщает x = y = 0 (это нет позиции). Позиция появляется в полёте примерно на 30 см и остаётся после посадки; одна калибровка её не даёт.
-- Точность по коврику около ±10-15 см, перелёт до ~20 см.
-- Шаги `code_z`, `circle`, `circle_z`: формат не проверен, загрузка отказывает.
-- Относительные команды (`setDir`, `setYaw`, `setHigh`, программы Number tracking) LiteBee Go отправляет только по USB-serial, формационный Wi-Fi-обработчик их не знает: `docs/PROTOCOL_SINGLE.md`. Принимает ли дрон такие кадры по Wi-Fi, не проверено.
-- Несколько дронов и синхронный старт не проверялись. Часы дронов в телеметрии показывают 0.
-- Видео с дрона недоступно (камерные модули C06/C10 имеют собственные точки доступа).
-- Lua на дроне невозможен. Язык шоу: Python.
+## Status
 
-Дополнительно про эту версию (проверено только на `FakeDrone`, не на живых дронах):
+Flown on real drones: all 10 drones of the kit, including `circle`. Several drones from one start are used in the classroom; the protocol is described in `docs/`.
 
-- Порт протокола в пакет `litebee/` побайтно совпадает с исходными скриптами (тесты сравнивают кадры и контрольные суммы с `drone_probe.py`, `drone_color.py`, `drone_hop.py`).
-- Загрузка в дрон умеет только шаги, доказанные на живых дронах: калибровка, взлёт, высота, посадка, цвет и движение по клеткам `code`. Шаги `code_z`, `circle`, `circle_z` в симуляции работают, а загрузка для них отказывает: формат этих шагов на проводе не проверен. Тесты движения по клеткам идут только против `FakeDrone`; кадры сверены с эталоном, снятым с живого дрона.
-- Аварийная посадка по кнопке, Esc, потеря связи и ошибки в приложении проверены только против `FakeDrone`.
-- Симуляция приблизительная: старт с первой клетки, посадка 3 с, направление кругов угадано, ориентация коврика в превью условная.
-
-## Структура
-
-```
-litebee/   ядро: protocol, mission, link, flight, show, reference, lbg, loader, show_worker, safety, cli, remote (USB-пульт Wing, только чтение), live (только построители «живых» кадров, не используются, не проверены на FM)
-app/       окно PySide6: main_window, preflight (порядок подготовки), preview, mat_map (карта коврика), cue_sheet (партитура света), drones_panel (фишки дронов), editor, reference_panel, drone_art (модель дрона), session, theme.qss и theme.py (единственное место цветов)
-tests/     тесты и FakeDrone
-shows/     шоу, конвертированные из .lbg
-docs/      DESIGN.md, UI_DESIGN.md, screenshots/
-```
-
-Исходные скрипты в корне (`drone_probe.py`, `drone_color.py`, `drone_hop.py`, `litebee_show.py`, `lbg_to_py.py`) не менялись и работают как раньше.
+*The photograph of the real drone is not in the repository yet: the drone in the screenshots is drawn by the app after it. To put a photo here, save it as `docs/images/drone.jpg` and add `![LiteBee Wing](docs/images/drone.jpg)` under the title.*

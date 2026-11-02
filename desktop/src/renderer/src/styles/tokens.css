@@ -1,0 +1,74 @@
+/* Every colour of the app lives here (docs/UI_DESIGN.md, PRODUCT.md brand commitments): light cool paper, ink that is
+   not pure black, one deep-cyan accent used only for selection and actions. Colours of drones and paths are data
+   (their LED colours) and are computed, never listed here. */
+:root {
+  --desk: #f1f3f5; /* window ground */
+  --sheet: #fbfcfd; /* panels */
+  --paper: #f6f7f9; /* the field sheet under the mat */
+  --rule: #d5dae1; /* 1 px field lines */
+  --rule-strong: #a9b2be; /* every third line, like the yard lines of a chart */
+  --ink: #1d2229;
+  --ink-2: #566070; /* secondary text, 6:1 on the sheet */
+  --ink-3: #5a6472; /* numerals on the field paper, 5.4:1; 4.7:1 on the selected-row tint */
+
+  --accent: #0b7285;
+  --accent-ink: #ffffff;
+  --accent-tint: #d6ebef;
+  --accent-hover: #0a6575;
+  --danger: #c7372f;
+  --danger-dn: #a92a24;
+  --warn: #b45309;
+  --ok: #187a4e;
+  --danger-tint: #fbeeec; /* the banner of an error in the code */
+  --now-strong: rgb(11 114 133 / 0.2); /* the line that runs now */
+  --now-soft: rgb(11 114 133 / 0.07); /* the last colour command */
+  --active-line: rgb(214 235 239 / 0.45);
+  --shadow-rgb: 29 34 41; /* the tint of every shadow: the ink in light, black in dark */
+  --scrim: rgb(29 34 41 / 0.28);
+  color-scheme: light;
+
+  --drone-body: #ffffff;
+  --drone-grey: #8d97a6;
+  --drone-dark: #3f4856;
+  --drone-silver: #a7b0bd;
+
+  --font-ui: 'Bahnschrift', 'Segoe UI', system-ui, sans-serif;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --radius: 6px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The dark theme: the same cool slate, never pure black, the same single cyan (lighter, so that it reads on dark). */
+:root[data-theme='dark'] {
+  --desk: #14181d;
+  --sheet: #1b2027;
+  --paper: #11151a;
+  --rule: #2b323c;
+  --rule-strong: #475161;
+  --ink: #e6e9ee;
+  --ink-2: #a5afbc;
+  --ink-3: #8b96a5;
+
+  --accent: #3fb3c8;
+  --accent-ink: #06222a;
+  --accent-tint: #183840;
+  --accent-hover: #5ac4d7;
+  --danger: #cf4037;
+  --danger-dn: #e0564d;
+  --warn: #e0a24a;
+  --ok: #4fc08a;
+  --danger-tint: #3a1f1e;
+  --now-strong: rgb(63 179 200 / 0.24);
+  --now-soft: rgb(63 179 200 / 0.09);
+  --active-line: rgb(63 179 200 / 0.08);
+  --shadow-rgb: 0 0 0;
+  --scrim: rgb(0 0 0 / 0.55);
+
+  --drone-body: #dfe4ea;
+  --drone-grey: #98a2b1;
+  --drone-dark: #5a6574;
+  --drone-silver: #b9c2ce;
+  color-scheme: dark;
+}

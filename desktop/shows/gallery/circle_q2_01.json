@@ -1,0 +1,331 @@
+{
+ "name": "Круг: два дрона напротив друг друга, оборот и обратно",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 13
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "cw"
+    },
+    "line": 14
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 15
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "ccw"
+    },
+    "line": 16
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 17
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "cw"
+    },
+    "line": 18
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 19
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "ccw"
+    },
+    "line": 20
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 21
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 22
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 22
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 22
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 22
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 25
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 26
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 27
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 28
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "cw"
+    },
+    "line": 29
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 30
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "ccw"
+    },
+    "line": 31
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 32
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "cw"
+    },
+    "line": 33
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 34
+   },
+   {
+    "kind": "circle",
+    "seconds": 16.0,
+    "args": {
+     "count": 2,
+     "cell1": 26,
+     "cell2": 39,
+     "rotate": "ccw"
+    },
+    "line": 35
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 36
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 37
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 37
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 37
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 37
+   }
+  ]
+ }
+}

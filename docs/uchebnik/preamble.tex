@@ -1,0 +1,154 @@
+% Преамбула учебника по Litebee IDE. Сборка: latexmk -xelatex uchebnik.tex
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{russian}
+\setotherlanguage{english}
+\setmainfont{Charis SIL}[Scale=0.93]
+\setsansfont{Fira Sans}
+\setmonofont{JetBrains Mono}[Scale=0.84, RawFeature={-calt;-liga}]
+\newfontfamily\cyrillicfonttt{JetBrains Mono}[Scale=0.84, RawFeature={-calt;-liga}]
+
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{0B7285}
+\definecolor{accentdark}{HTML}{095C6B}
+\definecolor{accentsoft}{HTML}{E3F1F4}
+\definecolor{ink}{HTML}{1F2933}
+\definecolor{inkgray}{HTML}{5B6770}
+\definecolor{rule}{HTML}{C9D2D6}
+\definecolor{paper}{HTML}{F5F7F8}
+\definecolor{warnfill}{HTML}{FBF3E4}
+\definecolor{warnedge}{HTML}{B7791F}
+\definecolor{stopfill}{HTML}{FAECEC}
+\definecolor{stopedge}{HTML}{A33A3A}
+\definecolor{ledred}{HTML}{D64545}
+\definecolor{ledgreen}{HTML}{3C9D5A}
+\definecolor{ledblue}{HTML}{3465C4}
+\definecolor{ledyellow}{HTML}{D9B22B}
+\definecolor{ledpurple}{HTML}{8A5CC4}
+\definecolor{ledcyan}{HTML}{2AA0B8}
+
+\usepackage{geometry}
+\geometry{a4paper, top=26mm, bottom=28mm, inner=24mm, outer=24mm, headsep=9mm}
+\KOMAoptions{parskip=half-}
+\linespread{1.06}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\setlist{itemsep=2pt, topsep=4pt, parsep=0pt}
+\setlist[enumerate,1]{leftmargin=1.9em}
+\setlist[itemize,1]{leftmargin=1.3em}
+\usepackage{caption}
+\captionsetup{font={small,color=inkgray}, labelfont={bf,color=ink}, labelsep=period, justification=raggedright, singlelinecheck=false, skip=6pt}
+\usepackage{fvextra}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, calc, positioning}
+\usepackage{float}
+\usepackage{needspace}
+\floatplacement{figure}{tbp}
+
+% ---------- заголовки
+\addtokomafont{disposition}{\sffamily\color{ink}}
+\KOMAoptions{headings=small}
+\renewcommand*{\chaptername}{Урок}
+\setkomafont{chapter}{\sffamily\bfseries\fontsize{24}{28}\selectfont\color{accent}}
+\setkomafont{chapterprefix}{\sffamily\bfseries\normalsize\color{inkgray}}
+\RedeclareSectionCommand[beforeskip=0pt, afterskip=1.6\baselineskip, innerskip=4pt]{chapter}
+\renewcommand*{\chapterformat}{\chapapp\nobreakspace\thechapter}
+\renewcommand*{\chapterlinesformat}[3]{%
+  \parbox{\textwidth}{\ifstr{#2}{}{}{{\usekomafont{chapterprefix}#2}\par\vspace{2pt}}{#3}\par\vspace{6pt}%
+  \textcolor{accent}{\rule{3.2cm}{1.6pt}}}}
+\setkomafont{section}{\sffamily\bfseries\Large\color{accentdark}}
+\setkomafont{subsection}{\sffamily\bfseries\large\color{ink}}
+\setkomafont{subsubsection}{\sffamily\bfseries\normalsize\color{ink}}
+\RedeclareSectionCommand[beforeskip=1.5\baselineskip plus 4pt, afterskip=.5\baselineskip]{section}
+\RedeclareSectionCommand[beforeskip=1.1\baselineskip plus 3pt, afterskip=.3\baselineskip]{subsection}
+\setkomafont{paragraph}{\sffamily\bfseries\normalsize\color{ink}}
+\RedeclareSectionCommand[beforeskip=.7\baselineskip, afterskip=-.5em]{paragraph}
+
+\usepackage[automark,headsepline,plainheadsepline]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+\clearpairofpagestyles
+\ihead{\headmark}
+\ohead{\pagemark}
+\setkomafont{pagehead}{\sffamily\small\color{inkgray}}
+\setkomafont{pagenumber}{\sffamily\small\bfseries\color{ink}}
+\setkomafont{headsepline}{\color{rule}}
+\renewcommand*{\chaptermarkformat}{\chapapp\nobreakspace\thechapter.\enskip}
+
+\usepackage[unicode, hidelinks, pdftitle={Программируем шоу дронов}, pdfauthor={Litebee IDE}]{hyperref}
+\hypersetup{colorlinks=true, linkcolor=accent, urlcolor=accent, citecolor=accent}
+
+% ---------- листинги
+\fvset{fontsize=\small, breaklines=true, breakanywhere=false, breaksymbolleft={}, breakindent=0pt,
+  breakautoindent=false, numbers=left, numbersep=7pt, xleftmargin=16pt, tabsize=4}
+\renewcommand{\theFancyVerbLine}{\textcolor{inkgray}{\scriptsize\arabic{FancyVerbLine}}}
+
+\tcbset{
+  codebox/.style={enhanced, colback=paper, colframe=paper, boxrule=0pt, sharp corners, frame hidden,
+    borderline west={2.5pt}{0pt}{accent}, left=9pt, right=6pt, top=3pt, bottom=3pt,
+    before skip=2pt, after skip=10pt},
+  note/.style={enhanced, breakable, colback=accentsoft, colframe=accentsoft, frame hidden, sharp corners,
+    borderline west={3pt}{0pt}{accent}, left=9pt, right=8pt, top=5pt, bottom=5pt, before skip=8pt, after skip=10pt},
+  warn/.style={enhanced, breakable, colback=warnfill, colframe=warnfill, frame hidden, sharp corners,
+    borderline west={3pt}{0pt}{warnedge}, left=9pt, right=8pt, top=5pt, bottom=5pt, before skip=8pt, after skip=10pt},
+  stop/.style={enhanced, breakable, colback=stopfill, colframe=stopfill, frame hidden, sharp corners,
+    borderline west={3pt}{0pt}{stopedge}, left=9pt, right=8pt, top=5pt, bottom=5pt, before skip=8pt, after skip=10pt},
+  try/.style={enhanced, breakable, colback=white, colframe=accent, boxrule=0.9pt, arc=3pt,
+    left=10pt, right=10pt, top=6pt, bottom=6pt, before skip=12pt, after skip=10pt,
+    fonttitle=\sffamily\bfseries\normalsize, coltitle=white, colbacktitle=accent, toptitle=3pt, bottomtitle=3pt},
+}
+
+% подпись файла над листингом + сам листинг; #1 — настройки VerbatimInput, #2 — путь
+\newcommand{\filelabel}[1]{\par\needspace{5\baselineskip}\noindent{\sffamily\scriptsize\color{inkgray}\texttt{\detokenize{#1}}}\par\nopagebreak\vspace{1pt}}
+\newcommand{\listing}[2][]{%
+  \filelabel{#2}%
+  \begin{tcolorbox}[codebox]\VerbatimInput[#1]{#2}\end{tcolorbox}}
+\newcommand{\solfile}[2][]{\listing[#1]{solutions/#2}}
+% длинный листинг без рамки, для ответов
+\newcommand{\answerfile}[2][]{%
+  \filelabel{solutions/#2}%
+  \begin{tcolorbox}[codebox]\VerbatimInput[fontsize=\footnotesize,#1]{solutions/#2}\end{tcolorbox}}
+
+% ---------- выноски
+\newenvironment{zametka}[1][Запомните]{\begin{tcolorbox}[note]{\sffamily\bfseries\small\color{accentdark}#1}\par\smallskip}{\end{tcolorbox}}
+\newenvironment{vnimanie}[1][Осторожно]{\begin{tcolorbox}[warn]{\sffamily\bfseries\small\color{warnedge}#1}\par\smallskip}{\end{tcolorbox}}
+\newenvironment{opasno}[1][Безопасность]{\begin{tcolorbox}[stop]{\sffamily\bfseries\small\color{stopedge}#1}\par\smallskip}{\end{tcolorbox}}
+
+% ---------- упражнения: нумерация «урок.номер»
+\newenvironment{probuy}{%
+  \begin{tcolorbox}[try, title={Попробуйте сами}]
+  \begin{enumerate}[label=\bfseries\sffamily\color{accent}\thechapter.\arabic*, leftmargin=2.6em, itemsep=4pt]}%
+  {\end{enumerate}\end{tcolorbox}}
+\newcommand{\otvety}[1]{\par\noindent{\small\sffamily\color{inkgray}Ответы к упражнениям этого урока на странице~\pageref{ans:l#1}.}\par}
+
+% ---------- короткие обозначения в тексте
+\newcommand{\kod}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\knopka}[1]{\textsf{«#1»}}
+\newcommand{\klavisha}[1]{\tcbox[on line, colback=paper, colframe=rule, boxrule=0.4pt, arc=2pt, boxsep=1pt, left=2pt, right=2pt, top=0pt, bottom=0pt]{\sffamily\small #1}}
+\usepackage{xspace}
+\newcommand{\cm}{\,см\xspace}
+\newcommand{\sek}{\,с\xspace}
+\addto\captionsrussian{\renewcommand*{\chaptername}{Урок}}
+\newcommand{\status}[1]{\textsf{\small #1}}
+
+% снимок окна: обрезанный фрагмент на всю ширину текста
+\newcommand{\snimok}[3]{%
+  \begin{figure}[tbp]
+    \centering
+    \fbox{\includegraphics[width=\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax]{figures/#1.png}}
+    \caption{#2}\label{#3}
+  \end{figure}}
+
+\emergencystretch=3em
+\tolerance=1500
+\usepackage{url}\urlstyle{tt}
+\DeclareTOCStyleEntry[indent=0pt, numwidth=2.4em]{tocline}{chapter}
+\DeclareTOCStyleEntry[indent=2.4em, numwidth=3em]{tocline}{section}
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{1}
+\renewcommand{\arraystretch}{1.25}

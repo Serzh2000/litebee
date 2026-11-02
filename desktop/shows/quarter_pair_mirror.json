@@ -1,0 +1,255 @@
+{
+ "name": "Зеркало",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 13
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 14
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 15
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 16
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 17
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 18
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 19
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 20
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 20
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 20
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 20
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 23
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 24
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 25
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 26
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 27
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 28
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 29
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 30
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 31
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 32
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 33
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 33
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 33
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 33
+   }
+  ]
+ }
+}

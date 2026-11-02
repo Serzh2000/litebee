@@ -1,0 +1,30 @@
+# Проект 1. Дрон 2 летит по следам лидера на один переход (4 секунды) позже и выше: 150 против 80 см.
+from litebee_show import Show
+
+show = Show('За лидером')
+
+d = show.drone(1)
+d.calibrate(5)
+d.takeoff(80, 5)
+d.rgb('red')
+d.code(13, 1)
+d.code(16, 4)
+d.code(52, 4)
+d.code(49, 4)
+d.code(13, 4)
+d.rgb('black')
+d.land()
+
+d = show.drone(2)
+d.calibrate(5)
+d.takeoff(150, 5)
+d.rgb('blue')
+d.code(37, 1)
+d.code(13, 4)
+d.code(16, 4)
+d.code(52, 4)
+d.code(49, 4)
+d.code(13, 4)
+d.code(37, 4)
+d.rgb('black')
+d.land_on(37)

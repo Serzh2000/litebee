@@ -1,0 +1,316 @@
+{
+ "name": "Лесенка в четверти",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 9
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 10
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 11
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 12
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 13
+   },
+   {
+    "kind": "set_z",
+    "seconds": 10.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 14
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 15
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 16
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 17
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 18
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 21
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 22
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 23
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 15
+    },
+    "line": 24
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 25
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 110.0
+    },
+    "line": 26
+   },
+   {
+    "kind": "set_z",
+    "seconds": 4.0,
+    "args": {
+     "z": 110.0
+    },
+    "line": 27
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 28
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 29
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 30
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 31
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 32
+   }
+  ],
+  "3": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 35
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 36
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 37
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 17
+    },
+    "line": 38
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 39
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 140.0
+    },
+    "line": 40
+   },
+   {
+    "kind": "set_z",
+    "seconds": 4.0,
+    "args": {
+     "z": 140.0
+    },
+    "line": 41
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 42
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 43
+   },
+   {
+    "kind": "set_z",
+    "seconds": 3.0,
+    "args": {
+     "z": 80.0
+    },
+    "line": 44
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 45
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 46
+   }
+  ]
+ }
+}

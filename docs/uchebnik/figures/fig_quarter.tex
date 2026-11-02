@@ -1,0 +1,24 @@
+% Четверть 6 x 6 с маршрутом 13 -> 16 -> 52 -> 49 -> 13
+\begin{tikzpicture}[x=1.45cm, y=1.45cm, font=\sffamily]
+  \foreach \r in {0,...,5}{
+    \foreach \c in {0,...,5}{
+      \pgfmathtruncatemacro{\n}{\c + 12*\r}
+      \node[font=\scriptsize, text=inkgray, anchor=north west] at (\c+0.03,\r+0.97) {\n};
+    }
+  }
+  \draw[rule] (0,0) grid (6,6);
+  \draw[ink, thick] (0,0) rectangle (6,6);
+  \foreach \c in {0,...,5}{ \node[font=\small, text=inkgray] at (\c+0.5,-0.3) {\c}; }
+  \foreach \r in {0,...,5}{ \node[font=\small, text=inkgray] at (-0.3,\r+0.5) {\r}; }
+  \coordinate (a) at (1.5,1.5); \coordinate (b) at (4.5,1.5);
+  \coordinate (c) at (4.5,4.5); \coordinate (e) at (1.5,4.5);
+  \draw[accent, very thick, -{Stealth[length=3mm]}] (a) -- (b);
+  \draw[accent, very thick, -{Stealth[length=3mm]}] (b) -- (c);
+  \draw[accent, very thick, -{Stealth[length=3mm]}] (c) -- (e);
+  \draw[accent, very thick, -{Stealth[length=3mm]}] (e) -- (a);
+  \foreach \p/\t in {a/13, b/16, c/52, e/49}{
+    \fill[white, draw=accent, very thick] (\p) circle (0.2);
+    \node[font=\scriptsize\bfseries, text=accent] at (\p) {\t};
+  }
+  \node[font=\small, text=inkgray] at (3,-0.85) {40\,см в каждой клетке; вся четверть $2{,}4\times2{,}4$\,м};
+\end{tikzpicture}

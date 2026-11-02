@@ -1,0 +1,1989 @@
+{
+ "name": "Восьмёрка: карусель",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 90.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 13
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 14
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 15
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 16
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 17
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 18
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 19
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 20
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 21
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 22
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 23
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 24
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 25
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 26
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 27
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 28
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 29
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 30
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 31
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 90.0
+    },
+    "line": 31
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 31
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 31
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 34
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 130.0
+    },
+    "line": 35
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 36
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 37
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 38
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 39
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 40
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 41
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 42
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 43
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 44
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 45
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 46
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 47
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 48
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 49
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 50
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 51
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 52
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 53
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 54
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 55
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 130.0
+    },
+    "line": 55
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 55
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 55
+   }
+  ],
+  "3": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 58
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 90.0
+    },
+    "line": 59
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 60
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 61
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 62
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 63
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 64
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 65
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 66
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 67
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 68
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 69
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 70
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 71
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 72
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 73
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 74
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 75
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 76
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 77
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 78
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 79
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 90.0
+    },
+    "line": 79
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 79
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 79
+   }
+  ],
+  "4": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 82
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 130.0
+    },
+    "line": 83
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 84
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 85
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 86
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 87
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 88
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 89
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 90
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 91
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 92
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 93
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 94
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 95
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 96
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 97
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 98
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 99
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 100
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 101
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 102
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 103
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 130.0
+    },
+    "line": 103
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 103
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 103
+   }
+  ],
+  "5": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 106
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 90.0
+    },
+    "line": 107
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 108
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 109
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 110
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 111
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 112
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 113
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 114
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 115
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 116
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 117
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 118
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 119
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 120
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 121
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 122
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 123
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 124
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 125
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 126
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 127
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 90.0
+    },
+    "line": 127
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 127
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 127
+   }
+  ],
+  "6": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 130
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 130.0
+    },
+    "line": 131
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 132
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 133
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 134
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 135
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 136
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 137
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 138
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 139
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 140
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 141
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 142
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 143
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 144
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 145
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 146
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 147
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 148
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 149
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 150
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 151
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 130.0
+    },
+    "line": 151
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 151
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 151
+   }
+  ],
+  "7": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 154
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 90.0
+    },
+    "line": 155
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 156
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 157
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 158
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 159
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 160
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 161
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 162
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 163
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 164
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 165
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 166
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 167
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 168
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 169
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 170
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 171
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 172
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 173
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 174
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 175
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 90.0
+    },
+    "line": 175
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 175
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 175
+   }
+  ],
+  "8": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 178
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 130.0
+    },
+    "line": 179
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 180
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 181
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 0
+    },
+    "line": 182
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 183
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 2
+    },
+    "line": 184
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 185
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 4
+    },
+    "line": 186
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 187
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 28
+    },
+    "line": 188
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 189
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 190
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 191
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 50
+    },
+    "line": 192
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 193
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 48
+    },
+    "line": 194
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 195
+   },
+   {
+    "kind": "code",
+    "seconds": 3.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 196
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 197
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 198
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 24
+    },
+    "line": 199
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 130.0
+    },
+    "line": 199
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 199
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 199
+   }
+  ]
+ }
+}

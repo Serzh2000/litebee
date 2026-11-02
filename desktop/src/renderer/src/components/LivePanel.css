@@ -1,0 +1,162 @@
+.live {
+  flex: none;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.live h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.live h2 span {
+  color: var(--ink);
+}
+
+.live ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* one line per drone: who, how much battery, where it stands, which drone of the show it is */
+.live li {
+  display: grid;
+  grid-template-columns: 44px 64px minmax(0, 1fr) 62px;
+  align-items: center;
+  column-gap: 10px;
+  min-height: 38px;
+}
+
+.live li + li {
+  border-top: 1px solid var(--rule);
+}
+
+.live-ip {
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-weight: 600;
+}
+
+/* the volts over a thin bar that draws the charge */
+.live-batt {
+  display: grid;
+  gap: 3px;
+}
+
+.live-batt b {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.live-batt i {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ok);
+}
+
+.live-batt[data-level='warn'] b {
+  color: var(--warn);
+}
+
+.live-batt[data-level='warn'] i {
+  background: var(--warn);
+}
+
+.live-batt[data-level='low'] b {
+  color: var(--danger);
+}
+
+.live-batt[data-level='low'] i {
+  background: var(--danger);
+}
+
+.live-cell {
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-off {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+.live-role {
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--sheet);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.live-role[data-auto='true'] {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.live-result {
+  grid-column: 1 / -1;
+  margin: 0 0 6px;
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+
+.live-result[data-ok='true'] {
+  color: var(--ok);
+}
+
+.live-none {
+  margin: 0 0 6px;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.live-archive {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-2);
+}
+
+.live-archive summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+
+.live-archive li {
+  grid-template-columns: 44px 64px minmax(0, 1fr);
+  opacity: 0.7;
+  min-height: 28px;
+}
+
+.live-clear {
+  margin-top: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--sheet);
+  color: var(--ink);
+}
+
+.live-clear:hover {
+  background: var(--desk);
+}
+
+.live-note {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}

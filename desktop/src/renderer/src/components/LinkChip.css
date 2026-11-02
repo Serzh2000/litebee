@@ -1,0 +1,57 @@
+.link-chip {
+  position: relative;
+}
+
+.link-chip .quiet[data-on='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.link-pop {
+  width: 310px;
+}
+
+.adapters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adapters button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--sheet);
+  color: var(--ink);
+  text-align: left;
+}
+
+.adapters button:hover {
+  border-color: var(--rule-strong);
+}
+
+.adapters button[aria-pressed='true'] {
+  background: var(--accent-tint);
+  border-color: var(--accent);
+}
+
+.adapters small {
+  grid-column: 1;
+  color: var(--ink-3);
+}
+
+.adapters em {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 600;
+}

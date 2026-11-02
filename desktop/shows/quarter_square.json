@@ -1,0 +1,357 @@
+{
+ "name": "Квадрат в четверти",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 10
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 11
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 12
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 13
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 14
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 15
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 16
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 17
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 18
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 19
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 22
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 23
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 24
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 25
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 26
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 27
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 28
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 29
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 30
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 31
+   }
+  ],
+  "3": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 34
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 35
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 36
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 37
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 38
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 39
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 40
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 41
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 42
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 43
+   }
+  ],
+  "4": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 46
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 47
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 48
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 49
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 50
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 16
+    },
+    "line": 51
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 52
+    },
+    "line": 52
+   },
+   {
+    "kind": "code",
+    "seconds": 4.0,
+    "args": {
+     "cell": 49
+    },
+    "line": 53
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 54
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 55
+   }
+  ]
+ }
+}

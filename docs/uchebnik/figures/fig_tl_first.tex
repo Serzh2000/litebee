@@ -1,0 +1,10 @@
+% Лента l02_first.py: 5 + 5 + 3 = 13 секунд
+\begin{tikzpicture}[x=0.9cm, font=\sffamily\small]
+  \def\h{0.9}
+  \foreach \a/\b/\t/\f in {0/5/{calibrate(5)}/paper, 5/10/{takeoff(100, 5)}/accentsoft, 10/13/{land()}/paper}{
+    \draw[fill=\f, draw=ink!60, thick] (\a,0) rectangle (\b,\h);
+    \node[font=\scriptsize, text=ink] at ({(\a+\b)/2},{\h/2}) {\t};
+  }
+  \draw[-{Stealth}, ink] (0,-0.5) -- (13.9,-0.5) node[right] {$t$, с};
+  \foreach \t in {0,5,10,13}{\draw[ink] (\t,-0.42) -- (\t,-0.58); \node[below, font=\scriptsize] at (\t,-0.58) {\t};}
+\end{tikzpicture}

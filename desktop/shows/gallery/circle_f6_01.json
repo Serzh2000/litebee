@@ -1,0 +1,983 @@
+{
+ "name": "Круг: шесть дронов по кругу, оборот и обратно",
+ "drones": {
+  "1": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 9
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 10
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 11
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 12
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 13
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 14
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 15
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 16
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 17
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 18
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 19
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 20
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 13
+    },
+    "line": 21
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 21
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 21
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 21
+   }
+  ],
+  "2": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 24
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 25
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 26
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 130
+    },
+    "line": 27
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 28
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 29
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 30
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 31
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 32
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 33
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 34
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 35
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 130
+    },
+    "line": 36
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 36
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 36
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 36
+   }
+  ],
+  "3": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 39
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 40
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 41
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 22
+    },
+    "line": 42
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 43
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 44
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 45
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 46
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 47
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 48
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 49
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 50
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 22
+    },
+    "line": 51
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 51
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 51
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 51
+   }
+  ],
+  "4": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 54
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 55
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 56
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 121
+    },
+    "line": 57
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 58
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 59
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 60
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 61
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 62
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "white",
+     "rgb": [
+      255,
+      255,
+      255
+     ]
+    },
+    "line": 63
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 64
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 65
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 121
+    },
+    "line": 66
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 66
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 66
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 66
+   }
+  ],
+  "5": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 69
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 70
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "blue",
+     "rgb": [
+      0,
+      0,
+      255
+     ]
+    },
+    "line": 71
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 5
+    },
+    "line": 72
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 73
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 74
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 75
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "green",
+     "rgb": [
+      0,
+      255,
+      0
+     ]
+    },
+    "line": 76
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 77
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "red",
+     "rgb": [
+      255,
+      0,
+      0
+     ]
+    },
+    "line": 78
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 79
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 80
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 5
+    },
+    "line": 81
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 81
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 81
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 81
+   }
+  ],
+  "6": [
+   {
+    "kind": "calibrate",
+    "seconds": 5.0,
+    "args": {},
+    "line": 84
+   },
+   {
+    "kind": "takeoff",
+    "seconds": 5.0,
+    "args": {
+     "z": 100.0
+    },
+    "line": 85
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "purple",
+     "rgb": [
+      255,
+      0,
+      255
+     ]
+    },
+    "line": 86
+   },
+   {
+    "kind": "code",
+    "seconds": 1.0,
+    "args": {
+     "cell": 138
+    },
+    "line": 87
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 88
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 89
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 90
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "cyan",
+     "rgb": [
+      0,
+      255,
+      255
+     ]
+    },
+    "line": 91
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "cw"
+    },
+    "line": 92
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "yellow",
+     "rgb": [
+      255,
+      255,
+      0
+     ]
+    },
+    "line": 93
+   },
+   {
+    "kind": "circle",
+    "seconds": 22.0,
+    "args": {
+     "count": 2,
+     "cell1": 65,
+     "cell2": 78,
+     "rotate": "ccw"
+    },
+    "line": 94
+   },
+   {
+    "kind": "rgb",
+    "seconds": 0.0,
+    "args": {
+     "color": "black",
+     "rgb": [
+      0,
+      0,
+      0
+     ]
+    },
+    "line": 95
+   },
+   {
+    "kind": "code",
+    "seconds": 2.0,
+    "args": {
+     "cell": 138
+    },
+    "line": 96
+   },
+   {
+    "kind": "set_z",
+    "seconds": 1.5,
+    "args": {
+     "z": 100.0
+    },
+    "line": 96
+   },
+   {
+    "kind": "set_z",
+    "seconds": 2.5,
+    "args": {
+     "z": 35.0
+    },
+    "line": 96
+   },
+   {
+    "kind": "land",
+    "seconds": 3.0,
+    "args": {},
+    "line": 96
+   }
+  ]
+ }
+}

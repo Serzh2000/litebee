@@ -1,0 +1,13 @@
+% land_on: высота по времени
+\begin{tikzpicture}[x=0.75cm, y=0.032cm, font=\sffamily\small]
+  \draw[-{Stealth}, ink] (-0.2,0) -- (11.6,0) node[right] {$t$, с};
+  \draw[-{Stealth}, ink] (0,-4) -- (0,125) node[above] {$z$, см};
+  \draw[accent, very thick] (0,100) -- (3.5,100) -- (6,35) -- (9,0);
+  \draw[dashed, rule] (2,0) -- (2,100); \draw[dashed, rule] (3.5,0) -- (3.5,100); \draw[dashed, rule] (6,0) -- (6,35);
+  \node[font=\scriptsize, text=inkgray, anchor=south] at (1,103) {code(cell, 2)};
+  \node[font=\scriptsize, text=inkgray, anchor=south] at (2.75,103) {set\_z};
+  \node[font=\scriptsize, text=inkgray, anchor=south west] at (5.3,82) {set\_z(35, 2.5)};
+  \node[font=\scriptsize, text=inkgray, anchor=south west] at (7.3,22) {land()};
+  \foreach \t in {0,2,3.5,6,9}{\draw[ink] (\t,-2) -- (\t,2); \node[below, font=\scriptsize] at (\t,-3) {\t};}
+  \foreach \z in {35,100}{\draw[ink] (-0.07,\z) -- (0.07,\z); \node[left, font=\scriptsize] at (-0.1,\z) {\z};}
+\end{tikzpicture}

@@ -1,0 +1,55 @@
+# Квадрат в одной четверти коврика (клетки 0-5 по столбцам и по строкам, это 2,4 x 2,4 м).
+# Четыре дрона стоят по углам квадрата 3 x 3 клетки: 13, 16, 52 и 49 (клетка = столбец + 12 x строка).
+# Каждый переходит на следующий угол по часовой стрелке и в конце возвращается к своему.
+# Чтобы перенести шоу в другую четверть, нажмите «Перенести шоу» над картой: номера клеток сдвинутся сами.
+from litebee_show import Show
+
+show = Show('Квадрат в четверти')
+
+d = show.drone(1)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.rgb('green')
+d.code(13, 1)
+d.code(16, 4)
+d.code(52, 4)
+d.code(49, 4)
+d.code(13, 4)
+d.rgb('black')
+d.land()
+
+d = show.drone(2)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.rgb('blue')
+d.code(16, 1)
+d.code(52, 4)
+d.code(49, 4)
+d.code(13, 4)
+d.code(16, 4)
+d.rgb('black')
+d.land()
+
+d = show.drone(3)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.rgb('yellow')
+d.code(52, 1)
+d.code(49, 4)
+d.code(13, 4)
+d.code(16, 4)
+d.code(52, 4)
+d.rgb('black')
+d.land()
+
+d = show.drone(4)
+d.calibrate(5)
+d.takeoff(100, 5)
+d.rgb('red')
+d.code(49, 1)
+d.code(13, 4)
+d.code(16, 4)
+d.code(52, 4)
+d.code(49, 4)
+d.rgb('black')
+d.land()

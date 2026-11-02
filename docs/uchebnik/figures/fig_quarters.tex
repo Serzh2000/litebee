@@ -1,0 +1,11 @@
+% Четыре четверти коврика и сдвиг номеров клеток
+\begin{tikzpicture}[x=1.0cm, y=1.0cm, font=\sffamily]
+  \foreach \q/\x/\y/\s in {1/0/0/0, 2/6/0/6, 3/0/6/72, 4/6/6/78}{
+    \fill[accentsoft] (\x,\y) rectangle (\x+6,\y+6);
+    \draw[accent, very thick] (\x,\y) rectangle (\x+6,\y+6);
+    \node[text=accent, font=\large\bfseries] at (\x+3,\y+4.4) {Четверть \q};
+    \node[text=ink, font=\small] at (\x+3,\y+3.4) {левая нижняя клетка: \s};
+    \node[text=inkgray, font=\small] at (\x+3,\y+2.4) {сдвиг номеров: \ifnum\s=0 нет\else $+\s$\fi};
+  }
+  \node[text=inkgray, font=\scriptsize] at (6,-0.4) {клетка 0 внизу слева, номера растут вправо и вверх};
+\end{tikzpicture}

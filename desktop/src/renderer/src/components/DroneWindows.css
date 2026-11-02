@@ -1,0 +1,130 @@
+/* a layer over the field; only the windows take the pointer, the mat under it stays usable */
+.dwins {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44px;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 10px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.dwins-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.dwin {
+  width: 188px;
+  pointer-events: auto;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--sheet);
+  box-shadow: 0 8px 18px -14px rgb(var(--shadow-rgb) / 0.35);
+  overflow: hidden;
+}
+
+.dwin[data-selected='true'] {
+  border-color: var(--accent);
+}
+
+.dwin header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 6px 0 8px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--desk);
+  cursor: pointer;
+}
+
+.dwin[data-selected='true'] header {
+  background: var(--accent-tint);
+}
+
+.dwin-num {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ink-3);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dwin-state {
+  color: var(--ink-2);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.dwin-led {
+  margin-left: auto;
+  width: 20px;
+  height: 5px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgb(var(--shadow-rgb) / 0.3);
+}
+
+.dwin-close {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.dwin-close:hover {
+  background: var(--rule);
+  color: var(--ink);
+}
+
+.dwin-code {
+  padding: 4px 0;
+}
+
+.dwin-line {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 1px 8px 1px 0;
+}
+
+.dwin-line code {
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: 11.5px;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-2);
+}
+
+.dwin-n {
+  padding-right: 6px;
+  text-align: right;
+  color: var(--ink-3);
+  font-size: 10.5px;
+}
+
+.dwin-line[data-now='true'] {
+  background: var(--now-strong);
+}
+
+.dwin-line[data-now='true'] code {
+  color: var(--ink);
+  font-weight: 700;
+}

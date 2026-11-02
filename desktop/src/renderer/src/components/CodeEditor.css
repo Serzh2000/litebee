@@ -1,0 +1,86 @@
+.code {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.code .cm-editor.cm-focused {
+  outline: none;
+}
+
+/* lines in effect at the time of the count sheet: the running step filled in the accent tint, the last colour command quiet */
+.code .cm-now-run {
+  background: var(--now-strong);
+  font-weight: 600;
+}
+
+.code .cm-now-light {
+  background: var(--now-soft);
+}
+
+.code .cm-lintRange-error {
+  background-image: none;
+  text-decoration: underline wavy var(--danger);
+  text-underline-offset: 3px;
+}
+
+.code .cm-lintRange-warning {
+  background-image: none;
+  text-decoration: underline wavy var(--warn);
+  text-underline-offset: 3px;
+}
+
+.cm-ref {
+  max-width: 380px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.cm-ref code {
+  font-family: 'Cascadia Mono', Consolas, monospace;
+}
+
+.cm-ref-sig {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cm-ref-sum {
+  color: var(--ink);
+}
+
+.cm-ref-param {
+  color: var(--ink-2);
+}
+
+.cm-ref-param code {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.cm-ref-status {
+  margin-top: 2px;
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+.cm-tooltip.cm-tooltip-hover {
+  background: var(--sheet);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 16px -8px rgb(var(--shadow-rgb) / 0.3);
+  color: var(--ink);
+}
+
+.code .cm-tooltip {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}

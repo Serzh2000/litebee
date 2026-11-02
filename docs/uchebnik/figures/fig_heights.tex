@@ -1,0 +1,11 @@
+% Вид сбоку: два дрона разминуются на разной высоте
+\begin{tikzpicture}[x=0.075cm, y=0.0275cm, font=\sffamily\small]
+  \draw[-{Stealth}, ink] (-5,0) -- (150,0) node[right] {$x$, см};
+  \draw[-{Stealth}, ink] (0,0) -- (0,172) node[above] {$z$, см};
+  \draw[dashed, rule] (-5,150) -- (140,150) node[right, font=\scriptsize] {лимит 150};
+  \draw[ledblue, very thick, -{Stealth}] (0,80) -- (120,80);
+  \draw[ledred, very thick, -{Stealth}] (120,150) -- (0,150);
+  \node[ledblue, anchor=north] at (30,76) {дрон 1, 80\,см};
+  \node[ledred, anchor=south] at (30,154) {дрон 2, 150\,см};
+  \draw[<->, accent, thick] (60,82) -- (60,148) node[midway, right, text=accent, font=\scriptsize\bfseries] {70\,см};
+\end{tikzpicture}

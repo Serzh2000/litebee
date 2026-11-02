@@ -1,0 +1,26 @@
+% Коврик 12 x 12: номера клеток, оси, пример клетки 97
+\begin{tikzpicture}[x=1.08cm, y=1.08cm, font=\sffamily]
+  \foreach \r in {0,...,11}{
+    \foreach \c in {0,...,11}{
+      \pgfmathtruncatemacro{\n}{\c + 12*\r}
+      \ifnum\c<6
+        \ifnum\r<6
+          \fill[accentsoft] (\c,\r) rectangle (\c+1,\r+1);
+        \fi
+      \fi
+      \node[font=\tiny, text=ink] at (\c+0.5,\r+0.5) {\n};
+    }
+  }
+  \fill[accent!35] (1,8) rectangle (2,9);
+  \node[font=\tiny\bfseries, text=ink] at (1.5,8.5) {97};
+  \draw[rule, thin] (0,0) grid (12,12);
+  \draw[accent, very thick] (0,0) rectangle (6,6);
+  \draw[ink, thick] (0,0) rectangle (12,12);
+  \foreach \c in {0,...,11}{ \node[font=\scriptsize, text=inkgray] at (\c+0.5,-0.3) {\c}; }
+  \foreach \r in {0,...,11}{ \node[font=\scriptsize, text=inkgray] at (-0.3,\r+0.5) {\r}; }
+  \node[text=inkgray, font=\small] at (6,-0.85) {столбец (ось $x$)};
+  \node[text=inkgray, font=\small, rotate=90] at (-0.85,6) {строка (ось $y$)};
+  \node[anchor=west, text=accent, font=\small\bfseries, fill=white, inner sep=1pt] at (6.15,5.6) {четверть 6$\times$6};
+  \draw[<->, inkgray] (0,12.35) -- (12,12.35) node[midway, above, font=\small] {12 клеток по 40\,см = 4,8\,м};
+  \node[anchor=west, font=\scriptsize, text=ink, fill=white, inner sep=1pt] at (2.1,8.5) {97 = 1 + 12$\times$8};
+\end{tikzpicture}
