@@ -11,4 +11,4 @@ for c in d.get_classes():
         if not code: continue
         print('###',key)
         for i in code.get_bc().get_instructions():
-            print('   ',i.get_name(),i.get_output()[:140])
+            print('   ',i.get_name(),i.get_output()[:140].encode('ascii','replace').decode())
