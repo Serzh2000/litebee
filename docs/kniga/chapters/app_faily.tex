@@ -1,0 +1,33 @@
+\chapter{Файлы и документы}
+
+Все материалы разбора лежат в репозитории и на диске. Исходные прошивки производителя в репозиторий не добавлялись.
+
+\section*{Документы в репозитории}
+
+\begin{tabularx}{\textwidth}{@{}p{6.4cm} Y@{}}
+\toprule
+\hdr{Файл} & \hdr{О чём} \\ \midrule
+\texttt{docs/FIRMWARE\_ARCHITECTURE.md} & Слои прошивки, потоки данных. \\
+\texttt{docs/FIRMWARE\_MARKERS.md} & Формула метки, ArUco. \\
+\texttt{docs/FIRMWARE\_UNKNOWNS.md} & Что известно и что нет. \\
+\texttt{docs/firmware/AWLINK\_TABLE.md} & Таблица команд awlink. \\
+\texttt{docs/firmware/MISSION\_AND\_MODES.md} & Миссия и режимы. \\
+\texttt{docs/firmware/WING\_MOBILE\_APP.md} & Приложение Wing, значения команд, телеметрия. \\
+\texttt{docs/firmware/MODULE\_UART\_LINK.md} & UART между модулем и автопилотом. \\
+\texttt{docs/firmware/POSITION\_MODULE\_V831.md} & Модуль: программа, кадр, команды. \\
+\texttt{docs/firmware/WING\_DRONE\_USB.md} & Дрон по USB, живая проверка. \\ \bottomrule
+\end{tabularx}
+
+\section*{Папка с копиями прошивок (вне репозитория)}
+
+\begin{tabularx}{\textwidth}{@{}p{5.6cm} Y@{}}
+\toprule
+\hdr{Папка} & \hdr{Содержимое} \\ \midrule
+\texttt{01\_wing\_drone\_packages} & Три архива производителя. \\
+\texttt{02\_c10\_melis\_flight\_core} & Прошивка ядра C10. \\
+\texttt{03\_position\_module\_V831} & Копия программы модуля, снята по ADB. \\
+\texttt{04\_mobile\_apps} & Два APK. \\
+\texttt{05\_wing\_rootfs\_extracted} & Корневая система образа 1.2.8. \\
+\texttt{06\_wing\_drone\_flash\_raw} & Восемь разделов флеша дрона. \\
+\texttt{07\_wing\_drone\_live\_files} & Файлы с работающего дрона. \\ \bottomrule
+\end{tabularx}
