@@ -77,8 +77,8 @@ DHCP & нет & \texttt{udhcpd}: \texttt{192.168.100.20}--\texttt{.254} \\
 \hdr{Порт} & \hdr{Протокол} & \hdr{Кто} & \hdr{Назначение} \\ \midrule
 9696 & UDP & \texttt{pilot} & Команды и телеметрия awlink для мобильного приложения Wing. \pr{} \\
 9697 & TCP & \texttt{pilot} & Второй канал awlink; назначение не выяснено. \nei{} \\
-13146 & UDP & \texttt{pilot} & Не выяснено (вероятно, связь между дронами). \nei{} \\
-17999 & TCP/UDP & \texttt{pilot} (клиент) & Исходящая связь по адресу из конфигурации. \nei{} \\
+13146 & UDP & \texttt{pilot} & Порт «объявлений» дронов формации (наш \texttt{litebee} использует его для связи с дронами). \vyv{} \\
+18001 & TCP & \texttt{pilot} (клиент) & Дрон подключается к TCP-серверу программы на ПК (LiteBee Go или наш \texttt{litebee}): протокол формации. Число \texttt{0x4651} в коде. \vyv{} \\
 21 & TCP & \texttt{ftpd} & FTP, корень файловой системы (режим \texttt{SERVER}). \pr{} \\
 7070 & RTSP & \texttt{VideoTransmission} & Видео (по приложению LiteBee Go; в бинарнике не найден). \vyv{} \\ \bottomrule
 \end{tabularx}
@@ -156,4 +156,4 @@ Linux 4.9.118 (OpenWrt, собран Sipeed), стандартный образ 
 
 \section{Что не выяснено}
 
-Кто переключает \texttt{wifiActor}; назначение портов 9697, 13146 и 17999; формат JSON-команд \texttt{VideoTransmission}; проверка подписи обновления; живая картина сети дрона в режиме \texttt{SERVER} (\texttt{netstat}, \texttt{ifconfig}): мы её не снимали, список портов основан на коде. \nei{}
+Кто переключает \texttt{wifiActor}; назначение порта 9697; формат JSON-команд \texttt{VideoTransmission}; проверка подписи обновления; живая картина сети дрона в режиме \texttt{SERVER} (\texttt{netstat}, \texttt{ifconfig}): мы её не снимали, список портов основан на коде. \nei{}
