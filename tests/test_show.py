@@ -17,7 +17,8 @@ from litebee.safety import (MAX_HEIGHT_CM, MAX_LEG_SPEED_CM_S, MAX_START_DISTANC
 from litebee.show import Show, UploadUnsupported, cell_xy, drone_to_mission
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SHOWS = sorted(glob.glob(os.path.join(ROOT, "shows", "*.py")))
+# the two real shows of the kit (ten drones each); the other files of shows/ are examples written for the app
+SHOWS = [os.path.join(ROOT, "shows", name) for name in ("my_dream.py", "my_people_my_country_5.py")]
 
 
 def test_cell_xy():
@@ -243,7 +244,7 @@ def test_raising_the_limit_does_not_bypass_other_checks():
     # a mission: hover limit and unproven steps are still checked at the highest limit
     long_hover = Mission([MissionStep(CMD_TAKEOFF, 50, z_data(100)), MissionStep(CMD_MOVEZ, 160, z_data(100))])
     assert any("Зависание" in f.message for f in check_mission(long_hover, 200))
-    for cmd in (CMD_MOVEXYZ, CMD_CIRCLE):                   # still not proven: refused at any limit
+    for cmd in (CMD_MOVEXYZ,):                              # still not proven: refused at any limit (circle was flown, see PROVEN_CMDS)
         unproven = Mission([MissionStep(cmd, 50, bytes(12))])
         assert any("не проверен" in f.message for f in check_mission(unproven, 200))
     assert not _height_errors(check_mission(hop_mission(160, 3, max_height_cm=170), 170))
@@ -300,7 +301,7 @@ def test_xy_data_covers_the_mat_and_refuses_the_rest():
 
 
 def test_only_proven_steps_can_be_packed():
-    assert PROVEN_CMDS == {0, 1, 2, 3, 5, 50}          # calibrate, takeOff, autoLand, moveXY, moveZ, RGB
+    assert PROVEN_CMDS == {0, 1, 2, 3, 5, 12, 50}      # calibrate, takeOff, autoLand, moveXY, moveZ, circle, RGB
     off_cell = Mission([MissionStep(CMD_MOVEXY, 50, bytes([1, 0, 40, 0]) + bytes(8))])   # y = 1 cm
     assert any("не лежит на клетке" in f.message for f in check_mission(off_cell))
     assert check_mission(Mission([MissionStep(CMD_TAKEOFF, 50, z_data(50)), MissionStep(CMD_MOVEXY, 90, xy_data(97))])) == []

@@ -1,4 +1,4 @@
-"""Command line: python -m litebee <listen|color|hop|simulate|import-lbg|wing-status|wing-fly>.
+"""Command line: python -m litebee <listen|color|hop|simulate|import-lbg|wing-status|wing-fly|buzz>.
 
 Every subcommand accepts --port (TCP port override, default 18001; ignored by
 the offline subcommands). --udp-port overrides the drone announce port (13146).
@@ -83,6 +83,13 @@ def build_parser():
     p.add_argument("--min-volts", type=float, default=7.4, help="минимум батареи для старта (ниже 7.0 нельзя)")
     p.add_argument("--land-flag", default=LAND_FLAG, help="файл-флаг: если появился, дрон садится")
     p.add_argument("--go", action="store_true", help="реально запустить моторы")
+
+    p = sub.add_parser("buzz", parents=[common],
+                       help="сыграть мелодию на зуммере по Wi-Fi через дрон (UDP-ретранслятор на дроне); без --go только план")
+    p.add_argument("song", help='мелодия: "C3:10 E3:10 R:5 G3:20" (нота:длительность по 0,05 с, R пауза)')
+    p.add_argument("--host", required=True, help="IP дрона в сети Wi-Fi (на нём должен работать UDP-ретранслятор)")
+    p.add_argument("--relay-port", type=int, default=5555, help="UDP-порт ретранслятора на дроне")
+    p.add_argument("--go", action="store_true", help="реально отправить кадры (иначе только список)")
     return ap
 
 
@@ -185,6 +192,23 @@ def cmd_import_lbg(args):
     return 0
 
 
+def cmd_buzz(args):
+    """Notes for the 4-wire buzzer over Wi-Fi: PC -> UDP -> relay on the drone -> module -> buzzer (docs/firmware/BUZZER_EXTENSION.md)."""
+    from . import buzzer
+    try:
+        steps = buzzer.plan(buzzer.parse_song(args.song))
+    except ValueError as e:
+        raise SystemExit(str(e))
+    total = sum(w for _, w in steps)
+    print(f"[buzz] нот и пауз: {len(steps)}, длительность около {total:.1f} с, кадр-реле {len(buzzer.relay_frame(buzzer.frame(25, 10)))} байт")
+    if not args.go:
+        print("[buzz] кадры НЕ отправлены (нужен --go)")
+        return 0
+    buzzer.play_udp(args.host, args.relay_port, steps)
+    print("[buzz] готово")
+    return 0
+
+
 def cmd_wing_status(args):
     """Talk to the USB remote exactly like LiteBee Go does on connect; only read-only messages are written."""
     from . import remote
@@ -272,7 +296,8 @@ def main(argv=None):
             pass
     args = build_parser().parse_args(argv)
     handler = {"listen": cmd_listen, "color": cmd_color, "hop": cmd_hop, "simulate": cmd_simulate,
-               "import-lbg": cmd_import_lbg, "wing-status": cmd_wing_status, "wing-fly": cmd_wing_fly}[args.cmd]
+               "import-lbg": cmd_import_lbg, "wing-status": cmd_wing_status, "wing-fly": cmd_wing_fly,
+               "buzz": cmd_buzz}[args.cmd]
     try:
         return handler(args)
     except ShowLoadError as e:

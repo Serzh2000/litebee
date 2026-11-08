@@ -2,13 +2,64 @@
   position: relative;
 }
 
-.link-chip .quiet[data-on='true'] {
-  color: var(--ink);
-  font-weight: 600;
+.link-chip .quiet,
+.link-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--control-h);
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  background: transparent;
+  color: var(--muted);
+  white-space: nowrap;
+  text-align: left;
 }
 
-.link-pop {
+.link-chip .quiet:hover,
+.link-chip .quiet[aria-expanded='true'] {
+  background: var(--active);
+  color: var(--text);
+}
+
+.link-chip .quiet[data-on='true'] {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.popover {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
   width: 310px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 6px 18px -6px rgb(var(--shadow-rgb) / 0.22);
+}
+
+.popover label {
+  font-weight: 500;
+}
+
+.popover .hint {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.popover .hint.bad {
+  color: var(--negative);
+}
+
+.popover input[aria-invalid='true'] {
+  border-color: var(--negative);
 }
 
 .adapters {
@@ -26,25 +77,27 @@
   gap: 0 10px;
   width: 100%;
   padding: 7px 10px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
   text-align: left;
 }
 
 .adapters button:hover {
-  border-color: var(--rule-strong);
+  border-color: var(--control);
+  background: var(--raised);
 }
 
 .adapters button[aria-pressed='true'] {
-  background: var(--accent-tint);
-  border-color: var(--accent);
+  background: var(--active);
+  border-color: var(--control);
 }
 
 .adapters small {
   grid-column: 1;
-  color: var(--ink-3);
+  color: var(--muted);
+  font-size: var(--fs-small);
 }
 
 .adapters em {
@@ -53,5 +106,49 @@
   align-self: center;
   color: var(--accent);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
+}
+
+/* the state of the link: a dot, filled when a drone answers, hollow while the app only listens, grey when idle */
+.lc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--faint);
+  flex: none;
+}
+
+.lc-dot[data-wait='true'] {
+  border-color: var(--accent);
+}
+
+.lc-dot[data-on='true'] {
+  border-color: var(--positive);
+  background: var(--positive);
+}
+
+.lc-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1099px) {
+  .link-chip .quiet,
+  .link-state {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .lc-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .popover {
+    left: 0;
+    width: 280px;
+  }
 }

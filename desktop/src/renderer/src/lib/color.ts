@@ -16,10 +16,10 @@ export function contrast(a: Rgb, b: Rgb): number {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-export const PAPER: Rgb = [246, 247, 249]
-export const SHEET: Rgb = [251, 252, 253]
-const DARK_PAPER: Rgb = [17, 21, 26]
-const DARK_SHEET: Rgb = [27, 32, 39]
+export const PAPER: Rgb = [244, 246, 248] // the canvas well (--raised)
+export const SHEET: Rgb = [255, 255, 255] // the sheet (--surface)
+const DARK_PAPER: Rgb = [25, 34, 42]
+const DARK_SHEET: Rgb = [20, 27, 33]
 
 /** The ground the colours are read on now: the paper of the field (or the sheet of a panel) of the current theme. */
 export const paper = (): Rgb => (currentTheme() === 'dark' ? DARK_PAPER : PAPER)

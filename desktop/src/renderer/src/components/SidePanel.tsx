@@ -1,58 +1,10 @@
 import { useState } from 'react'
-import { ChevronDown, CircleX, Info, TriangleAlert, WifiOff } from 'lucide-react'
-import { colorAt, type Show } from '@core/show'
+import { ChevronDown, CircleX, Info, TriangleAlert } from 'lucide-react'
 import type { Finding } from '@core/checks'
 import type { Group } from '@core/groups'
-import { css, isLit, readable, seconds } from '../lib/color'
+import { seconds } from '../lib/color'
 import './SidePanel.css'
 import { tr } from '@core/i18n'
-
-interface FleetProps {
-  show: Show
-  t: number
-  selected: number | null
-  onSelect: (n: number | null) => void
-}
-
-/** One row per drone of the show. Live drones (battery, cell, state) join these rows when the link is ported. */
-export function Fleet({ show, t, selected, onSelect }: FleetProps) {
-  return (
-    <section className="panel" aria-labelledby="fleet-title">
-      <header className="panel-head">
-        <h2 id="fleet-title">{tr('Дроны')}</h2>
-        <span className="panel-note">{tr('в шоу {n}, на связи 0', { n: show.drones.length })}</span>
-      </header>
-      <ul className="rows">
-        {show.drones.map((d) => {
-          const [, led] = colorAt(d.steps, t)
-          const lit = d.steps.find((s) => s.kind === 'rgb' && isLit(s.args.rgb))
-          const identity = lit ? readable(lit.args.rgb) : null
-          const on = selected === d.number
-          return (
-            <li key={d.number}>
-              <button type="button" className="row fleet-row" data-selected={on} aria-pressed={on} onClick={() => onSelect(on ? null : d.number)}>
-                <span className="badge" style={{ borderColor: identity ? css(identity) : 'var(--ink-3)' }}>
-                  {d.number}
-                  {isLit(led) && <i style={{ background: css(led) }} />}
-                </span>
-                <span className="row-main">
-                  <span className="row-title">{tr('Дрон {n}', { n: d.number })}</span>
-                  <span className="row-sub">
-                    {tr('{n} шагов, {s} с', { n: d.steps.length, s: seconds(d.duration) })}
-                  </span>
-                </span>
-                <span className="row-state">
-                  <WifiOff size={13} strokeWidth={1.75} aria-hidden="true" />
-                  {tr('Нет связи')}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
-  )
-}
 
 const ICON = { error: CircleX, warn: TriangleAlert, info: Info } as const
 const LABEL = { error: 'Ошибка', warn: 'Замечание', info: 'Сведение' } as const // shown through tr()

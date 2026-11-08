@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronsUpDown, FileCode } from 'lucide-react'
 import type { Project, ProjectActions } from '../App'
 import { baseName } from '../lib/files'
-import { LangSwitch } from './LangSwitch'
-import { ThemeSwitch } from './ThemeSwitch'
 import './ProjectMenu.css'
 import { tr } from '@core/i18n'
 
-/** The project in the top bar: its name and file, and the menu to create, open and save projects. */
+/** The project in the sidebar: its name and file, and the menu to create, open and save projects. */
 export function ProjectMenu({ project, actions }: { project: Project; actions: ProjectActions }) {
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement | null>(null)
@@ -33,7 +31,8 @@ export function ProjectMenu({ project, actions }: { project: Project; actions: P
 
   return (
     <div className="project" ref={box}>
-      <button type="button" className="project-button" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)}>
+      <button type="button" className="project-button" aria-expanded={open} aria-haspopup="menu" title={tr(project.data.name)} onClick={() => setOpen((o) => !o)}>
+        <FileCode className="project-icon" size={16} strokeWidth={1.75} aria-hidden="true" />
         <span className="project-text">
           <span className="project-name">{tr(project.data.name)}</span>
           <span className="project-file">{project.path
@@ -42,7 +41,7 @@ export function ProjectMenu({ project, actions }: { project: Project; actions: P
                 ? tr('пример, не сохранён в файл')
                 : tr('не сохранён')}</span>
         </span>
-        <ChevronDown size={16} strokeWidth={1.9} aria-hidden="true" />
+        <ChevronsUpDown size={16} strokeWidth={1.75} aria-hidden="true" />
       </button>
 
       {open && (
@@ -62,14 +61,6 @@ export function ProjectMenu({ project, actions }: { project: Project; actions: P
           <button type="button" role="menuitem" onClick={run(() => actions.onSave(true))}>
             {tr('Сохранить как…')}<kbd>Ctrl Shift S</kbd>
           </button>
-          <div className="menu-lang">
-            <span>{tr('Язык')}</span>
-            <LangSwitch />
-          </div>
-          <div className="menu-lang">
-            <span>{tr('Тема')}</span>
-            <ThemeSwitch />
-          </div>
         </div>
       )}
 

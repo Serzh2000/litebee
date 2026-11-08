@@ -1,21 +1,21 @@
+/* The drones on the link, in the popover of the timetable: who, how much battery, where, which drone of the show. */
 .live {
-  flex: none;
-  padding: 14px 18px 10px;
-  border-bottom: 1px solid var(--rule);
+  padding: 16px;
 }
 
 .live h2 {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin: 0 0 4px;
-  color: var(--ink-3);
-  font-size: var(--text-sm);
+  margin: 0 0 8px;
+  font-size: var(--fs-section);
   font-weight: 600;
 }
 
 .live h2 span {
-  color: var(--ink);
+  color: var(--muted);
+  font-family: var(--font-num);
+  font-weight: 400;
 }
 
 .live ul {
@@ -24,13 +24,12 @@
   padding: 0;
 }
 
-/* one line per drone: who, how much battery, where it stands, which drone of the show it is */
 .live li {
   display: grid;
-  grid-template-columns: 44px 64px minmax(0, 1fr) 62px;
+  grid-template-columns: 48px 76px minmax(0, 1fr) 72px;
   align-items: center;
-  column-gap: 10px;
-  min-height: 38px;
+  column-gap: 8px;
+  min-height: 40px;
 }
 
 .live li + li {
@@ -38,125 +37,119 @@
 }
 
 .live-ip {
-  font-family: 'Cascadia Mono', Consolas, monospace;
-  font-weight: 600;
+  font-family: var(--font-num);
+  font-weight: 500;
 }
 
-/* the volts over a thin bar that draws the charge */
+/* the volts over a thin bar that draws the charge; below the limits a mark and words say so as well */
 .live-batt {
   display: grid;
   gap: 3px;
 }
 
 .live-batt b {
-  font-size: var(--text-sm);
-  font-weight: 600;
+  font-family: var(--font-num);
+  font-size: var(--fs-small);
+  font-weight: 500;
 }
 
 .live-batt i {
   display: block;
   height: 3px;
   border-radius: 2px;
-  background: var(--ok);
+  background: var(--muted);
 }
 
 .live-batt[data-level='warn'] b {
-  color: var(--warn);
+  color: var(--warning);
 }
 
 .live-batt[data-level='warn'] i {
-  background: var(--warn);
+  background: var(--warning);
 }
 
 .live-batt[data-level='low'] b {
-  color: var(--danger);
+  color: var(--negative);
 }
 
 .live-batt[data-level='low'] i {
-  background: var(--danger);
+  background: var(--negative);
 }
 
 .live-cell {
   min-width: 0;
-  color: var(--ink-2);
-  font-size: var(--text-sm);
+  color: var(--muted);
+  font-size: var(--fs-small);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .live-off {
-  color: var(--ink-3);
-  font-size: 11.5px;
+  color: var(--muted);
+  font-size: var(--fs-small);
 }
 
 .live-role {
-  height: 26px;
+  height: 28px;
   padding: 0 4px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink-2);
-  font: inherit;
-  font-size: var(--text-sm);
+  font-size: var(--fs-small);
 }
 
 .live-role[data-auto='true'] {
   border-color: var(--accent);
-  color: var(--ink);
 }
 
 .live-result {
   grid-column: 1 / -1;
-  margin: 0 0 6px;
-  font-size: var(--text-sm);
-  color: var(--danger);
+  margin: 0 0 8px;
+  font-size: var(--fs-small);
+  color: var(--negative);
 }
 
 .live-result[data-ok='true'] {
-  color: var(--ok);
+  color: var(--positive);
 }
 
 .live-none {
-  margin: 0 0 6px;
-  color: var(--ink-2);
-  font-size: var(--text-sm);
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: var(--fs-small);
 }
 
 .live-archive {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid var(--rule);
-  color: var(--ink-2);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
 }
 
 .live-archive summary {
   cursor: pointer;
-  font-size: var(--text-sm);
+  font-size: var(--fs-small);
 }
 
 .live-archive li {
-  grid-template-columns: 44px 64px minmax(0, 1fr);
-  opacity: 0.7;
-  min-height: 28px;
+  grid-template-columns: 48px 76px minmax(0, 1fr);
+  min-height: 32px;
 }
 
 .live-clear {
-  margin-top: 6px;
-  height: 26px;
-  padding: 0 10px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink);
+  margin-top: 8px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .live-clear:hover {
-  background: var(--desk);
+  background: var(--raised);
 }
 
 .live-note {
   margin: 4px 0 0;
-  font-size: 11.5px;
-  color: var(--ink-3);
+  font-size: var(--fs-small);
+  color: var(--muted);
 }

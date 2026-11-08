@@ -6,36 +6,47 @@ import { linesAt } from '@core/now'
 import { AreaBar } from './components/AreaBar'
 import { newProject, newSource, projectFileName } from '@core/project'
 import { buildShow, type Show, type ShowData } from '@core/show'
-import { CodePane } from './components/CodePane'
+import { DroneEditor } from './components/DroneEditor'
 import type { CodeEditorHandle } from './components/CodeEditor'
-import { CueSheet } from './components/CueSheet'
-import { FleetRail } from './components/FleetRail'
-import { DroneWindows } from './components/DroneWindows'
-import { LivePanel } from './components/LivePanel'
 import { NewProjectWizard } from './components/NewProjectWizard'
 import { StartScreen } from './components/StartScreen'
 import { localizeSource } from './lib/localize'
 import { forget, remember } from './lib/recent'
 import { useLang } from './state/useLang'
-import { MatChart } from './components/MatChart'
+import { lazy, Suspense } from 'react'
+import { fitMap, MatChart } from './components/MatChart'
+
+const Mat3D = lazy(() => import('./components/Mat3D').then((m) => ({ default: m.Mat3D })))
 import { MAX_DRONES } from '@core/project'
+import { sectionAt, splitDrones } from '@core/sections'
 import { addDrone, freeStartCell, setStartCell, type Edit } from '@core/placement'
 import { autoRoles, startCell } from '@core/roles'
-import { useLink } from './state/useLink'
-import { compileDrone, UploadUnsupported } from '@core/mission'
-import { Readout } from './components/Readout'
+import { batteryLevel, fmtVolts, useLink } from './state/useLink'
+import { compileDrone, unprovenSteps, UploadUnsupported } from '@core/mission'
+import { Inspector } from './components/Inspector'
+import { Sidebar } from './components/Sidebar'
+import { RightPanel, type Tab } from './components/RightPanel'
 import { Reference } from './components/Reference'
 import { Checks } from './components/SidePanel'
-import { TopBar } from './components/TopBar'
+import { Timetable } from './components/Timetable'
+import { LivePanel } from './components/LivePanel'
 import { Transport } from './components/Transport'
+import { TopBar } from './components/TopBar'
+import { tail } from './components/LivePanel'
 import { SHOWS } from './data/shows'
 import { baseName, openProjectFile, saveProjectFile } from './lib/files'
 import { runner } from './python/runShow'
-import { preflight } from './state/preflight'
+import { honestyNotes, preflight } from './state/preflight'
 import { usePlayback } from './state/usePlayback'
 import { useSize } from './state/useSize'
 import './App.css'
+import './styles/studio.css'
 import { tr } from '@core/i18n'
+
+/** The tool strip is one row pinned 16 px inside the well's top-left corner: 16 above, 28 of controls. */
+const STRIP_H = 48
+/** The most the strip can be wide (px, 16 from the left edge included): a map whose grid starts to the right of it needs no row of its own. */
+const STRIP_W = 372
 
 interface Report {
   findings: Finding[]
@@ -94,6 +105,7 @@ interface WorkspaceProps {
   onSource: (text: string) => void
   note: string
   first: boolean
+  inactive: boolean
 }
 
 function ownLimit(show: Show): number {
@@ -103,26 +115,46 @@ function ownLimit(show: Show): number {
 
 const LEVEL = { error: 'error', warn: 'warning', info: 'info' } as const
 
-function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) {
+function Workspace({ project, actions, onSource, note, first, inactive }: WorkspaceProps) {
   const show = useMemo(() => buildShow(project.data), [project.data])
   const playback = usePlayback(show.duration, first ? START.t : 0)
   const [selected, setSelected] = useState<number | null>(first ? START.select : null)
   const [hoverCell, setHoverCell] = useState<number | null>(null)
+  const [mapTags, setMapTags] = useState(false)
+  const [mapRoutes, setMapRoutes] = useState(true)
   const [hint, setHint] = useState<string | null>(null)
-  // Beside the map the code of each drone floats in a window of its own while the count sheet is used.
-  const [windowsOn, setWindowsOn] = useState(true)
   // a drone that waits for a click on the map to be put on the cell
+  const [view, setViewState] = useState<'2d' | '3d'>(() => {
+    try {
+      return (PARAMS.get('view') ?? localStorage.getItem('litebee.view')) === '3d' ? '3d' : '2d'
+    } catch {
+      return '2d'
+    }
+  })
+  const setView = (v: '2d' | '3d') => {
+    setViewState(v)
+    try {
+      localStorage.setItem('litebee.view', v)
+    } catch {
+      /* the choice is simply not remembered */
+    }
+  }
   const [placing, setPlacing] = useState<number | null>(null)
-  const [closedWindows, setClosedWindows] = useState<Set<number>>(new Set())
-  const [mode, setMode] = useState<Mode>(first ? START.mode : 'code')
-  const [side, setSide] = useState<'checks' | 'ref'>(first ? START.side : 'checks')
+  const [mode, setMode] = useState<Mode>('map')
+  const [inspectorOpen, setInspectorOpen] = useState(() => window.innerWidth >= 1100)
   // A show that was made to fly as it is (an imported one) opens with a limit that is its own highest point.
   const [maxHeight, setMaxHeight] = useState(() => ownLimit(show))
   const [report, setReport] = useState<Report | null>(null)
   const [notice, setNotice] = useState('')
   const link = useLink()
   const [matRef, mat] = useSize<HTMLDivElement>()
+  const [tab, setTab] = useState<Tab>(() => {
+    const asked = PARAMS.get('tab') ?? (START.side === 'ref' ? 'ref' : null)
+    if (first && (asked === 'score' || asked === 'code' || asked === 'fleet' || asked === 'checks' || asked === 'ref')) return asked
+    return first && START.select !== null ? 'code' : 'score'
+  })
   const editor = useRef<CodeEditorHandle | null>(null)
+  const [gotoLine, setGotoLine] = useState<number | null>(null)
   // The working area follows the show until the person picks one: a show written for a quarter opens on that quarter.
   const [area, setArea] = useState<Area>(() => detectArea(project.data))
   const areaChosen = useRef(false)
@@ -165,7 +197,9 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
       if (moved.changed === 0) {
         setNotice(
           moved.skipped
-            ? tr('Номера клеток в коде записаны не числами (переменные, списки): перенести их автоматически нельзя. Впишите клетки числами или поправьте вручную.')
+            ? tr(
+                'Номера клеток в коде записаны не числами (переменные, списки): перенести их автоматически нельзя. Впишите клетки числами или поправьте вручную.',
+              )
             : tr('В коде нет номеров клеток, которые можно сдвинуть.'),
         )
         return
@@ -174,7 +208,9 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
       else onSource(moved.source)
       chooseArea(to)
       setNotice(
-        tr('Шоу перенесено: {n} клеток сдвинуты', { n: moved.changed }) + (moved.skipped ? tr(', {n} аргументов не числа, проверьте их вручную', { n: moved.skipped }) : '') + '.',
+        tr('Шоу перенесено: {n} клеток сдвинуты', { n: moved.changed }) +
+          (moved.skipped ? tr(', {n} аргументов не числа, проверьте их вручную', { n: moved.skipped }) : '') +
+          '.',
       )
     } catch (e) {
       setNotice(e instanceof Error ? tr(e.message) : tr('Не удалось перенести шоу.'))
@@ -225,8 +261,8 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
   }
 
   useEffect(() => {
-    if (mode === 'code') runner.warm()
-  }, [mode])
+    runner.warm()
+  }, [])
 
   const emergency = useCallback(() => {
     playback.stop()
@@ -274,7 +310,7 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
   const assigned = link.active.filter((d) => roles[d.ip])
   const loadBlock = useMemo(() => {
     if (!link.connected) return 'Нет дронов на связи'
-    if (assigned.length === 0) return 'Справа выберите, каким дроном шоу будет каждый дрон на связи'
+    if (assigned.length === 0) return 'Назначьте бортам дроны на связи в расписании'
     for (const d of assigned) {
       const model = show.drones.find((m) => m.number === roles[d.ip])
       if (!model) return `В шоу нет дрона ${roles[d.ip]}`
@@ -305,7 +341,11 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
     }
     link.refresh()
     setLoading(false)
-    setNotice(done === assigned.length ? tr('Миссия загружена в дронов: {n}.', { n: done }) : tr('Загружено {a} из {b}: смотрите причины в списке дронов.', { a: done, b: assigned.length }))
+    setNotice(
+      done === assigned.length
+        ? tr('Миссия загружена в дронов: {n}.', { n: done })
+        : tr('Загружено {a} из {b}: смотрите причины в списке дронов.', { a: done, b: assigned.length }),
+    )
   }
 
   const arm = async () => {
@@ -325,7 +365,20 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
     else if (i === 3) void go()
   }
 
-  const { steps, reason, cta } = preflight({ check, errors, connected: link.connected, loadBlock, loading, loaded, armed, flying })
+  // A drone whose steps cannot be compiled yet (code_z and the like) counts as unproven too.
+  const unproven = useMemo(
+    () =>
+      show.drones.filter((d) => {
+        try {
+          return unprovenSteps(compileDrone(d.steps)).length > 0
+        } catch {
+          return true
+        }
+      }).length,
+    [show],
+  )
+  const notes = honestyNotes(show.drones.length, unproven)
+  const { steps, reason } = preflight({ check, errors, connected: link.connected, loadBlock, loading, loaded, armed, flying })
 
   // Underlines in the code: the error of the run first, then one per finding that points at a line.
   const marks = useMemo(() => {
@@ -337,161 +390,212 @@ function Workspace({ project, actions, onSource, note, first }: WorkspaceProps) 
     return out
   }, [project.run, report])
 
+  /** a drone picked on the scene opens its program in the right window */
+  const pickOnMap = (n: number | null) => {
+    setSelected(n)
+    if (n !== null) setTab('code')
+  }
+
   const jump = (f: Finding) => {
     if (f.drone !== null) setSelected(f.drone)
     if (f.t !== null) playback.seek(f.t)
-    if (f.line && mode === 'code') editor.current?.reveal(f.line)
+    if (f.line) {
+      // the code of the drone that owns the line opens and the cursor goes to it
+      const split = splitDrones(project.source)
+      const owner = split ? sectionAt(split, f.line) : null
+      if (owner) setSelected(owner.number)
+      setGotoLine(f.line)
+      setTab('code')
+    }
   }
 
-  const stepCount = show.drones.reduce((n, d) => n + d.steps.length, 0)
-  // Which lines of the code are in effect at the time on the count sheet: the editor lights them.
+  // Which lines of the code are in effect at the time on the timetable: the editor lights them.
   const now = useMemo(() => linesAt(show, playback.t, selected), [show, playback.t, selected])
 
+  // The person's choice of the drone on the link that flies drone `number`: whoever had that number gives it up.
+  const assign = (number: number, ip: string | null) =>
+    setManual((m) => {
+      const next = { ...m }
+      for (const d of link.active) if (roles[d.ip] === number) next[d.ip] = null
+      if (ip) next[ip] = number
+      return next
+    })
+
+  // The one finding of the screen, read first under the title: what most needs attention before a flight.
+  const weak = link.active
+    .map((d) => ({ d, level: batteryLevel(d.batteryV) }))
+    .filter((x) => x.level !== 'ok')
+    .sort((a, b) => (a.level === b.level ? a.d.batteryV - b.d.batteryV : a.level === 'low' ? -1 : 1))[0]
+  const finding: { tone: 'warning' | 'negative' | 'info' | 'next'; text: string } =
+    check === 'errors'
+      ? { tone: 'negative', text: tr(reason) }
+      : weak
+        ? {
+            tone: weak.level === 'low' ? 'negative' : 'warning',
+            text: tr(weak.level === 'low' ? 'Дрон {ip}: батарея {v}, взлёт запрещён' : 'Дрон {ip}: батарея {v}, лучше заменить', {
+              ip: tail(weak.d.ip),
+              v: fmtVolts(weak.d.batteryV),
+            }),
+          }
+        : notes[0]
+          ? { tone: 'info', text: tr(notes[0]) }
+          : { tone: 'next', text: tr(reason) }
+
+  // The map takes the well. The tools are a row over its top-left corner: when the map is centred and its grid starts to
+  // the right of them (a wide well) it has the whole height, otherwise it sits under the row.
+  const full = fitMap(area, mat.width, mat.height)
+  const stripHeight = mat.width < 430 ? 88 : STRIP_H
+  const clear = (mat.width - full.gridW) / 2 >= STRIP_W + 16
+  const mapSize = clear ? { width: mat.width, height: mat.height } : { width: mat.width, height: Math.max(mat.height - stripHeight, 0) }
+  const matPad = clear ? undefined : { paddingTop: stripHeight }
+
+  const well = (
+    <div className="well">
+      <AreaBar
+        area={area}
+        onArea={chooseArea}
+        from={fromArea}
+        onMigrate={migrate}
+        maxHeight={maxHeight}
+        onMaxHeight={setMaxHeight}
+        view={view}
+        onView={setView}
+        tags={mapTags}
+        onTags={() => setMapTags((value) => !value)}
+        routes={mapRoutes}
+        onRoutes={() => setMapRoutes((value) => !value)}
+      />
+      {selected !== null && view === '2d' && placing === null && (
+        <p className="well-hint">{tr('Перетащите дрона на другую клетку')}</p>
+      )}
+      <div className="mat-box" ref={matRef} style={matPad}>
+        {view === '3d' ? (
+          <Suspense fallback={<div className="scene-loading" role="status">{tr('Загрузка 3D-сцены…')}</div>}>
+            <Mat3D show={show} t={playback.t} selected={selected} onSelect={pickOnMap} area={area} live={link.drones} onMove={standOn} size={mapSize} />
+          </Suspense>
+        ) : (
+          <MatChart
+            area={area}
+            show={show}
+            t={playback.t}
+            selected={selected}
+            onSelect={pickOnMap}
+            live={link.drones}
+            hoverCell={hoverCell}
+            onHoverCell={setHoverCell}
+            onPick={placing !== null ? placeAt : undefined}
+            onMove={standOn}
+            size={mapSize}
+            showTags={mapTags}
+            showRoutes={mapRoutes}
+          />
+        )}
+      </div>
+      {view === '2d' && <div className="map-caption" aria-hidden="true"><span>{tr('Клетка: 40 × 40 см')}</span><span>{area.cols * 40} × {area.rows * 40} {tr('см')}</span></div>}
+    </div>
+  )
+
+  const inspector = (
+    <Inspector
+      show={show}
+      t={playback.t}
+      selected={selected}
+      hoverCell={hoverCell}
+      start={selected === null ? null : startCell(show.drones.find((d) => d.number === selected)?.steps ?? [])}
+      placing={placing !== null}
+      onPlace={togglePlace}
+      notice={tr(notice || note)}
+      editor={
+        selected === null ? null : (
+          <DroneEditor
+            project={project}
+            drone={selected}
+            marks={marks}
+            editor={editor}
+            onSource={onSource}
+            now={now}
+            goto={gotoLine}
+            onGotoDone={() => setGotoLine(null)}
+          />
+        )
+      }
+    />
+  )
+
+
+
   return (
-    <div className="app">
+    <div className="app" data-mode={mode} data-inspector={inspectorOpen} inert={inactive}>
+      <Sidebar project={project} actions={actions} mode={mode} onMode={setMode} reference={tab === 'ref' && inspectorOpen} onReference={() => { setTab('ref'); setInspectorOpen(true) }} link={link} />
       <TopBar
+        mode={mode}
         project={project}
         actions={actions}
         steps={steps}
-        reason={reason}
-        cta={cta}
         onCheck={runCheck}
-        mode={mode}
-        onMode={setMode}
-        link={link}
         onStep={onStep}
         onEmergency={emergency}
+        status={flying ? 'flying' : armed ? 'armed' : 'sim'}
+        finding={hint ? { tone: 'info', text: hint } : finding}
+        onSave={() => actions.onSave(false)}
+        inspectorOpen={inspectorOpen}
+        onInspector={() => setInspectorOpen((open) => !open)}
       />
-      <div className="body" data-mode={mode}>
-        {mode === 'code' ? (
-          <CodePane
-            project={project}
-            marks={marks}
-            steps={stepCount}
-            editor={editor}
-            onSource={onSource}
-            onGoto={(line) => editor.current?.reveal(line)}
-            now={now}
-            t={playback.t}
-            selected={selected}
-            onSelect={setSelected}
-            show={show}
-            onSimulate={() => setMode('map')}
-            onAddDrone={show.drones.length < MAX_DRONES ? addOne : null}
-          />
-        ) : (
-          <FleetRail show={show} t={playback.t} selected={selected} onSelect={setSelected} onAdd={addOne} />
-        )}
-        <main className="field">
-          <AreaBar area={area} onArea={chooseArea} from={fromArea} onMigrate={migrate} maxHeight={maxHeight} onMaxHeight={setMaxHeight} placing={placing !== null} onPlace={togglePlace} />
-          {mode === 'map' && windowsOn && (playback.playing || playback.t > 0) && (
-            <DroneWindows
-              show={show}
-              t={playback.t}
-              source={project.source}
-              selected={selected}
-              onPick={(n) => setSelected((s) => (s === n ? null : n))}
-              hidden={closedWindows}
-              onHide={(n) => setClosedWindows((s) => new Set(s).add(n))}
+      <main className="sheet">
+        <div className="stage">
+          <div className="work">{well}</div>
+          {inspectorOpen && (
+            <RightPanel
+              tab={tab}
+              onTab={setTab}
+              fleetCount={link.active.length}
+              transport={
+                <Transport
+                  t={playback.t}
+                  duration={show.duration}
+                  playing={playback.playing}
+                  speed={playback.speed}
+                  onToggle={playback.toggle}
+                  onSpeed={playback.setSpeed}
+                  onSeek={playback.seek}
+                />
+              }
+              score={
+                <Timetable
+                  show={show}
+                  t={playback.t}
+                  selected={selected}
+                  onSelect={setSelected}
+                  onSeek={playback.seek}
+                  onHover={setHint}
+                  onAdd={show.drones.length < MAX_DRONES ? addOne : null}
+                />
+              }
+              code={inspector}
+              checks={<Checks groups={groups} stale={check === 'stale'} onJump={jump} />}
+              reference={<Reference onInsert={(code) => editor.current?.insert(code)} />}
+              fleet={
+                link.active.length === 0 && link.archive.length === 0 ? (
+                  <p className="rp-none">{tr('Включите дроны: они найдут компьютер сами.')}</p>
+                ) : (
+                  <div className="rp-fleet">
+                    <LivePanel
+                      active={link.active}
+                      archive={link.archive}
+                      numbers={show.drones.map((d) => d.number)}
+                      roles={roles}
+                      autoIps={new Set(Object.keys(roles).filter((ip) => roles[ip] && !(ip in manual)))}
+                      onRole={(ip, n) => (n === null ? assign(roles[ip] ?? -1, null) : assign(n, ip))}
+                      uploads={uploads}
+                      onForget={() => void link.forget()}
+                    />
+                  </div>
+                )
+              }
             />
           )}
-          <div className="mat-box" ref={matRef}>
-            <MatChart
-              area={area}
-              show={show}
-              t={playback.t}
-              selected={selected}
-              onSelect={setSelected}
-              live={link.drones}
-              hoverCell={hoverCell}
-              onHoverCell={setHoverCell}
-              onPick={placing !== null ? placeAt : undefined}
-              onMove={standOn}
-              size={{ width: Math.max(mat.width - 28, 0), height: Math.max(mat.height - 10, 0) }}
-            />
-          </div>
-        </main>
-        <aside className="side">
-          <Readout
-            show={show}
-            t={playback.t}
-            selected={selected}
-            hoverCell={hoverCell}
-            compact={mode === 'code'}
-            start={selected === null ? null : startCell(show.drones.find((d) => d.number === selected)?.steps ?? [])}
-            placing={placing !== null}
-            onPlace={togglePlace}
-          />
-          <LivePanel
-            active={link.active}
-            archive={link.archive}
-            numbers={show.drones.map((d) => d.number)}
-            roles={roles}
-            onRole={(ip, n) => setManual((r) => ({ ...r, [ip]: n }))}
-            autoIps={new Set(Object.keys(roles).filter((ip) => roles[ip] && !(ip in manual)))}
-            onForget={() => void link.forget()}
-            uploads={uploads}
-          />
-          <div className="tabs" role="tablist" aria-label={tr('Боковая панель')}>
-            <button type="button" role="tab" aria-selected={side === 'checks'} onClick={() => setSide('checks')}>
-              {tr('Проверки')}
-            </button>
-            <button type="button" role="tab" aria-selected={side === 'ref'} onClick={() => setSide('ref')}>
-              {tr('Справочник')}
-            </button>
-          </div>
-          {side === 'checks' ? (
-            <Checks groups={groups} stale={check === 'stale'} onJump={jump} />
-          ) : (
-            <Reference onInsert={(code) => editor.current?.insert(code)} />
-          )}
-          <p className="notice" role="status" aria-live="assertive">
-            {tr(notice || note)}
-          </p>
-        </aside>
-        {mode === 'map' && (
-        <div className="dock">
-            <Transport
-              t={playback.t}
-              duration={show.duration}
-              playing={playback.playing}
-              speed={playback.speed}
-              onToggle={playback.toggle}
-              onSpeed={playback.setSpeed}
-              onSeek={playback.seek}
-            />
-          </div>
-        )}
-        {mode === 'map' && (
-          <div className="drawer">
-            <p className="drawer-hint">
-              <span>{hint ?? tr('Тяните по партитуре или ← → (Shift: по 10 с), ↑ ↓ выбирают дрон')}</span>
-              {mode === 'map' && (
-                <button
-                  type="button"
-                  className="drawer-toggle"
-                  aria-pressed={windowsOn}
-                  onClick={() => {
-                    setWindowsOn((on) => !on)
-                    setClosedWindows(new Set())
-                  }}
-                >
-                  {windowsOn ? tr('Окна кода: вкл') : tr('Окна кода: выкл')}
-                </button>
-              )}
-            </p>
-            <CueSheet
-              show={show}
-              t={playback.t}
-              selected={selected}
-              onSelect={setSelected}
-              onSeek={playback.seek}
-              onHover={setHint}
-              height={240}
-            />
-          </div>
-        )}
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
@@ -512,7 +616,8 @@ export default function App() {
   useLang() // the whole page redraws when the language changes
   // the start window greets a launch without an address that points at a show
   const [home, setHome] = useState(START.show === null)
-  const [wizard, setWizard] = useState(false)
+  const [wizard, setWizard] = useState(PARAMS.get('wizard') === '1')
+  const [wizardTab, setWizardTab] = useState<'example' | 'blank'>('example')
   const [opened, setOpened] = useState(0) // projects opened by the user; the start state only belongs to the first one
   const [note, setNote] = useState('')
 
@@ -530,9 +635,7 @@ export default function App() {
         const result = await runner.run(source, project.path ? baseName(project.path) : 'show.py')
         setProject((p) => {
           if (p.key !== key || p.source !== source) return p
-          return 'ok' in result
-            ? { ...p, data: result.ok, run: { state: 'ok' } }
-            : { ...p, run: { state: 'error', error: result.error, line: result.line } }
+          return 'ok' in result ? { ...p, data: result.ok, run: { state: 'ok' } } : { ...p, run: { state: 'error', error: result.error, line: result.line } }
         })
       },
       first ? 0 : 450,
@@ -562,7 +665,7 @@ export default function App() {
       try {
         const file = await openProjectFile()
         if (!file) return
-        replace(file.text, EMPTY, baseName(file.path), file.path, true, '')
+          replace(file.text, EMPTY, baseName(file.path), file.path, true, '')
         if (window.litebee) remember(file.path, baseName(file.path))
         setHome(false)
       } catch (e) {
@@ -597,17 +700,22 @@ export default function App() {
 
   return (
     <>
-    <Workspace
-      key={project.key}
-      project={project}
-      actions={actions}
-      onSource={(text) => setProject((p) => ({ ...p, source: text, saved: false }))}
-      note={note}
-      first={opened === 0}
-    />
+      <Workspace
+        key={project.key}
+        project={project}
+        actions={actions}
+        onSource={(text) => setProject((p) => ({ ...p, source: text, saved: false }))}
+        note={note}
+        first={opened === 0}
+        inactive={home || wizard}
+      />
       {home && (
         <StartScreen
-          onWizard={() => setWizard(true)}
+          inactive={wizard}
+          onWizard={(tab) => {
+            setWizardTab(tab)
+            setWizard(true)
+          }}
           onOpen={actions.onOpen}
           onOpenRecent={actions.onOpenPath}
           onExample={actions.onExample}
@@ -617,6 +725,7 @@ export default function App() {
       )}
       {wizard && (
         <NewProjectWizard
+          initialTab={wizardTab}
           onCancel={() => setWizard(false)}
           onBlank={(n, c) => (setWizard(false), actions.onNew(n, c))}
           onExample={(id) => (setWizard(false), actions.onExample(id))}

@@ -1,0 +1,402 @@
+/* The timetable. A card on the sheet: the head (title, transport, drones on the link), the column heads with the time
+   ruler, and one 40 px row per drone. The columns are fixed so that the accent time cursor, one 1 px line, can be laid over
+   the strip column of the head and of the rows alike. The strip column is what is left of the card:
+   card width - 2 x 16 padding - 112 - 196 - 150 - 3 x 16 gaps. */
+.tt {
+  --c-name: 112px;
+  --cg: 16px;
+  --px: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.tt-head {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: none;
+  height: 44px;
+  padding: 0 var(--px);
+}
+
+.tt-head h2 {
+  font-size: var(--fs-section);
+  font-weight: 600;
+  flex: none;
+}
+
+.tt-live {
+  position: relative;
+  flex: none;
+}
+
+.tt-pop {
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: auto;
+  right: 0;
+  width: 400px;
+  padding: 0;
+  gap: 0;
+}
+
+.tt-cols,
+.tt-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--c-name) minmax(0, 1fr);
+  column-gap: var(--cg);
+  align-items: center;
+  padding: 0 var(--px);
+}
+
+.tt-cols {
+  flex: none;
+  height: 32px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.tt-h {
+  white-space: nowrap;
+}
+
+.tt-h-link {
+  padding-left: 8px;
+}
+
+.tt-ruler {
+  position: relative;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.tt-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.tt-tick::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--control);
+}
+
+.tt-tick[data-num='true']::before {
+  height: 10px;
+}
+
+.tt-tick b {
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  font-size: var(--fs-small);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.tt-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  outline-offset: -2px;
+}
+
+.tt-rows {
+  position: relative;
+}
+
+.tt-cursor-layer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--px) + var(--c-name) + var(--cg));
+  right: var(--px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tt-cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--accent);
+}
+
+.tt-row {
+  height: var(--row-tt);
+  border-bottom: 1px solid var(--rule);
+  transition: background-color 0.15s var(--ease-out);
+}
+
+.tt-row:hover {
+  background: var(--raised);
+}
+
+.tt-row[data-selected='true'] {
+  background: var(--active);
+}
+
+.tt-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  min-width: 0;
+  margin-left: -4px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tt-row[data-selected='true'] .tt-name {
+  font-weight: 600;
+}
+
+.tt-bullet {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border: 2px solid var(--faint);
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* the drone of the link: the real select sits invisible over a two-line label, so the label can hold battery words */
+.tt-link {
+  position: relative;
+  min-width: 0;
+  height: 36px;
+  border-radius: var(--radius-control);
+}
+
+.tt-link:hover {
+  background: var(--raised);
+}
+
+.tt-row[data-selected='true'] .tt-link:hover {
+  background: var(--surface);
+}
+
+.tt-link:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+
+.tt-link select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.tt-link-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: 0 24px 0 8px;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.tt-link-text > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-small);
+  line-height: 16px;
+}
+
+.tt-link-id {
+  color: var(--text);
+}
+
+.tt-batt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.tt-batt[data-level='warn'] {
+  color: var(--warning);
+}
+
+.tt-batt[data-level='low'] {
+  color: var(--negative);
+  font-weight: 500;
+}
+
+.tt-batt b {
+  font-weight: 400;
+}
+
+.tt-batt[data-level='low'] b {
+  font-weight: 500;
+}
+
+.tt-batt svg {
+  flex: none;
+}
+
+.tt-none {
+  color: var(--faint);
+  font-size: var(--fs-body);
+}
+
+.tt-chev {
+  position: absolute;
+  right: 6px;
+  top: 11px;
+  color: var(--muted);
+}
+
+.tt-code {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.tt-code-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-num);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text);
+}
+
+.tt-code-line {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.tt-code-wait {
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.tt-strip {
+  position: relative;
+  height: var(--row-tt);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.tt-track {
+  position: absolute;
+  left: 0;
+  top: calc(50% - 1px);
+  height: 2px;
+  background: var(--control);
+}
+
+.tt-seg {
+  position: absolute;
+  top: calc(50% - 3px);
+  height: 6px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(var(--shadow-rgb) / 0.28);
+}
+
+.tt-letter {
+  position: absolute;
+  top: 0;
+  padding-left: 2px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 14px;
+  color: var(--text);
+  pointer-events: none;
+}
+
+.tt-station {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text);
+  background: var(--surface);
+  pointer-events: none;
+}
+
+.tt-empty {
+  padding: 12px var(--px);
+  color: var(--muted);
+}
+
+.tt-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--row-tt);
+  padding: 0 var(--px);
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  transition: background-color 0.15s var(--ease-out);
+}
+
+.tt-add:hover:enabled {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.tt-add:disabled {
+  color: var(--faint);
+}
+
+@media (max-width: 1279px) {
+  .tt {
+    --c-name: 104px;
+    --c-link: 172px;
+    --c-code: 124px;
+    --cg: 12px;
+  }
+}
+
+/* in the right window the score is the panel itself */
+.tt.tt-flat {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}

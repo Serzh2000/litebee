@@ -8,8 +8,8 @@ import { setLang, tr } from '../core/i18n'
 import { adapters, Link } from './link'
 
 // The window background is the desk colour, so a slow first paint does not flash white or black.
-const DESK = '#F1F3F5'
-const DESK_DARK = '#14181D'
+const DESK = '#EEF3F6'
+const DESK_DARK = '#0F1519'
 
 // Screenshot mode, for checking the interface at exact sizes without a screen grab:
 //   LITEBEE_SHOT=out.png LITEBEE_SIZE=1440x900 LITEBEE_QUERY="select=4&t=30" electron .

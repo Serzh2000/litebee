@@ -1,27 +1,38 @@
 .lang {
   display: inline-flex;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
   overflow: hidden;
 }
 
 .lang button {
-  height: 26px;
-  min-width: 36px;
+  height: 28px;
+  min-width: 32px;
   padding: 0 8px;
   border: 0;
   border-radius: 0;
-  background: var(--sheet);
-  color: var(--ink-2);
-  font-size: var(--text-sm);
-  font-weight: 600;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  display: inline-grid;
+  place-items: center;
+}
+
+.lang button:hover {
+  background: var(--raised);
+  color: var(--text);
 }
 
 .lang button + button {
-  border-left: 1px solid var(--rule);
+  border-left: 1px solid var(--border);
 }
 
 .lang button[aria-pressed='true'] {
-  background: var(--accent-tint);
-  color: var(--ink);
+  background: var(--active);
+  color: var(--text);
+}
+
+.lang button:focus-visible {
+  outline-offset: -3px;
 }

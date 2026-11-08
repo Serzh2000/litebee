@@ -1,0 +1,64 @@
+\chapter{Общая картина}\label{ch:kartina}
+
+Дрон LiteBee Wing выглядит как одно устройство, но внутри и рядом с ним работают \textbf{три отдельных компьютера}. Каждый с собственной операционной системой и собственной программой.
+
+\begin{figure}[tbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=9mm and 12mm,
+  box/.style={draw=rule, fill=paper, rounded corners=3pt, minimum width=38mm, minimum height=14mm, align=center, font=\sffamily\small},
+  big/.style={draw=accent, fill=accentsoft, rounded corners=3pt, line width=0.9pt, align=center, font=\sffamily\small},
+  lnk/.style={-{Stealth[length=2.4mm]}, line width=0.8pt, color=accentdark},
+  tag/.style={font=\sffamily\scriptsize, color=inkgray}
+]
+\node[box] (app) {Приложение\\LiteBee Go / телефон};
+\node[big, right=22mm of app, minimum width=66mm, minimum height=38mm] (drone) {};
+\node[font=\sffamily\bfseries\small, color=accentdark, anchor=north] at ($(drone.north)+(0,-2mm)$) {Дрон Wing (Allwinner A33, Linux)};
+\node[box, anchor=north west, minimum width=22mm, minimum height=9mm] (pilot) at ($(drone.north west)+(3mm,-9mm)$) {\texttt{pilot\_f}\\автопилот};
+\node[box, anchor=north east, minimum width=22mm, minimum height=9mm] (flow) at ($(drone.north east)+(-3mm,-9mm)$) {\texttt{flow}\\оптпоток};
+\node[box, anchor=south, minimum width=46mm, minimum height=9mm] (hw) at ($(drone.south)+(0,3mm)$) {IMU, барометр, моторы (STM8s)};
+\node[big, right=24mm of drone, minimum width=54mm, minimum height=26mm] (mod) {};
+\node[font=\sffamily\bfseries\small, color=accentdark, anchor=north, align=center] at ($(mod.north)+(0,-2mm)$) {Модуль позиционирования\\(Allwinner V831, Linux)};
+\node[box, anchor=south, minimum width=36mm, minimum height=9mm] (cam) at ($(mod.south)+(0,2.5mm)$) {\texttt{app\_ckh831}: камера, ToF};
+\draw[lnk, <->] (app) -- node[above, tag]{Wi-Fi, UDP 9696} (drone);
+\draw[lnk, <->] (drone) -- node[above, tag]{UART, 115200} node[below, tag]{\texttt{ttyS0}} (mod);
+\node[box, below=14mm of drone, minimum width=42mm] (rc) {Пульт 2,4 ГГц};
+\draw[lnk, <->] (rc) -- (drone);
+\node[box, below=14mm of mod, minimum width=38mm] (mat) {Ковёр с метками\\(\texttt{tag36h11})};
+\draw[lnk, ->] (mat) -- node[right, tag]{видит камера} (mod);
+\end{tikzpicture}}
+\caption{Три компьютера и ковёр. Модуль смотрит на метки, автопилот летает, приложение рисует и командует.}\label{fig:arch}
+\end{figure}
+
+\section{Кто что делает}
+
+\begin{tabularx}{\textwidth}{@{}>{\sffamily\bfseries}p{3.1cm} p{3.7cm} Y@{}}
+\toprule
+\hdr{Устройство} & \hdr{Чип и система} & \hdr{Задача} \\ \midrule
+Дрон Wing & Allwinner A33, Linux 3.4-rt & Автопилот \texttt{pilot\_f}: стабилизация, режимы, миссии; программа \texttt{flow} считает оптический поток; Wi-Fi и радиоканал пульта. \\
+Модуль позиционирования & Allwinner V831, Linux 4.9 & Находит метку на ковре, меряет расстояние до земли, шлёт дрону готовый результат по UART. \\
+Приложение & Windows, Android & Строит миссии, показывает телеметрию, обновляет прошивки. \\ \bottomrule
+\end{tabularx}
+
+\begin{zametka}[Главная находка]
+Опознание метки делает не дрон и не приложение, а \textbf{отдельный модуль}. В образе дрона нет ни одной таблицы меток. Автопилот получает от модуля уже готовое число: «видна метка номер такой-то, она смещена на столько-то, расстояние такое-то». \pr{}
+\end{zametka}
+
+\section{Две семьи прошивки}
+
+Мы встретили сразу две платформы, построенные на одном и том же исходном коде автопилота (он называется \emph{AWpilot} и пришёл от Allwinner).
+
+\begin{tabularx}{\textwidth}{@{}p{2.4cm} p{3.6cm} p{3.2cm} Y@{}}
+\toprule
+\hdr{Семья} & \hdr{Чип полёта} & \hdr{Связь с приложением} & \hdr{Особенность} \\ \midrule
+Wing (C06) & Allwinner A33, Linux & UDP 192.168.100.1:9696 & Автопилот \texttt{pilot}, бинарник без символов. \\
+Bot (C10) & Allwinner V853S, ядро RISC-V (E907), Melis & TCP 192.168.5.1:17788 & Прошивка \texttt{melis30\_1.5.elf} с символами и отладочной информацией. \\ \bottomrule
+\end{tabularx}
+
+\vspace{4pt}
+Прошивка C10 для нас как «чертёж»: в ней сохранены имена функций, структур и перечислений. Те же модули (и даже те же формулы) мы потом нашли в голом бинарнике Wing. \vyv{}
+
+\begin{zametka}[Не путать]
+\texttt{melis30\_1.5.elf} относится к C10, а не к Wing. Приложение LiteBee Go скачивает её как пакет \texttt{c10\_drone\_firmware}. Всё, что мы говорим про логику Wing «по прошивке ядра C10», основано на сходстве кода, а не на прямом чтении Wing. \pr{}
+\end{zametka}

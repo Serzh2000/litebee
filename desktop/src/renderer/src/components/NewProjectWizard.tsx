@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useModalFocus } from '../state/useModalFocus'
 import { Search, X } from 'lucide-react'
 import {
   AREA_NAME,
@@ -15,6 +16,7 @@ import {
 } from '@core/catalog'
 import { MAX_DRONES } from '@core/project'
 import { CATALOG } from '../data/shows'
+import { ShowThumb } from './ShowThumb'
 import './NewProjectWizard.css'
 import { plural, tr } from '@core/i18n'
 
@@ -22,6 +24,8 @@ interface Props {
   onCancel: () => void
   onBlank: (name: string, drones: number) => void
   onExample: (id: string) => void
+  /** the tab it opens on */
+  initialTab?: 'example' | 'blank'
 }
 
 const droneWord = (n: number) => plural(n, ['дрон', 'дрона', 'дронов'], ['drone', 'drones'])
@@ -36,8 +40,10 @@ const AREAS: Area[] = ['quarter', 'full']
 const LENGTHS: Length[] = ['short', 'middle', 'long']
 
 /** The new-project wizard: start from an example found with filters, or from an empty project. */
-export function NewProjectWizard({ onCancel, onBlank, onExample }: Props) {
-  const [tab, setTab] = useState<'example' | 'blank'>('example')
+export function NewProjectWizard({ onCancel, onBlank, onExample, initialTab = 'example' }: Props) {
+  const dialog = useRef<HTMLDivElement>(null)
+  useModalFocus(dialog)
+  const [tab, setTab] = useState<'example' | 'blank'>(initialTab)
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
   const [picked, setPicked] = useState<string | null>(null)
   const [name, setName] = useState('')
@@ -77,7 +83,7 @@ export function NewProjectWizard({ onCancel, onBlank, onExample }: Props) {
 
   return (
     <div className="scrim" onMouseDown={onCancel}>
-      <div className="wizard" data-tab={tab} role="dialog" aria-label={tr('Новый проект')} onMouseDown={(e) => e.stopPropagation()}>
+      <div className="wizard" ref={dialog} data-tab={tab} role="dialog" aria-modal="true" aria-label={tr('Новый проект')} onMouseDown={(e) => e.stopPropagation()}>
         <header className="wz-head">
           <h2>{tr('Новый проект')}</h2>
           <div className="wz-tabs" role="tablist">
@@ -170,7 +176,9 @@ export function NewProjectWizard({ onCancel, onBlank, onExample }: Props) {
                         onClick={() => setPicked(s.id)}
                         onDoubleClick={() => onExample(s.id)}
                       >
+                        <ShowThumb id={s.id} size={s.area === 'full' ? 12 : 6} />
                         <span className="wz-title">{tr(s.title)}</span>
+                        <span className="wz-note">{tr(s.note)}</span>
                         <span className="wz-meta">
                           <b>{AREA_NAME[s.area]}</b>
                           <span>
@@ -180,7 +188,6 @@ export function NewProjectWizard({ onCancel, onBlank, onExample }: Props) {
                           {s.tags.includes('Круги circle') && <em title={tr(FEATURE_HINT['Круги circle'])}>circle</em>}
                           {s.tags.includes('Только свет') && <em>{tr('свет')}</em>}
                         </span>
-                        <span className="wz-note">{tr(s.note)}</span>
                       </button>
                     </li>
                   ))}
@@ -214,6 +221,7 @@ export function NewProjectWizard({ onCancel, onBlank, onExample }: Props) {
           </>
         ) : (
           <form
+            noValidate
             className="wz-blank"
             onSubmit={(e) => {
               e.preventDefault()

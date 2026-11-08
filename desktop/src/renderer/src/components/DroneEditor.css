@@ -1,0 +1,25 @@
+/* the program of one drone, in the right panel */
+.deditor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.deditor-note {
+  margin: 0;
+  color: var(--muted, var(--ink-2));
+  font-size: 12px;
+}
+
+.deditor-box {
+  height: clamp(220px, 34vh, 420px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface, var(--sheet));
+  overflow: hidden;
+}
+
+.deditor-box > * {
+  height: 100%;
+}

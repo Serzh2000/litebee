@@ -50,6 +50,7 @@
 \usepackage{float}
 \usepackage{needspace}
 \floatplacement{figure}{tbp}
+\raggedbottom
 
 % ---------- заголовки
 \addtokomafont{disposition}{\sffamily\color{ink}}
@@ -144,6 +145,9 @@
     \caption{#2}\label{#3}
   \end{figure}}
 
+\setlength{\fboxsep}{0pt}
+\setlength{\fboxrule}{0.4pt}
+\hfuzz=1.5pt
 \emergencystretch=3em
 \tolerance=1500
 \usepackage{url}\urlstyle{tt}

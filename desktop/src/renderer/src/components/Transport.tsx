@@ -32,17 +32,20 @@ export function Transport({ t, duration, playing, speed, onToggle, onSpeed, onSe
       <p className="count" aria-live="off">
         <strong>{seconds(t)}</strong> / {seconds(duration)} {tr('с')}
       </p>
-      <input
-        className="scrub"
-        type="range"
-        min={0}
-        max={duration}
-        step={0.1}
-        value={t}
-        aria-label={tr('Время шоу')}
-        onChange={(e) => onSeek(Number(e.target.value))}
-        style={{ ['--at' as string]: `${duration > 0 ? (t / duration) * 100 : 0}%` }}
-      />
+      <div className="scrub-box">
+        <i className="scrub-track" aria-hidden="true" />
+        <i className="scrub-fill" aria-hidden="true" style={{ width: `calc(${duration > 0 ? t / duration : 0} * (100% - 14px) + 7px)` }} />
+        <input
+          className="scrub"
+          type="range"
+          min={0}
+          max={duration}
+          step={0.1}
+          value={t}
+          aria-label={tr('Время шоу')}
+          onChange={(e) => onSeek(Number(e.target.value))}
+        />
+      </div>
     </div>
   )
 }

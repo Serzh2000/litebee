@@ -23,3 +23,8 @@
 .mat[data-dragging='true'] .mat-drone {
   cursor: grabbing;
 }
+
+/* figures of the map stay in columns */
+.mat-num {
+  font-variant-numeric: tabular-nums;
+}

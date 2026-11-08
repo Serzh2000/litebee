@@ -1,46 +1,38 @@
+/* The only filled red of the screen. White on #c4242a, a bold label and the key that does the same. */
 .emergency {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: var(--radius);
-  background: var(--danger);
-  color: #fff;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  transition:
-    background-color 0.18s var(--ease-out),
-    transform 0.12s var(--ease-out);
+  height: var(--control-h);
+  padding: 0 12px;
+  border: 1px solid var(--emergency);
+  border-radius: var(--radius-control);
+  background: var(--emergency);
+  color: #ffffff;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  white-space: nowrap;
+  flex: none;
+  transition: background-color 0.15s var(--ease-out);
 }
 
 .emergency:hover {
-  background: var(--danger-dn);
+  background: #a41c22;
+  border-color: #a41c22;
 }
 
 .emergency:active {
-  transform: translateY(1px);
+  background: #8a161b;
 }
 
 .emergency:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .emergency kbd {
-  margin-left: 4px;
-  border-color: rgb(255 255 255 / 0.7);
+  border-color: rgb(255 255 255 / 0.75);
   opacity: 1;
-}
-
-/* in the top bar: the same red, a size that does not take over the bar */
-.emergency[data-compact='true'] {
-  width: auto;
-  height: 36px;
-  gap: 8px;
-  padding: 0 12px;
-  font-size: var(--text-md);
+  line-height: 18px;
 }

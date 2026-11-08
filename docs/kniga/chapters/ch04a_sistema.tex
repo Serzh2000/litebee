@@ -1,0 +1,161 @@
+\chapter{Система, службы и сеть}\label{ch:sys}
+
+Эта глава собирает в одном месте то, что работает внутри обоих устройств: какая операционная система, какие процессы, как они запускаются и как устроена сеть. Всё снято с живого дрона и живого модуля по USB (только чтение) и подтверждено файлами из образов.
+
+\section{Дрон: от включения до автопилота}
+
+На дроне работает Linux 3.4 с патчем реального времени и оболочка BusyBox. Корень лежит в сжатой файловой системе \texttt{squashfs} \emph{только для чтения}; всё, что меняется, живёт в маленьком разделе \texttt{/netPrivate}.
+
+\begin{figure}[tbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  st/.style={draw=rule, fill=paper, rounded corners=3pt, minimum height=11mm, minimum width=27mm, align=center, font=\sffamily\scriptsize},
+  hot/.style={st, draw=accent, fill=accentsoft},
+  ar/.style={-{Stealth[length=2.2mm]}, color=accentdark, line width=0.8pt}
+]
+\node[st] (a) {загрузчик\\\texttt{uboot}};
+\node[st, right=7mm of a] (b) {ядро\\Linux 3.4-rt};
+\node[st, right=7mm of b] (c) {\texttt{init}\\\texttt{/etc/inittab}};
+\node[st, right=7mm of c] (d) {\texttt{rcS}\\\texttt{autorun.sh}};
+\node[hot, right=7mm of d] (e) {\texttt{wifi\_switch.sh}\\выбор режима};
+\node[st, below=9mm of e, xshift=-22mm] (f) {\texttt{CLIENT}:\\\texttt{pilot\_f}};
+\node[st, below=9mm of e, xshift=22mm] (g) {\texttt{SERVER}:\\\texttt{pilot} +\\\texttt{VideoTransmission}};
+\draw[ar] (a)--(b); \draw[ar] (b)--(c); \draw[ar] (c)--(d); \draw[ar] (d)--(e);
+\draw[ar] (e.south) -- ++(0,-3mm) -| (f.north);
+\draw[ar] (e.south) -- ++(0,-3mm) -| (g.north);
+\end{tikzpicture}}
+\caption{Загрузка дрона. Режим Wi-Fi выбирается одним скриптом по содержимому файла \texttt{/netPrivate/wifiActor}.}\label{fig:boot}
+\end{figure}
+
+\subsection*{Что запускает \texttt{autorun.sh}}
+\begin{enumerate}
+  \item \texttt{wifi\_switch.sh}: читает режим и запускает нужный автопилот.
+  \item \texttt{pmonitor} (служебный наблюдатель) и \texttt{adbd} (отладка по USB).
+  \item Пауза 3 секунды. Если режим \texttt{SERVER}, запускается \texttt{VideoTransmission} (видео и обновление).
+  \item Сброс буферов раздела \texttt{/netPrivate}.
+\end{enumerate}
+
+\subsection*{Процессы на живом дроне}
+
+\begin{tabularx}{\textwidth}{@{}l Y@{}}
+\toprule
+\hdr{Режим} & \hdr{Что работает} \\ \midrule
+\texttt{CLIENT} & \texttt{init}, \texttt{flow}, \texttt{wpa\_supplicant}, \texttt{udhcpc}, \textbf{\texttt{pilot\_f}}, \texttt{pmonitor}, \texttt{adbd}, консоль \\
+\texttt{SERVER} & \texttt{init}, \texttt{flow}, \texttt{hostapd}, \texttt{udhcpd}, \texttt{ftpd}, \textbf{\texttt{pilot}}, \texttt{pmonitor}, \texttt{VideoTransmission}, \texttt{adbd}, консоль \\ \bottomrule
+\end{tabularx}
+
+\vspace{4pt}
+\pr{} Программа \texttt{flow} работает всегда: она считает оптический поток по нижней камере и отдаёт результат автопилоту.
+
+\section{Дрон: два режима Wi-Fi}
+
+Режим задаёт одна строка в \texttt{/netPrivate/wifiActor}. Если файла нет, скрипт создаёт его со значением \texttt{CLIENT}. \pr{}
+
+\begin{tabularx}{\textwidth}{@{}p{2.8cm} Y Y@{}}
+\toprule
+& \hdr{\texttt{CLIENT}} & \hdr{\texttt{SERVER}} \\ \midrule
+Wi-Fi & Подключается к сети (\texttt{wpa\_supplicant}), адрес по DHCP & Раздаёт сеть (\texttt{hostapd}), WPA2, до 1 клиента \\
+Адрес & по DHCP & \texttt{192.168.100.1/24} \\
+DHCP & нет & \texttt{udhcpd}: \texttt{192.168.100.20}--\texttt{.254} \\
+Файлы & нет & \texttt{ftpd}, порт 21 \\
+Автопилот & \texttt{pilot\_f} & \texttt{pilot} \\
+Видео, обновление & нет & \texttt{VideoTransmission} \\ \bottomrule
+\end{tabularx}
+
+\vspace{4pt}
+Сеть, к которой дрон подключается как клиент, берётся из \texttt{/netPrivate/wpa\_supplicant.conf}, а если его нет --- из файла по умолчанию в образе. Имя собственной сети по умолчанию \texttt{MR100\_123456}, после запуска оно заменяется на \texttt{LiteBee Wing\_<код>}.
+
+\begin{zametka}[Почему автопилот менялся]
+Наш дрон сначала работал как \texttt{CLIENT} с \texttt{pilot\_f}, а после того как его унесли из помещения с нужной сетью, оказался в режиме \texttt{SERVER} с \texttt{pilot}. Вывод: без знакомой сети дрон становится точкой доступа. Кто и по какому событию переписывает \texttt{wifiActor}, мы не нашли. \vyv{}
+\end{zametka}
+
+\section{Порты дрона}
+
+\begin{tabularx}{\textwidth}{@{}r l l Y@{}}
+\toprule
+\hdr{Порт} & \hdr{Протокол} & \hdr{Кто} & \hdr{Назначение} \\ \midrule
+9696 & UDP & \texttt{pilot} & Команды и телеметрия awlink для мобильного приложения Wing. \pr{} \\
+9697 & TCP & \texttt{pilot} & Второй канал awlink; назначение не выяснено. \nei{} \\
+13146 & UDP & \texttt{pilot} & Порт «объявлений» дронов формации (наш \texttt{litebee} использует его для связи с дронами). \vyv{} \\
+18001 & TCP & \texttt{pilot} (клиент) & Дрон подключается к TCP-серверу программы на ПК (LiteBee Go или наш \texttt{litebee}): протокол формации. Число \texttt{0x4651} в коде. \vyv{} \\
+21 & TCP & \texttt{ftpd} & FTP, корень файловой системы (режим \texttt{SERVER}). \pr{} \\
+7070 & RTSP & \texttt{VideoTransmission} & Видео (по приложению LiteBee Go; в бинарнике не найден). \vyv{} \\ \bottomrule
+\end{tabularx}
+
+\vspace{4pt}
+\texttt{VideoTransmission} принимает команды в формате \textbf{JSON}, умеет читать список видеофайлов на карте, менять имя сети и запускать обновление прошивки через \texttt{/etc/ota.sh}. Формат команд не разобран. \nei{}
+
+\begin{figure}[tbp]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw=rule, fill=paper, rounded corners=3pt, minimum height=11mm, align=center, font=\sffamily\small},
+  big/.style={draw=accent, fill=accentsoft, rounded corners=3pt, line width=0.9pt, align=center, font=\sffamily\small},
+  lnk/.style={-{Stealth[length=2.4mm]}, line width=0.8pt, color=accentdark},
+  tag/.style={font=\sffamily\scriptsize, color=inkgray, align=center}
+]
+\node[box, minimum width=34mm] (phone) {Телефон / ПК};
+\node[big, right=26mm of phone, minimum width=68mm, minimum height=44mm] (drone) {};
+\node[font=\sffamily\bfseries\small, color=accentdark, anchor=north] at ($(drone.north)+(0,-2mm)$) {Дрон (\texttt{192.168.100.1})};
+\node[box, minimum width=28mm] (p) at ($(drone.center)+(-17mm,4mm)$) {\texttt{pilot}\\UDP 9696\\TCP 9697};
+\node[box, minimum width=28mm] (v) at ($(drone.center)+(17mm,4mm)$) {\texttt{Video-}\\\texttt{Transmission}\\RTSP 7070};
+\node[box, minimum width=28mm] (f) at ($(drone.center)+(-17mm,-12mm)$) {\texttt{ftpd}\\TCP 21};
+\node[box, minimum width=28mm] (h) at ($(drone.center)+(17mm,-12mm)$) {\texttt{hostapd}\\\texttt{udhcpd}};
+\node[box, right=26mm of drone, minimum width=36mm] (mod) {Модуль\\(без сети)};
+\draw[lnk, <->] (phone) -- node[above, tag]{Wi-Fi\\WPA2} (drone);
+\draw[lnk, <->] (drone) -- node[above, tag]{UART\\115200} (mod);
+\end{tikzpicture}}
+\caption{Сеть дрона в режиме \texttt{SERVER}. Модуль не имеет сети: он связан с дроном только кабелем.}\label{fig:net}
+\end{figure}
+
+\section{Модуль: внутренности}
+
+\begin{tabularx}{\textwidth}{@{}p{3.3cm} Y@{}}
+\toprule
+\hdr{Узел} & \hdr{Что известно} \\ \midrule
+Процессор & Allwinner V831 (\texttt{sun8iw19}), один Cortex-A7. \pr{} \\
+Память & 60 МБ оперативной памяти, раздел подкачки 75 МБ. \pr{} \\
+Хранилище & Карта 482 МБ: \texttt{env}, \texttt{boot}, \texttt{cfg}, \texttt{rootfs}, \texttt{swap}, \texttt{UDISK}. \pr{} \\
+Камера & Сенсор OV2685 (2 Мп, MIPI) на I\textsuperscript{2}C. В системе есть драйверы ещё трёх сенсоров (\texttt{ov7251}, \texttt{ov9732}, \texttt{sp2305}), они не используются. \pr{} \\
+Датчик & ToF VI5300 на \texttt{i2c-2}. \pr{} \\
+Светодиоды & WS2812 через SPI; подсветка камеры --- четыре канала ШИМ. \pr{} \\
+Линии & UART0 (разъём расширения, зуммер) и UART1 (к дрону), две шины I\textsuperscript{2}C, SPI, USB-устройство. \pr{} \\ \bottomrule
+\end{tabularx}
+
+\section{Модуль: система и службы}
+
+Linux 4.9.118 (OpenWrt, собран Sipeed), стандартный образ MaixPy3. Скрипты запуска: \texttt{S00mpp} (медиаплатформа), \texttt{S01audio}, \texttt{S01logging}, \texttt{S02app} (запуск программы), \texttt{S10udev}, \texttt{S11dev}, \texttt{S12usb} (USB-устройство). \pr{}
+
+Живые процессы: \texttt{init}, \texttt{keep\_app.sh}, \textbf{\texttt{app\_ckh831}}, \texttt{adbd}. Больше ничего нет: ни \texttt{sshd}, ни \texttt{telnetd}, ни сетевых служб.
+
+\begin{zametka}[Сторожевой таймер]
+\texttt{keep\_app.sh} каждые 0,2 секунды пишет в \texttt{/dev/watchdog} и перезапускает программу, если она упала. Если остановить сам \texttt{keep\_app.sh}, модуль перезагрузится: мы это наблюдали при первой попытке снять кадры с камеры. \pr{}
+\end{zametka}
+
+\section{Модуль: сети нет}
+
+Это важный факт. В системе модуля \textbf{один сетевой интерфейс --- петля \texttt{lo}}. Нет Wi-Fi, нет Ethernet, хотя ядро умеет Wi-Fi (\texttt{cfg80211}) и на плате есть слот. Единственный открытый порт --- TCP~5037 (ADB). UDP-портов нет. \pr{}
+
+С внешним миром модуль связан двумя способами:
+\begin{itemize}
+  \item \textbf{UART} к дрону (на модуле это \texttt{ttyS1}, на дроне \texttt{ttyS0}): кадры о метке и команды (глава~\ref{ch:uart});
+  \item \textbf{второй UART} (\texttt{ttyS0}, разъём U0TX/U0RX): наружу, к внешним устройствам; мы подключили к нему зуммер (глава~\ref{ch:pult}); \pr{}
+  \item \textbf{USB}: ADB (оболочка root) и флеш-диск.
+\end{itemize}
+
+\section{Безопасность}
+
+\begin{opasno}[Что открыто]
+\begin{itemize}
+  \item ADB по USB даёт оболочку \textbf{root без пароля} и на дроне, и на модуле.
+  \item FTP на дроне (режим \texttt{SERVER}) открыт с корнем файловой системы и фиксированным логином и паролем, записанными в \texttt{/etc/ftpd.conf}.
+  \item Пароль точки доступа по умолчанию простой и общий для всех дронов.
+  \item Модуль безопаснее: у него нет сетевых служб.
+  \item Наш ретранслятор для зуммера (глава~\ref{ch:pult}) на время работы открывает на дроне \textbf{UDP-порт 5555}. Он пропускает только кадры с заголовком \texttt{AD FA}, но это не защита: любое устройство в той же сети может послать модулю команду (светодиоды, ШИМ, GPIO). Запускайте его только в своей сети и останавливайте командой \texttt{kill}. В штатной прошивке такого порта нет.
+\end{itemize}
+\end{opasno}
+
+\section{Что не выяснено}
+
+Кто переключает \texttt{wifiActor}; назначение порта 9697; формат JSON-команд \texttt{VideoTransmission}; проверка подписи обновления; живая картина сети дрона в режиме \texttt{SERVER} (\texttt{netstat}, \texttt{ifconfig}): мы её не снимали, список портов основан на коде. \nei{}

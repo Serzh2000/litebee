@@ -1,123 +1,135 @@
+/* Play, speed, the time and the scrubber: one row inside the head of the timetable. */
 .transport {
   display: flex;
   align-items: center;
-  gap: 14px;
-  height: 46px;
-  padding: 0 20px;
-  flex: none;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
 }
 
 .play {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  height: 32px;
+  justify-content: center;
+  gap: 8px;
+  height: var(--control-h);
   min-width: 96px;
-  padding: 0 14px 0 12px;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink);
-  font-weight: 600;
-  transition: background-color 0.18s var(--ease-out);
+  padding: 0 12px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  transition: background-color 0.15s var(--ease-out);
 }
 
 .play:hover {
-  background: var(--desk);
+  background: var(--raised);
 }
 
 .play:active {
-  transform: translateY(1px);
+  background: var(--active);
 }
 
 .speeds {
   display: inline-flex;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
   overflow: hidden;
+  flex: none;
 }
 
 .speeds button {
   height: 30px;
-  min-width: 40px;
+  min-width: 36px;
   border: 0;
-  border-right: 1px solid var(--rule);
-  background: var(--sheet);
-  color: var(--ink-2);
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-num);
+  font-size: var(--fs-small);
 }
 
 .speeds button:last-child {
   border-right: 0;
 }
 
+.speeds button:hover {
+  background: var(--raised);
+  color: var(--text);
+}
+
 .speeds button[aria-pressed='true'] {
-  background: var(--accent-tint);
-  color: var(--ink);
-  font-weight: 700;
+  background: var(--active);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.speeds button:focus-visible {
+  outline-offset: -3px;
 }
 
 .count {
-  color: var(--ink-2);
+  font-family: var(--font-num);
+  font-size: var(--fs-body);
+  color: var(--muted);
   white-space: nowrap;
+  flex: none;
 }
 
 .count strong {
-  color: var(--ink);
-  font-size: var(--text-lg);
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* the scrubber: a flat 2 px track, the played part in ink, and a transparent range input on top that does the work */
+.scrub-box {
+  position: relative;
+  flex: 1;
+  min-width: 96px;
+  height: 24px;
+}
+
+.scrub-track,
+.scrub-fill {
+  position: absolute;
+  left: 0;
+  top: 11px;
+  height: 2px;
+  pointer-events: none;
+}
+
+.scrub-track {
+  right: 0;
+  background: var(--control);
+}
+
+.scrub-fill {
+  background: var(--text);
 }
 
 .scrub {
-  flex: 1;
-  min-width: 120px;
-  height: 20px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 24px;
+  margin: 0;
   appearance: none;
-  background: linear-gradient(var(--accent), var(--accent)) 0 50% / var(--at) 3px no-repeat,
-    linear-gradient(var(--rule-strong), var(--rule-strong)) 0 50% / 100% 3px no-repeat;
+  background: transparent;
   cursor: pointer;
+}
+
+.scrub::-webkit-slider-runnable-track {
+  height: 24px;
+  background: transparent;
 }
 
 .scrub::-webkit-slider-thumb {
   appearance: none;
   width: 14px;
   height: 14px;
+  margin-top: 5px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
-  background: var(--sheet);
-}
-
-.cue-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 10px 0 12px;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.cue-toggle[aria-expanded='true'] {
-  background: var(--accent-tint);
-}
-
-.cue-toggle svg {
-  transition: transform 0.18s var(--ease-out);
-}
-
-.cue-toggle svg[data-open='true'] {
-  transform: rotate(180deg);
-}
-
-.hint {
-  flex: none;
-  width: 0;
-  min-width: 0;
-  text-align: right;
-  color: var(--ink-3);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border: 2px solid var(--text);
+  background: var(--surface);
 }

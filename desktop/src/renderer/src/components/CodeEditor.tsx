@@ -116,8 +116,8 @@ const highlight = HighlightStyle.define([
 
 const theme = EditorView.theme({
   '&': { height: '100%', backgroundColor: 'var(--sheet)', color: 'var(--ink)' },
-  '.cm-scroller': { fontFamily: "'Cascadia Mono', Consolas, monospace", fontSize: '13px', lineHeight: '1.6' },
-  '.cm-gutters': { backgroundColor: 'var(--desk)', color: 'var(--ink-3)', border: 'none', borderRight: '1px solid var(--rule)' },
+  '.cm-scroller': { fontFamily: 'var(--font-num)', fontSize: '13px', lineHeight: '1.6' },
+  '.cm-gutters': { backgroundColor: 'var(--desk)', color: 'var(--ink-3)', border: 'none', borderRight: '1px solid var(--border)' },
   '.cm-activeLine': { backgroundColor: 'var(--active-line)' },
   '.cm-activeLineGutter': { backgroundColor: 'var(--accent-tint)', color: 'var(--ink)' },
   '.cm-cursor': { borderLeftColor: 'var(--ink)' },

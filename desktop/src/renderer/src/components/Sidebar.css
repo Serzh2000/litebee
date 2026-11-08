@@ -1,0 +1,23 @@
+/* Navigation has four destinations. Labels remain visible; the project lives in the top bar. */
+.sidebar { grid-area: side; position: relative; display: flex; flex-direction: column; gap: 32px; min-height: 0; padding: 16px 8px 12px; background: var(--ground); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0; height: auto; }
+.brand svg { color: var(--accent); }
+.brand-name { display: block; font-size: 11px; font-weight: 600; color: var(--text); }
+.nav { display: flex; flex-direction: column; gap: 8px; }
+.nav-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 60px; padding: 8px 2px; border: 0; border-radius: 9px; color: var(--muted); background: transparent; font-size: 11px; line-height: 14px; text-align: center; transition: color .15s, background .15s; }
+.nav-label { position: static; display: block; width: auto; height: auto; overflow: visible; clip-path: none; }
+.nav-item:hover, .nav-item[aria-pressed='true'] { color: var(--text); background: var(--surface); }
+.nav-item[aria-current='page'] { color: var(--text); background: var(--active); font-weight: 600; }
+.nav-item[aria-current='page']::before { content: ''; position: absolute; left: -8px; height: 22px; width: 2px; border-radius: 0 2px 2px 0; background: var(--text); }
+.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.sidebar .link-chip .quiet, .sidebar .link-state { justify-content: center; padding: 0; height: 36px; }
+.sidebar .lc-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.sidebar .popover { left: 64px; bottom: 0; }
+.rail-settings { position: relative; }
+.rail-settings-panel { position: absolute; z-index: 35; left: 72px; bottom: 0; width: 232px; padding: 18px; border: 1px solid var(--control); border-radius: 12px; background: var(--surface); box-shadow: 0 12px 32px rgb(var(--shadow-rgb) / .2); }
+.rail-settings-panel h2 { font-size: 12px; font-weight: 500; margin: 0 0 10px; color: var(--muted); }
+.rail-settings-panel h2:not(:first-child) { margin-top: 20px; }
+.rail-settings-panel .lang { flex-direction: row; }
+.rail-settings-panel .lang button { min-width: 48px; height: 34px; }
+.rail-settings-panel .lang button + button { border-top: 0; border-left: 1px solid var(--border); }
+@media (max-width: 760px) { .sidebar { padding: 14px 5px 8px; } .nav-item { font-size: 10px; } .rail-settings-panel { left: 59px; } }

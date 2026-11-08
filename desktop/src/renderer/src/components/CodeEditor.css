@@ -42,7 +42,7 @@
 }
 
 .cm-ref code {
-  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-family: var(--font-num);
 }
 
 .cm-ref-sig {
@@ -66,7 +66,7 @@
 .cm-ref-status {
   margin-top: 2px;
   color: var(--ink-3);
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
 .cm-tooltip.cm-tooltip-hover {
@@ -79,7 +79,7 @@
 
 .code .cm-tooltip {
   background: var(--sheet);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: var(--font-ui);
