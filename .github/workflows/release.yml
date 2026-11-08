@@ -17,8 +17,7 @@ jobs:
       run:
         working-directory: desktop
     steps:
-      # tests compare text with 
- line endings: do not let git turn them into CRLF on the Windows runner
+      # tests compare text with LF line endings: do not let git turn them into CRLF on the Windows runner
       - run: git config --global core.autocrlf false
         working-directory: .
       - uses: actions/checkout@v4
