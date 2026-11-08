@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Wifi, WifiOff } from 'lucide-react'
+import { WifiOff } from 'lucide-react'
 import { isAlive, type Link } from '../state/useLink'
 import './LinkChip.css'
 import { tr } from '@core/i18n'
@@ -27,7 +27,7 @@ export function LinkChip({ link }: { link: Link }) {
     return (
       <span className="link-state" title={tr('Связь с дронами работает только в приложении для компьютера, не в браузере')}>
         <WifiOff size={15} strokeWidth={1.75} aria-hidden="true" />
-        {tr('Без дронов')}
+        <span className="lc-text">{tr('Без дронов')}</span>
       </span>
     )
   }
@@ -39,7 +39,7 @@ export function LinkChip({ link }: { link: Link }) {
   return (
     <div className="link-chip" ref={box}>
       <button type="button" className="quiet" aria-expanded={open} data-on={alive > 0} onClick={() => setOpen((o) => !o)}>
-        {listening ? <Wifi size={15} strokeWidth={1.9} aria-hidden="true" /> : <WifiOff size={15} strokeWidth={1.75} aria-hidden="true" />}
+        <span className="lc-dot" data-on={alive > 0} data-wait={alive === 0 && Boolean(listening)} aria-hidden="true" />
         <span className="lc-text">{label}</span>
       </button>
       {open && (

@@ -4,6 +4,17 @@
  * message; the page recognises a finished message by these templates (see tr() in ../i18n.ts).
  */
 export const EN_MESSAGES: [ru: string, en: string][] = [
+  ['Настройки', 'Settings'],
+  ['Инспектор', 'Inspector'],
+  ['Вид', 'View'],
+  ['Справка', 'Help'],
+  ['Загрузка 3D-сцены…', 'Loading 3D scene…'],
+  ['Не удалось загрузить модель. Переключитесь в 2D.', 'Could not load the model. Switch to 2D.'],
+  ['Отображение карты', 'Map display'],
+  ['Маршруты', 'Routes'],
+  ['Метки коврика', 'Mat markers'],
+  ['Клетка: 40 × 40 см', 'Cell: 40 × 40 cm'],
+  ['Language / Язык', 'Language / Язык'],
   // ---- checks (core/checks.ts)
   ['В шоу нет ни одного дрона', 'The show has no drones'],
   ['Дрон {n}: клетка {c} вне коврика 0-{max}', 'Drone {n}: cell {c} is off the mat 0-{max}'],
@@ -117,7 +128,7 @@ export const EN_MESSAGES: [ru: string, en: string][] = [
   ['Миссия на борту. Нажмите «Взвести»: это разрешает старт', 'The mission is on board. Press “Arm”: this allows the start'],
   ['Взведено. Нажмите «Старт»: дроны полетят после вашего подтверждения. Снять взвод: ещё раз «Взвести»', 'Armed. Press “Start”: the drones fly after you confirm. To disarm press “Arm” again'],
   ['Нет дронов на связи', 'No drones on the link'],
-  ['Справа выберите, каким дроном шоу будет каждый дрон на связи', 'On the right, pick which drone of the show each drone on the link is'],
+
   ['В шоу нет дрона {n}', 'The show has no drone {n}'],
   // ---- running the Python source (worker, litebee/show.py)
   ['Синтаксическая ошибка в строке {l}: {m}', 'Syntax error on line {l}: {m}'],

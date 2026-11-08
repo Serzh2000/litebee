@@ -5,7 +5,7 @@ import { tr } from '@core/i18n'
 const LEVEL_WORD = { ok: '', warn: 'Батарея ниже 7,4 В: лучше заменить', low: 'Батарея ниже 7,0 В: взлёт запрещён' } // shown through tr()
 
 /** Where the cell of a drone is, in words. */
-function placeText(d: LiveDrone): string {
+export function placeText(d: LiveDrone): string {
   if (!d.fix) return tr('позиции нет')
   if (d.cell === null) return tr('вне коврика')
   return tr('клетка {n}', { n: d.cell })
@@ -18,7 +18,7 @@ export function offsetFromCentre(d: LiveDrone): { dx: number; dy: number } | nul
 }
 
 const sign = (n: number) => (n > 0 ? `+${n}` : String(n))
-const tail = (ip: string) => `…${ip.split('.').pop()}`
+export const tail = (ip: string) => `…${ip.split('.').pop()}`
 
 interface Props {
   /** drones that are talking to the PC now */

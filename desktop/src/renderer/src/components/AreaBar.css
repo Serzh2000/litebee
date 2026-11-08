@@ -1,49 +1,117 @@
+/* The tool strip of the canvas: small white controls pinned 16 px inside its top-left corner. */
 .areabar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 3;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  min-height: 44px;
-  padding: 6px 16px;
-  border-bottom: 1px solid var(--rule);
-  background: var(--sheet);
-}
-
-.areabar-field,
-.areabar-custom label {
-  display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--ink-2);
-  font-size: var(--text-sm);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  pointer-events: none;
 }
 
-.areabar select,
-.areabar input {
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink);
-  font: inherit;
-}
-
-.areabar input {
-  width: 54px;
-}
-
-.areabar-custom {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 6px 12px;
+.areabar > *,
+.areabar-right > * {
+  pointer-events: auto;
 }
 
 .areabar-right {
-  display: flex;
+  display: contents;
+}
+
+.areabar-field,
+.areabar-custom {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: var(--fs-body);
+}
+
+.areabar-field {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.areabar-field select {
+  min-width: 0;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  height: 24px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.areabar-field select:hover {
+  background: var(--raised);
+}
+
+.areabar-custom {
+  flex-wrap: wrap;
+  padding: 0 8px;
+}
+
+.areabar-custom label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-small);
+}
+
+.areabar-custom input {
+  width: 54px;
+  height: 24px;
+  padding: 0 4px;
+}
+
+/* 2D / 3D: one control with two states */
+.areabar-view {
+  display: inline-flex;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.areabar-view button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.areabar-view button + button {
+  border-left: 1px solid var(--border);
+}
+
+.areabar-view button:hover {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.areabar-view button[aria-pressed='true'] {
+  background: var(--active);
+  color: var(--text);
+}
+
+.areabar-view button:focus-visible {
+  outline-offset: -3px;
 }
 
 .areabar-move {
@@ -53,56 +121,120 @@
 .areabar-button {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
-  background: var(--sheet);
-  color: var(--ink);
-  font-weight: 600;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
 }
 
 .areabar-button:hover,
 .areabar-button[aria-expanded='true'] {
-  background: var(--accent-tint);
+  background: var(--raised);
 }
 
 .areabar-menu {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
   z-index: 30;
-  width: 270px;
+  width: 300px;
   padding: 6px;
   display: flex;
   flex-direction: column;
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
   box-shadow: 0 6px 18px -6px rgb(var(--shadow-rgb) / 0.22);
 }
 
 .areabar-menu p {
   margin: 4px 8px 6px;
-  color: var(--ink-2);
-  font-size: var(--text-sm);
+  color: var(--muted);
+  font-size: var(--fs-small);
 }
 
 .areabar-menu button {
-  height: 34px;
+  height: 32px;
   padding: 0 10px;
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--ink);
+  color: var(--text);
   text-align: left;
 }
 
 .areabar-menu button:hover:enabled {
-  background: var(--accent-tint);
+  background: var(--active);
 }
 
 .areabar-menu button:disabled {
-  color: var(--ink-3);
+  color: var(--faint);
+}
+
+.areabar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.areabar-section + .areabar-section {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.areabar-section > strong {
+  margin: 2px 8px 4px;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.areabar-limit label,
+.areabar-limit input,
+.areabar-limit .hint {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.areabar-limit label {
+  color: var(--text);
+}
+
+.areabar-limit .hint {
+  margin-top: 4px;
+  margin-bottom: 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.areabar-limit .hint.bad {
+  color: var(--negative);
+}
+
+.areabar-confirm > div {
+  display: flex;
+  gap: 8px;
+  margin: 6px 8px 2px;
+}
+
+.areabar-confirm button {
+  border: 1px solid var(--control);
+  background: var(--surface);
+}
+
+.areabar-confirm .areabar-go {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 600;
+}
+
+.areabar-confirm .areabar-go:hover:enabled {
+  background: var(--primary-hover);
 }

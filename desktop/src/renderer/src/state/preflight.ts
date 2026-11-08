@@ -92,3 +92,28 @@ export function preflight({ check, errors, connected, loadBlock, loading, loaded
     cta: !loading && (loaded || (!loadBlock && connected)),
   }
 }
+
+/** Whether the step `i` can be pressed now: checking always; loading when it is possible; arming (and disarming); the start. */
+export function canPress(steps: PreflightStep[], i: number): boolean {
+  const s = steps[i]
+  if (!s) return false
+  return i === 0 || (i === 1 && s.state === 'current' && s.word === 'можно') || (i === 2 && (s.state === 'current' || s.word === 'взведён')) || (i === 3 && s.state === 'current')
+}
+
+/** The step that the primary button of the screen does: the first one that is not done, or null while the drones fly. */
+export function nextStep(steps: PreflightStep[], flying: boolean): number | null {
+  if (flying) return null
+  const i = steps.findIndex((s) => s.state !== 'done')
+  return i < 0 ? null : i
+}
+
+/**
+ * Quiet notes about what nobody has flown yet, shown under the chain. `drones` is the number of drones of the show,
+ * `unproven` the number of drones holding a step that is not proven on a real drone (see core/mission.ts unprovenSteps).
+ */
+export function honestyNotes(drones: number, unproven: number): string[] {
+  const out: string[] = []
+  if (drones > 1) out.push('Несколько дронов вместе пока не проверены в полёте')
+  if (unproven > 0) out.push('В шоу есть шаги, не проверенные на дроне')
+  return out
+}

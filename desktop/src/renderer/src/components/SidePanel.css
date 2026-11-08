@@ -12,13 +12,13 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  padding: 14px 18px 8px;
+  padding: 12px 16px 4px;
   flex: none;
 }
 
 .panel-head h2 {
   font-size: var(--text-lg);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .panel-note {
@@ -30,8 +30,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  overflow-y: auto;
-  min-height: 0;
 }
 
 .rows[data-stale='true'] {
@@ -43,9 +41,9 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 7px 18px;
+  padding: 8px 16px;
   border: 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border);
   background: transparent;
   text-align: left;
   color: var(--ink);
@@ -67,47 +65,9 @@
   flex: 1;
 }
 
-.row-title {
-  font-weight: 600;
-}
-
 .row-sub {
   font-size: var(--text-sm);
   color: var(--ink-2);
-}
-
-.row-state {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--text-sm);
-  color: var(--ink-2);
-  flex: none;
-}
-
-.badge {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid var(--ink-3);
-  background: var(--sheet);
-  font-weight: 700;
-  flex: none;
-}
-
-.badge i {
-  position: absolute;
-  right: -3px;
-  bottom: -3px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 2px var(--sheet),
-    inset 0 0 0 1px rgb(var(--shadow-rgb) / 0.35);
 }
 
 .finding {
@@ -156,14 +116,14 @@
 .finding-items {
   list-style: none;
   margin: 0;
-  padding: 0 0 6px 46px;
-  border-bottom: 1px solid var(--rule);
+  padding: 0 0 6px 44px;
+  border-bottom: 1px solid var(--border);
 }
 
 .finding-items button {
   display: block;
   width: 100%;
-  padding: 4px 18px 4px 0;
+  padding: 4px 16px 4px 0;
   border: 0;
   background: transparent;
   color: var(--ink-2);
@@ -177,13 +137,20 @@
 }
 
 .finding-text {
-  font-size: 12.5px;
-  line-height: 1.35;
+  font-size: var(--fs-body);
+  line-height: 1.4;
 }
 
 .empty {
-  padding: 4px 18px 16px;
-  color: var(--ink-2);
-  font-size: 12.5px;
-  max-width: 46ch;
+  padding: 12px 16px 16px;
+  color: var(--muted);
+}
+
+/* the tab above says "Checks"; the title stays for screen readers */
+.panel-checks .panel-head h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }

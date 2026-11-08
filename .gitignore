@@ -22,3 +22,20 @@ docs/uchebnik/*.out
 
 # design tool state
 .impeccable/
+
+# third-party skills and their work files (installed with npx skills, not part of the app)
+.agents/
+.taste-skill/
+desktop/.taste-skill/
+skills-lock.json
+
+# the 3D model: its photographs and the Blender scenes stay on the machine (the licence of the photographs is not established)
+assets/litebee_fm10/references/
+assets/litebee_fm10/*.blend
+assets/litebee_fm10/*.blend1
+references/
+desktop/release/
+
+# Blender backups and logs of the 3D model work
+assets/**/*.blend1
+assets/**/*.log

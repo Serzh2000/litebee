@@ -1,13 +1,13 @@
-/* One joined control: four segments in a single frame, the current one filled. */
+/* One flat segmented stepper on the frame: four buttons in a 1px group; the current step is ink over a 2px accent underline. */
 .preflight {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--rule-strong);
-  border-radius: 8px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
   overflow: hidden;
-  background: var(--sheet);
+  background: var(--surface);
 }
 
 .pf-item {
@@ -15,97 +15,92 @@
 }
 
 .pf-item + .pf-item {
-  border-left: 1px solid var(--rule);
+  border-left: 1px solid var(--border);
 }
 
 .pf-step {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 16px 0 10px;
+  height: 30px;
+  padding: 2px 14px 0 12px;
   border: 0;
+  border-bottom: 2px solid transparent;
   border-radius: 0;
   background: transparent;
-  color: var(--ink-2);
+  color: var(--muted);
   white-space: nowrap;
-  transition: background-color 0.18s var(--ease-out);
+  transition: background-color 0.15s var(--ease-out);
 }
 
 .pf-mark {
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1.5px solid currentColor;
-  font-size: 11.5px;
-  font-weight: 700;
+  min-width: 16px;
+  font-size: var(--fs-small);
+  font-weight: 500;
   flex: none;
 }
 
 .pf-label {
-  font-size: var(--text-md);
-  font-weight: 600;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+  font-size: var(--fs-body);
+  font-weight: 500;
 }
 
 .pf-step[data-state='done'] {
-  color: var(--ink);
+  color: var(--text);
 }
 
 .pf-step[data-state='done'] .pf-mark {
-  color: var(--ok);
+  color: var(--positive);
 }
 
 .pf-step[data-state='current'] {
-  background: var(--accent);
-  color: var(--accent-ink);
+  color: var(--text);
+  border-bottom-color: var(--accent);
 }
 
-.pf-step[data-state='current']:enabled:hover {
-  background: var(--accent-hover);
-}
-
-.pf-step[data-state='current']:enabled:active {
-  transform: translateY(1px);
+.pf-step[data-state='current'] .pf-label {
+  font-weight: 600;
 }
 
 .pf-step[data-state='current'][data-error='true'] .pf-mark {
-  background: var(--accent-ink);
-  color: var(--danger);
-  border-color: var(--accent-ink);
+  color: var(--negative);
 }
 
 .pf-step[data-state='next'] {
-  color: var(--ink);
+  color: var(--text);
 }
 
-.pf-step[data-state='next'] .pf-mark {
-  color: var(--accent);
+.pf-step[data-state='blocked'],
+.pf-step[data-state='next']:disabled {
+  color: var(--muted);
 }
 
-.pf-step[data-state='blocked'] {
-  color: var(--ink-3);
-}
-
-.pf-step:focus-visible {
-  outline-color: var(--ink);
-  outline-offset: -3px;
-}
-
-/* a step that can be pressed says so: a pointer, and a tint under it before it is the current one */
 .pf-step:enabled {
   cursor: pointer;
 }
 
-.pf-step[data-state='done']:enabled:hover {
-  background: var(--accent-tint);
+.pf-step:enabled:hover {
+  background: var(--raised);
+}
+
+.pf-step:enabled:active {
+  background: var(--active);
+}
+
+.pf-step:focus-visible {
+  outline-offset: -3px;
+}
+
+@media (max-width: 1240px) {
+  .pf-step {
+    padding: 2px 10px 0 8px;
+  }
+}
+
+@media (max-width: 960px) {
+  .pf-label {
+    display: none;
+  }
 }

@@ -1,0 +1,32 @@
+{
+  "blender_version": "5.2.3 LTS",
+  "mesh_objects": 122,
+  "materials": 19,
+  "collections": [
+    "LiteBee FM aircraft",
+    "Studio lighting and camera"
+  ],
+  "bounds_min_m": [
+    -0.082167848944664,
+    -0.07739832997322083,
+    0.0005000000237487257
+  ],
+  "bounds_max_m": [
+    0.082167848944664,
+    0.07739832997322083,
+    0.05849999934434891
+  ],
+  "bounds_dimensions_mm": [
+    164.335697889328,
+    154.79665994644165,
+    57.99999932060018
+  ],
+  "finite_vertices": true,
+  "empty_meshes": [],
+  "camera": "Camera",
+  "units": "METRIC",
+  "non_manifold_meshes": [],
+  "motor_plugs": 4,
+  "motor_supply_leads": 8,
+  "all_motor_leads_end_inside_plugs": true
+}

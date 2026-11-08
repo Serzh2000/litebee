@@ -11,7 +11,8 @@ Everything except the explicit link commands works without drones: write a show,
 ## What it does
 
 - **Map of the mat.** 12 × 12 cells of 40 cm, top view. Cell number = column + 12 × row. The drones are drawn after the real LiteBee Wing. A whole mat or one quarter (6 × 6 cells, a classroom mat folded in four) can be shown.
-- **Code and simulation tabs.** The code tab has one tab per drone. The simulation tab has the map, the cue sheet (light over time) and the transport; the cue sheet is always open, and the code of each drone pops up over the map while you move along it.
+- **2D and 3D.** The map can be switched to a 3D view: the 3D model of the LiteBee Wing flies over the mat, its LED lights in the colour of the show, the propellers turn in the air, and a tag with the number and the colour hangs over each drone. Drag to turn the camera.
+- **One window.** The scene (a 2D or 3D map of the mat) takes two fifths on the left. The window on the right takes three fifths and has its tabs in one row: **Score** (one column per drone, time runs down, the light and the stations on each line), **Code**, **Drones**, **Checks**, **Reference**. The show time above the tabs is the same on every tab. Press a drone on the map and its own program opens in **Code**; the project is still one Python file inside, but every drone is shown and edited on its own. Drag a drone to another cell on the map (2D or 3D) to change where it starts.
 - **Check.** Runs the show and reports errors, drones closer than 60 cm, height over the limit, speed over 100 cm/s and steps that cannot be loaded.
 - **Link to real drones.** Battery and position of every drone, roles by the cell a drone stands on, an archive of known drones. Order of work: Check, Load, Arm, Start. Start asks for confirmation.
 - **Emergency landing** is always visible (top right, key `Esc`).
@@ -20,7 +21,7 @@ Everything except the explicit link commands works without drones: write a show,
 - **Russian and English** interface, light and dark theme.
 - **Reference** of every show function with units, examples and the status “flown on a drone” or “simulator only” (`F1`).
 
-![The code tab](docs/images/code-en.png)
+![3D view](docs/images/simulation-3d-en.png)
 
 ![Dark theme, the whole mat](docs/images/simulation-dark-en.png)
 

@@ -1,0 +1,14 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["desktop/src/renderer/src"],
+  "locale": "ru-RU",
+  "canonicalMap": "DESIGN.md",
+  "requiredCapabilities": ["Select/Listbox", "Scrollbar"],
+  "ownership": {"Select/Listbox": "native"},
+  "requiredCommands": ["typecheck", "unit", "build"],
+  "commands": {
+    "typecheck": "cd desktop && npm run typecheck",
+    "unit": "cd desktop && npm test",
+    "build": "cd desktop && npm run build"
+  }
+}

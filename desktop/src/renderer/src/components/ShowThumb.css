@@ -1,0 +1,9 @@
+/* the routes of a show as the picture of its card */
+.thumb {
+  display: block;
+  width: 100%;
+  height: 150px;
+  flex: none;
+  border-radius: 6px;
+  background: var(--raised, var(--desk));
+}

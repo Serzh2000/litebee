@@ -1,0 +1,26 @@
+/* the simulation in three dimensions: the canvas fills the box that the flat map has */
+.mat3d {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  touch-action: none;
+}
+
+.mat3d canvas {
+  display: block;
+  cursor: grab;
+}
+
+.mat3d canvas:active {
+  cursor: grabbing;
+}
+
+.mat3d-hint {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}

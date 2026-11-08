@@ -1,0 +1,288 @@
+/* The inspector: a card (1px border, radius 8, no shadow) of 320 px beside the map. */
+.insp {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.insp-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.insp-drone {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  padding: 16px 16px 8px;
+}
+
+.insp-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+}
+
+.insp-head h2 {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-section);
+  font-weight: 600;
+}
+
+.insp-cell {
+  flex: none;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.insp-place {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.insp-place p {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+/* facts: key and value on a 32 px pitch, values right-aligned in the numeral face */
+.insp-facts {
+  margin: 12px 0 0;
+  border-top: 1px solid var(--rule);
+}
+
+.insp-facts div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 32px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.insp-facts dt {
+  color: var(--muted);
+}
+
+.insp-facts dd {
+  margin: 0;
+  text-align: right;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.insp-code {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.insp-line {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  height: 24px;
+  margin: 0 -8px;
+  padding: 0 8px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.insp-line code {
+  font-family: var(--font-num);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.insp-line[data-now='true'] {
+  background: var(--active);
+  color: var(--text);
+}
+
+.insp-line[data-now='true'] code {
+  font-weight: 500;
+}
+
+.insp-wait,
+.insp-none {
+  margin-top: 12px;
+  color: var(--muted);
+}
+
+.insp-none {
+  margin-top: 0;
+}
+
+.insp-hover {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 18px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.insp-hover span {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.insp > .notice,
+.insp-scroll ~ .notice {
+  flex: none;
+}
+
+/* two tabs: 2 px underline under the active one, on a full-width 1px rule */
+.tabs {
+  display: flex;
+  flex: none;
+  gap: 20px;
+  margin-top: 8px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button {
+  height: 40px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  margin-bottom: -1px;
+}
+
+.tabs button[aria-selected='true'] {
+  color: var(--text);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+.tabs button:hover {
+  color: var(--text);
+}
+
+.insp-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.notice {
+  padding: 8px 18px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.notice:empty {
+  display: none;
+}
+
+/* the program of the picked drone */
+.insp-editor {
+  margin-top: 16px;
+}
+
+/* with a drone picked the panel does not scroll as a whole: the head stays, the editor takes what is left, the tabs keep a strip */
+.app .insp-scroll {
+  overflow: hidden;
+}
+
+.app .insp-drone {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app .insp-drone > * {
+  flex: none;
+}
+
+.app .insp-drone > .insp-editor {
+  flex: 1 1 0;
+  min-height: 120px;
+  margin-top: 12px;
+}
+
+.app .insp-editor .deditor {
+  height: 100%;
+}
+
+.app .insp-editor .deditor-box {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+.app .insp .tabs {
+  flex: none;
+}
+
+.app .insp-panel {
+  flex: none;
+  height: 132px;
+  min-height: 0;
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+/* the facts of this second are on the timetable row and the map: with the editor open they would take its place */
+.app .insp-facts {
+  display: none;
+}
+
+/* the drones as numbered circles, where the timetable that lists them is not on the screen */
+.insp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 18px 0;
+}
+
+.insp-chip {
+  cursor: pointer;
+  background: var(--sheet);
+  color: var(--text);
+}
+
+.insp-chip[aria-pressed='true'] {
+  background: var(--active);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.insp-add {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px dashed var(--control);
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.insp-add:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}

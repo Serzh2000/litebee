@@ -1,70 +1,128 @@
-/* Every colour of the app lives here (docs/UI_DESIGN.md, PRODUCT.md brand commitments): light cool paper, ink that is
-   not pure black, one deep-cyan accent used only for selection and actions. Colours of drones and paths are data
-   (their LED colours) and are computed, never listed here. */
+/* Canonical studio tokens: neutral surfaces and flat work panels, with deep cyan retained as the brand accent.
+   LED colors come from real show data. Legacy component names below are semantic aliases, not a second palette.
+   See the root DESIGN.md for composition and ownership. */
 :root {
-  --desk: #f1f3f5; /* window ground */
-  --sheet: #fbfcfd; /* panels */
-  --paper: #f6f7f9; /* the field sheet under the mat */
-  --rule: #d5dae1; /* 1 px field lines */
-  --rule-strong: #a9b2be; /* every third line, like the yard lines of a chart */
-  --ink: #1d2229;
-  --ink-2: #566070; /* secondary text, 6:1 on the sheet */
-  --ink-3: #5a6472; /* numerals on the field paper, 5.4:1; 4.7:1 on the selected-row tint */
-
-  --accent: #0b7285;
+  --ground: #f0f0ed; /* neutral studio chrome; runtime tokens are the canonical palette */
+  --surface: #ffffff; /* the sheet and everything on it */
+  --raised: #f6f6f3; /* the stage and interactive hover surfaces */
+  --active: #ebedee; /* the active navigation item, the selected row, the pressed control */
+  --border: #e8eaec; /* card and sheet edges */
+  --rule: #f0f1f2; /* row rules */
+  --control: #cdced1; /* the border of a control */
+  --text: #131416;
+  --muted: #5d5f60;
+  --faint: #686a6c; /* numerals and meta: still 4.5:1 on the raised ground */
+  --accent: #1b6c80;
   --accent-ink: #ffffff;
-  --accent-tint: #d6ebef;
-  --accent-hover: #0a6575;
-  --danger: #c7372f;
-  --danger-dn: #a92a24;
-  --warn: #b45309;
-  --ok: #187a4e;
-  --danger-tint: #fbeeec; /* the banner of an error in the code */
-  --now-strong: rgb(11 114 133 / 0.2); /* the line that runs now */
-  --now-soft: rgb(11 114 133 / 0.07); /* the last colour command */
-  --active-line: rgb(214 235 239 / 0.45);
-  --shadow-rgb: 29 34 41; /* the tint of every shadow: the ink in light, black in dark */
-  --scrim: rgb(29 34 41 / 0.28);
+  --accent-hover: #155a6b;
+  --primary: #1d1f20; /* the one filled button of a screen */
+  --primary-ink: #ffffff;
+  --primary-hover: #34373a;
+  --positive: #1e7b4f;
+  --negative: #c4242a;
+  --negative-dn: #a41c22;
+  --warning: #92400e;
+  --emergency: #c4242a;
+  --pill-positive-bg: #dcfae5;
+  --pill-positive-ink: #04250e;
+  --pill-negative-bg: #ffedea;
+  --pill-negative-ink: #831c1e;
+  --pill-warning-bg: #fffbeb;
+  --pill-warning-ink: #92400e;
+  --pill-warning-line: #fde68a;
+  --pill-neutral-bg: #ebedee;
+  --pill-neutral-ink: #353736;
+  --shadow-rgb: 19 20 22; /* only what floats (a menu, a popover) has a shadow */
+  --scrim: rgb(19 20 22 / 0.28);
   color-scheme: light;
+
+  --radius-card: 12px;
+  --radius-control: 7px;
+  --radius-sheet: 0px;
+  --gap: 12px;
+  --pad: 16px;
+  --sheet-inset: 0px;
+  --sidebar: 80px;
+  --topbar: 60px;
+  --row: 48px;
+  --row-tt: 36px; /* a row of the timetable */
+  --control-h: 34px;
+
+  --font-ui: 'IBM Plex Sans', system-ui, 'Segoe UI', sans-serif;
+  --font-num: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace; /* one job: ids, code, figures of tables. taste-skill-ignore */
+  --fs-title: 22px;
+  --fs-section: 16px;
+  --fs-body: 14px;
+  --fs-small: 12px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   --drone-body: #ffffff;
   --drone-grey: #8d97a6;
   --drone-dark: #3f4856;
   --drone-silver: #a7b0bd;
 
-  --font-ui: 'Bahnschrift', 'Segoe UI', system-ui, sans-serif;
-  --text-sm: 12px;
-  --text-md: 13px;
-  --text-lg: 15px;
-  --radius: 6px;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* aliases: the names that the older components still use */
+  --desk: var(--raised);
+  --sheet: var(--surface);
+  --paper: var(--raised);
+  --rule-strong: var(--control);
+  --ink: var(--text);
+  --ink-2: var(--muted);
+  --ink-3: var(--faint);
+  --accent-tint: var(--active);
+  --danger: var(--negative);
+  --danger-dn: var(--negative-dn);
+  --warn: var(--warning);
+  --ok: var(--positive);
+  --danger-tint: var(--pill-negative-bg);
+  --now-strong: rgb(27 108 128 / 0.2); /* the line that runs now */
+  --now-soft: rgb(27 108 128 / 0.07); /* the last colour command */
+  --active-line: rgb(235 237 238 / 0.6);
+  --text-sm: var(--fs-small);
+  --text-md: var(--fs-body);
+  --text-lg: var(--fs-section);
+  --text-xl: var(--fs-title);
+  --radius: var(--radius-control);
+  --space: 8px;
 }
 
-/* The dark theme: the same cool slate, never pure black, the same single cyan (lighter, so that it reads on dark). */
+/* Dark studio: neutral charcoal, readable metadata, no navy cast. */
 :root[data-theme='dark'] {
-  --desk: #14181d;
-  --sheet: #1b2027;
-  --paper: #11151a;
-  --rule: #2b323c;
-  --rule-strong: #475161;
-  --ink: #e6e9ee;
-  --ink-2: #a5afbc;
-  --ink-3: #8b96a5;
-
-  --accent: #3fb3c8;
+  --ground: #111113;
+  --surface: #1b1b1e;
+  --raised: #202023;
+  --active: #303034;
+  --border: #323237;
+  --rule: #29292e;
+  --control: #4a4a52;
+  --text: #f1f1ef;
+  --muted: #b4b4bb;
+  --faint: #9d9da5;
+  --accent: #8ecbd2;
   --accent-ink: #06222a;
-  --accent-tint: #183840;
-  --accent-hover: #5ac4d7;
-  --danger: #cf4037;
-  --danger-dn: #e0564d;
-  --warn: #e0a24a;
-  --ok: #4fc08a;
-  --danger-tint: #3a1f1e;
-  --now-strong: rgb(63 179 200 / 0.24);
-  --now-soft: rgb(63 179 200 / 0.09);
-  --active-line: rgb(63 179 200 / 0.08);
+  --accent-hover: #7cc7d8;
+  --primary: #f1f1ef;
+  --primary-ink: #171719;
+  --primary-hover: #ffffff;
+  --positive: #4fc08a;
+  --negative: #f07a7e;
+  --negative-dn: #ff9a9d;
+  --warning: #e0a24a;
+  --emergency: #c4242a;
+  --pill-positive-bg: #172a1d;
+  --pill-positive-ink: #4fc08a;
+  --pill-negative-bg: #2c1a20;
+  --pill-negative-ink: #f07a7e;
+  --pill-warning-bg: #2b2415;
+  --pill-warning-ink: #e0a24a;
+  --pill-warning-line: #4a3b1a;
+  --pill-neutral-bg: #303034;
+  --pill-neutral-ink: #dedee2;
   --shadow-rgb: 0 0 0;
   --scrim: rgb(0 0 0 / 0.55);
+  --now-strong: rgb(91 179 199 / 0.24);
+  --now-soft: rgb(91 179 199 / 0.09);
+  --active-line: rgb(91 179 199 / 0.08);
 
   --drone-body: #dfe4ea;
   --drone-grey: #98a2b1;

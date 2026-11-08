@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRightLeft, MapPin } from 'lucide-react'
+import { Box, Clapperboard, Route, ScanLine, Square } from 'lucide-react'
 import { FULL, QUARTERS, sameArea, validArea, type Area } from '@core/area'
-import { LimitPopover } from './LimitPopover'
+import { LimitField } from './LimitPopover'
 import './AreaBar.css'
 import { tr } from '@core/i18n'
 
@@ -13,22 +13,31 @@ interface Props {
   onMigrate: (to: Area) => void
   maxHeight: number
   onMaxHeight: (cm: number) => void
-  /** stand the selected drone on a cell chosen on the map */
-  placing: boolean
-  onPlace: () => void
+  /** the flat map or the model view */
+  view: '2d' | '3d'
+  onView: (v: '2d' | '3d') => void
+  tags: boolean
+  onTags: () => void
+  routes: boolean
+  onRoutes: () => void
 }
 
 const PRESETS = [{ id: 'full', title: 'Весь коврик, 12×12', area: FULL }, ...QUARTERS.map((q) => ({ id: q.id, title: q.title + ', 6×6', area: q.area }))]
 
 /** Which part of the mat is shown and used for checks, and the move of a show into another quarter. */
-export function AreaBar({ area, onArea, from, onMigrate, maxHeight, onMaxHeight, placing, onPlace }: Props) {
+export function AreaBar({ area, onArea, from, onMigrate, maxHeight, onMaxHeight, view, onView, tags, onTags, routes, onRoutes }: Props) {
   const preset = PRESETS.find((p) => sameArea(p.area, area))
   const [custom, setCustom] = useState(false)
   const [menu, setMenu] = useState(false)
+  /** the quarter waiting for a confirmation */
+  const [ask, setAsk] = useState<number | null>(null)
   const box = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    if (!menu) return
+    if (!menu) {
+      setAsk(null)
+      return
+    }
     const away = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) setMenu(false)
     }
@@ -48,6 +57,10 @@ export function AreaBar({ area, onArea, from, onMigrate, maxHeight, onMaxHeight,
 
   return (
     <div className="areabar">
+      {view === '2d' && <div className="map-display" role="group" aria-label={tr('Отображение карты')}>
+        <button type="button" aria-pressed={routes} aria-label={tr('Маршруты')} title={tr('Маршруты')} onClick={onRoutes}><Route size={15} aria-hidden="true" /></button>
+        <button type="button" aria-pressed={tags} aria-label={tr('Метки коврика')} title={tr('Метки коврика')} onClick={onTags}><ScanLine size={15} aria-hidden="true" /></button>
+      </div>}
       <label className="areabar-field">
         <span>{tr('Область')}</span>
         <select
@@ -86,33 +99,57 @@ export function AreaBar({ area, onArea, from, onMigrate, maxHeight, onMaxHeight,
       )}
 
       <div className="areabar-right">
-      <button type="button" className="areabar-button" aria-pressed={placing} onClick={onPlace} title={tr('Возьмите дрона на карте и перетащите на клетку, или выберите дрона, нажмите эту кнопку и потом клетку')}>
-          <MapPin size={15} strokeWidth={1.9} aria-hidden="true" />
-          {placing ? tr('Нажмите клетку на карте') : tr('Поставить дрона')}
+      <div className="areabar-view" role="group" aria-label={tr('Вид карты')}>
+        <button type="button" aria-pressed={view === '2d'} onClick={() => onView('2d')} title={tr('Карта сверху')}>
+          <Square size={14} strokeWidth={1.9} aria-hidden="true" />
+          2D
         </button>
-      <LimitPopover value={maxHeight} onChange={onMaxHeight} />
+        <button type="button" aria-pressed={view === '3d'} onClick={() => onView('3d')} title={tr('Объёмная модель дронов, камеру можно вращать')}>
+          <Box size={14} strokeWidth={1.9} aria-hidden="true" />
+          3D
+        </button>
+      </div>
       <div className="areabar-move" ref={box}>
-        <button type="button" className="areabar-button" aria-expanded={menu} onClick={() => setMenu((m) => !m)}>
-          <ArrowRightLeft size={15} strokeWidth={1.9} aria-hidden="true" />
-          {tr('Перенести шоу')}
+        <button type="button" className="areabar-button" aria-expanded={menu} aria-haspopup="menu" onClick={() => setMenu((m) => !m)}>
+          <Clapperboard size={15} strokeWidth={1.9} aria-hidden="true" />
+          {tr('Шоу…')}
         </button>
         {menu && (
-          <div className="areabar-menu" role="menu" aria-label={tr('Перенести шоу в четверть')}>
-            <p>{tr('Сдвинет номера клеток в коде. Отменить можно Ctrl+Z в редакторе.')}</p>
-            {QUARTERS.map((q) => (
-              <button
-                key={q.id}
-                type="button"
-                role="menuitem"
-                disabled={from !== null && sameArea(from, q.area)}
-                onClick={() => {
-                  setMenu(false)
-                  onMigrate(q.area)
-                }}
-              >
-                {q.title}
-              </button>
-            ))}
+          <div className="areabar-menu" role="menu" aria-label={tr('Шоу')}>
+            <div className="areabar-section">
+              <strong>{tr('Перенести шоу в четверть')}</strong>
+              {ask === null ? (
+                QUARTERS.map((q, i) => (
+                  <button key={q.id} type="button" role="menuitem" disabled={from !== null && sameArea(from, q.area)} onClick={() => setAsk(i)}>
+                    {tr(q.title)}
+                  </button>
+                ))
+              ) : (
+                <div className="areabar-confirm">
+                  <p>{tr('Сдвинуть шоу в четверть {n}? Номера клеток в коде изменятся, отменить можно Ctrl+Z в редакторе.', { n: ask + 1 })}</p>
+                  <div>
+                    <button
+                      type="button"
+                      className="areabar-go"
+                      onClick={() => {
+                        const to = QUARTERS[ask].area
+                        setMenu(false)
+                        onMigrate(to)
+                      }}
+                    >
+                      {tr('Сдвинуть')}
+                    </button>
+                    <button type="button" onClick={() => setAsk(null)}>
+                      {tr('Отмена')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="areabar-section areabar-limit">
+              <strong>{tr('Высота')}</strong>
+              <LimitField value={maxHeight} onChange={onMaxHeight} />
+            </div>
           </div>
         )}
       </div>
