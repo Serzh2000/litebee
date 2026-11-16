@@ -1,6 +1,6 @@
 {
   "name": "litebee-desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Litebee IDE: РїСЂРѕРіСЂР°РјРјРёСЂРѕРІР°РЅРёРµ Рё Р·Р°РїСѓСЃРє С€РѕСѓ РґСЂРѕРЅРѕРІ LiteBee Wing",
   "main": "./out/main/index.js",
