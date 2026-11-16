@@ -292,6 +292,18 @@ ENTRIES = (
           notes=("То же, что rgb((r, g, b)): тот же шаг RGB. На живых дронах проверены только 8 именованных цветов",
                  "Значение вне 0..255 даёт ошибку")),
 
+    # ---- sound --------------------------------------------------------------------------------
+    Entry("Drone", "buzz", "method", "buzz(note, seconds)",
+          "Нота на зуммере, подключённом к позиционному модулю", "light", STATUS_SIM,
+          params=_p(("note", "нота", "Имя из таблицы LiteBee Go: 'C3', 'CS3' (диез) ... от B0 до DS8"),
+                    ("seconds", "с", "Длительность ноты")),
+          example="d.buzz('C3', 1.0)\nd.buzz('E3', 1.0)\n",
+          notes=("Загрузка в дрон (мисссия) отказывает: формат шага на проводе не проверен, как у code_z",
+                 "На живом дроне нота играет через отдельную команду `python -m litebee buzz-live` "
+                 "(litebee/buzzer.py: native_frame, подтверждено на слух 2026-11-16), не через запуск самого шоу",
+                 "Неизвестное имя ноты даёт ошибку сразу при вызове",
+                 "docs/firmware/BUZZER_EXTENSION.md, раздел 6")),
+
     # ---- simulator helpers ------------------------------------------------------------------
     Entry("Show", "duration", "property", "duration",
           "Длительность шоу, с: у самого долгого дрона", "sim", STATUS_HELPER, dsl=False,
@@ -338,6 +350,11 @@ ENTRIES = (
           params=_p(("t", "с", "Время от начала программы дрона"),), dsl=False,
           example="d.rgb('red')\nprint(d.color_at(1.0))\n",
           notes=("До первого rgb светодиод выключен: ('black', (0, 0, 0))",)),
+    Entry("Drone", "note_at", "method", "note_at(t)",
+          "Нота зуммера (имя, оставшиеся секунды), играющая в момент t", "sim", STATUS_HELPER,
+          params=_p(("t", "с", "Время от начала программы дрона"),), dsl=False,
+          example="d.buzz('C3', 1.0)\nprint(d.note_at(0.5))\n",
+          notes=("(None, 0.0), если в этот момент нота не играет",)),
 )
 
 _HOP_EXAMPLE = ("from litebee import Show\n\nshow = Show('Короткий взлёт')\nd = show.drone(1)\n"

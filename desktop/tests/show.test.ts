@@ -2,12 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { buildShow, cellFromXY, cellXY, colorAt, positionAt, positionsAt, stepAt, type ShowData } from '../src/core/show'
 import myDream from '../shows/my_dream.json'
 import myPeople from '../shows/my_people_my_country_5.json'
+import buzzerScale from '../shows/quarter_buzzer_scale.json'
+import buzzerDuet from '../shows/quarter_buzzer_duet.json'
 import goldenDream from './golden/my_dream.json'
 import goldenPeople from './golden/my_people_my_country_5.json'
+import goldenBuzzerScale from './golden/quarter_buzzer_scale.json'
+import goldenBuzzerDuet from './golden/quarter_buzzer_duet.json'
 
 const CASES: [string, ShowData, any][] = [
   ['my_dream', myDream as unknown as ShowData, goldenDream],
   ['my_people_my_country_5', myPeople as unknown as ShowData, goldenPeople],
+  ['quarter_buzzer_scale', buzzerScale as unknown as ShowData, goldenBuzzerScale],
+  ['quarter_buzzer_duet', buzzerDuet as unknown as ShowData, goldenBuzzerDuet],
 ]
 
 describe.each(CASES)('the simulator matches the Python one: %s', (_name, data, golden) => {

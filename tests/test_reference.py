@@ -65,7 +65,9 @@ def test_entry_is_complete(e):
 def test_status_matches_proven_commands():
     for e in ref.ENTRIES:
         if e.command is None:
-            assert e.status == ref.STATUS_HELPER, e.key
+            # buzz sends real bytes to the drone, but over the live Wi-Fi awlink channel
+            # (litebee/buzzer.py), not as a mission CMD id, so it has no place in COMMANDS.
+            assert e.status == (ref.STATUS_SIM if e.key == "Drone.buzz" else ref.STATUS_HELPER), e.key
             continue
         assert e.command in ref.CMD_ID_BY_NAME, e.key
         proven = e.cmd_id in PROVEN_CMDS
@@ -132,7 +134,8 @@ def test_get_find_search():
     assert [e.key for e in ref.find("takeoff")] == ["Drone.takeoff"]
     assert [e.key for e in ref.find("duration")] == ["Show.duration", "Drone.duration"]
     assert {e.name for e in ref.drone_commands()} == {
-        "calibrate", "takeoff", "land", "land_on", "set_z", "code", "code_s", "code_z", "circle", "circle_z", "rgb", "rgb_value"}
+        "calibrate", "takeoff", "land", "land_on", "set_z", "code", "code_s", "code_z", "circle", "circle_z", "rgb", "rgb_value",
+        "buzz"}
     assert ref.search("") == ref.items()
     assert ref.get("Drone.takeoff") in ref.search("ВЗЛЁТ")
     assert ref.get("Drone.takeoff") in ref.search("взлет")                 # ё and е are the same

@@ -10,7 +10,7 @@ export const CELL_CM = 40
 export const GRID_W = 12
 export const GRID_CELLS = GRID_W * GRID_W
 
-export type StepKind = 'calibrate' | 'takeoff' | 'rgb' | 'code' | 'code_z' | 'set_z' | 'circle' | 'circle_z' | 'land'
+export type StepKind = 'calibrate' | 'takeoff' | 'rgb' | 'code' | 'code_z' | 'set_z' | 'circle' | 'circle_z' | 'land' | 'buzz'
 
 export interface Step {
   kind: StepKind

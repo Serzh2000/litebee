@@ -10,6 +10,8 @@ Nothing here opens a port: the functions only build bytes. Docs: docs/firmware/B
 """
 from typing import List, Optional, Tuple, Union
 
+from . import protocol as proto
+
 HEADER = bytes([0xAD, 0xFA])
 CMD_NOTE = 0x01
 UNIT_S = 0.05                       # seconds per duration unit (from LiteBee Go: 10 units = 0.5 s; the song sounded right)
@@ -109,3 +111,54 @@ def play_udp(host: str, port: int, steps: List[Tuple[bytes, float]], send=None, 
     finally:
         if sock is not None:
             sock.close()
+
+
+# ---- native Wi-Fi set_buzzer (group=2/sub=3/mode=27), confirmed live 2026-11-16 -------------
+#
+# ПРОЧТЕНО on a live drone+module+buzzer, over the same TCP 18001 link the formation protocol
+# already uses (litebee.link.Link): `pilot`/`pilot_f` answers an awlink frame
+# [9, 0, 2, 3, 27, 1, note, duration, 0, 0, 0, 0, 3] by playing that note on the buzzer wired to
+# the position module -- no UDP relay, no ADB, works in CLIENT (the mode a show runs in).
+# docs/firmware/BUZZER_EXTENSION.md section 6 has the session's notes.
+#
+# ВЫВОД (not re-measured carefully, just one evening of ear tests): the duration byte's unit is
+# close to 0.05 s (ten back-to-back notes totalling 110 units sounded like ~5 s of continuous
+# tone), and the drone does not leave a gap between two notes sent one after another -- pitch
+# just slides. mode=24 (`[9,0,2,3,24,0,...]`, guessed from WING_MOBILE_APP.md's buzzerControl(0))
+# was sent right after each note as an attempt to silence it before the next one; whether it is a
+# real "off" command is НЕИЗВЕСТНО, only that playback sounded less slurred with it than without.
+
+NATIVE_UNIT_S = 0.045  # ВЫВОД, see above; not the same unit as the AD FA relay path (UNIT_S)
+
+
+def native_frame(note: Union[int, str], duration: int) -> bytes:
+    """set_buzzer(note, duration) over the formation Wi-Fi link: group=2/sub=3/mode=27."""
+    idx = note_index(note) if isinstance(note, str) else int(note)
+    if not 0 <= idx <= MAX_NOTE:
+        raise ValueError(f"Нота {idx} вне таблицы 0..{MAX_NOTE}")
+    if not 1 <= duration <= 255:
+        raise ValueError("Длительность 1..255")
+    return proto.frame([9, 0, 2, 3, 27, 1, idx, duration, 0, 0, 0, 0, 3])
+
+
+def native_off_frame() -> bytes:
+    """buzzerControl(0), mode=24: an attempt at 'stop the sound' between two native notes."""
+    return proto.frame([9, 0, 2, 3, 24, 0, 0, 0, 0, 0, 0, 0, 0])
+
+
+def play_live(send, song: Song, gap_s: float = 0.06, unit_s: float = NATIVE_UNIT_S, sleep=None) -> None:
+    """Play `song` (as parse_song()) over an already-connected drone link: `send` is a
+    DroneConn.send-like callable (bytes -> None), e.g. `litebee.link.Link.wait_for(ip).send`.
+
+    Blocks for the song's own duration (each note's native_frame, held for duration*unit_s,
+    then native_off_frame and a small technical gap before the next one)."""
+    import time
+    sleep = sleep or time.sleep
+    for note, dur in song:
+        if note is None:
+            sleep(dur * unit_s)
+            continue
+        send(native_frame(note, dur))
+        sleep(dur * unit_s)
+        send(native_off_frame())
+        sleep(gap_s)

@@ -56,6 +56,10 @@ class Drone:
         return self._add("circle", seconds, count=int(count), cell1=int(cell1),
                          cell2=int(cell2), rotate=rotate)
 
+    def buzz(self, note, seconds):
+        """Play one buzzer note for `seconds` (see litebee/buzzer.py); the drone does not move."""
+        return self._add("buzz", seconds, note=str(note).strip().upper())
+
     def land(self):
         return self._add("land", LAND_SECONDS)
 

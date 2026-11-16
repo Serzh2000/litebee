@@ -71,6 +71,10 @@ import quarterEightCarousel from '../../../../shows/quarter_eight_carousel.json'
 import quarterEightCarouselSource from '../../../../../shows/quarter_eight_carousel.py?raw'
 import quarterEightPulse from '../../../../shows/quarter_eight_pulse.json'
 import quarterEightPulseSource from '../../../../../shows/quarter_eight_pulse.py?raw'
+import quarterBuzzerScale from '../../../../shows/quarter_buzzer_scale.json'
+import quarterBuzzerScaleSource from '../../../../../shows/quarter_buzzer_scale.py?raw'
+import quarterBuzzerDuet from '../../../../shows/quarter_buzzer_duet.json'
+import quarterBuzzerDuetSource from '../../../../../shows/quarter_buzzer_duet.py?raw'
 
 export interface ShowEntry {
   id: string
@@ -128,6 +132,8 @@ const ENTRIES: Omit<ShowEntry, 'drones' | 'seconds' | 'themes' | 'tags' | 'galle
   { id: 'quarter_shuttle', title: 'Челнок', file: 'quarter_shuttle.py', source: quarterShuttleSource, data: data(quarterShuttle), note: '3 дрона, от края до края', kind: 'quarter' },
   { id: 'quarter_triangle', title: 'Треугольник', file: 'quarter_triangle.py', source: quarterTriangleSource, data: data(quarterTriangle), note: '3 дрона, по вершинам', kind: 'quarter' },
   { id: 'quarter_hops', title: 'Прыжки по очереди', file: 'quarter_hops.py', source: quarterHopsSource, data: data(quarterHops), note: '4 дрона', kind: 'quarter' },
+  { id: 'quarter_buzzer_scale', title: 'Гамма на зуммере', file: 'quarter_buzzer_scale.py', source: quarterBuzzerScaleSource, data: data(quarterBuzzerScale), note: '2 дрона, зуммер в унисон и свет', kind: 'quarter' },
+  { id: 'quarter_buzzer_duet', title: 'Перекличка зуммеров', file: 'quarter_buzzer_duet.py', source: quarterBuzzerDuetSource, data: data(quarterBuzzerDuet), note: '2 дрона, зуммер по очереди', kind: 'quarter' },
   // the whole mat, 12 x 12 cells
   { id: 'full_rainbow', title: 'Радуга', file: 'full_rainbow.py', source: fullRainbowSource, data: data(fullRainbow), note: '6 дронов, только свет', kind: 'full' },
   { id: 'full_corners', title: 'Углы к центру', file: 'full_corners.py', source: fullCornersSource, data: data(fullCorners), note: '4 дрона', kind: 'full' },

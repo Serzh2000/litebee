@@ -11,6 +11,7 @@ export const STEP_NAME: Record<StepKind, string> = {
   rgb: 'цвет светодиода',
   circle: 'круг',
   circle_z: 'круг с подъёмом',
+  buzz: 'нота зуммера',
 }
 
 const n0 = (v: unknown) => String(Math.round(Number(v ?? 0)))
@@ -32,6 +33,8 @@ export function stepText(kind: StepKind, args: Record<string, any> = {}): string
       return `круг вокруг клеток ${args.cell1} и ${args.cell2} с подъёмом ${n0(args.dz)} см`
     case 'rgb':
       return `цвет ${args.color ?? ''}`.trim()
+    case 'buzz':
+      return `нота ${args.note ?? ''}`.trim()
     default:
       return STEP_NAME[kind] ?? kind
   }

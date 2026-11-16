@@ -2772,6 +2772,32 @@
     "Разная высота",
     "Проверенные шаги"
    ]
+  },
+  {
+   "id": "quarter_buzzer_scale",
+   "area": "quarter",
+   "drones": 2,
+   "seconds": 22,
+   "themes": [
+    "Звук"
+   ],
+   "tags": [
+    "Зуммер",
+    "Только свет"
+   ]
+  },
+  {
+   "id": "quarter_buzzer_duet",
+   "area": "quarter",
+   "drones": 2,
+   "seconds": 16,
+   "themes": [
+    "Звук"
+   ],
+   "tags": [
+    "Зуммер",
+    "Только свет"
+   ]
   }
  ]
 }

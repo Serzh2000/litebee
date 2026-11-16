@@ -134,6 +134,19 @@ class Drone:
         return self._add("circle_z", seconds, cell1=int(cell1), cell2=int(cell2),
                          dz=float(dz), rotate=rotate)
 
+    def buzz(self, note, seconds):
+        """Play one buzzer note for `seconds`; the drone does not move or change colour.
+
+        `note` is a name from litebee.buzzer.NOTE_NAMES ('C3', 'CS3', ...). Validated here so a
+        typo is caught in the editor, not after upload. Needs a buzzer module wired to the drone's
+        position module (docs/firmware/BUZZER_EXTENSION.md) and is sent LIVE while connected
+        (litebee.buzzer.play_live / `python -m litebee buzz-live`): the upload-mission wire layout
+        for a buzzer step is not proven on a live drone, so drone_to_mission refuses it.
+        """
+        from .buzzer import note_index
+        note_index(note)  # raises ValueError early for a bad name
+        return self._add("buzz", seconds, note=str(note).strip().upper())
+
     def land(self):
         return self._add("land", LAND_SECONDS)
 
@@ -224,6 +237,16 @@ class Drone:
                 cur = (s.args["color"], s.args["rgb"])
             now += s.seconds
         return cur
+
+    def note_at(self, t):
+        """(note name, remaining seconds) of the buzzer step playing at time t, else (None, 0.0)."""
+        now = 0.0
+        for s in self.steps:
+            t1 = now + s.seconds
+            if s.kind == "buzz" and now <= t < t1:
+                return s.args["note"], t1 - t
+            now = t1
+        return None, 0.0
 
 
 def _position(path, ends, t):

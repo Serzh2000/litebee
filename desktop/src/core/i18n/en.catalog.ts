@@ -353,4 +353,11 @@ export const EN_CATALOG: [ru: string, en: string][] = [
   ["Двойная звезда в четверти", "Double star"],
   ["Волна высоты", "Height wave"],
   ["Волна в четверти", "Height wave"],
+  ["Звук", "Sound"],
+  ["Зуммер", "Buzzer"],
+  ["Гамма на зуммере", "Buzzer scale"],
+  ["2 дрона, зуммер в унисон и свет", "2 drones, buzzer in unison and light"],
+  ["Гамма до-мажор", "C-major scale"],
+  ["Перекличка зуммеров", "Buzzer call and response"],
+  ["2 дрона, зуммер по очереди", "2 drones, buzzer in turn"],
 ]

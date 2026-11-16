@@ -46,6 +46,8 @@ function colorLetter(name: string): string {
 interface Lane {
   number: number
   leds: { from: number; to: number; rgb: Rgb; name: string }[]
+  /** buzzer notes over time, for the note row under the LED strip */
+  notes: { from: number; to: number; note: string }[]
   /** the moments of the stations: take-off when it starts, a target when it is reached, landing when the drone is down */
   stations: number[]
   end: number
@@ -54,6 +56,7 @@ interface Lane {
 function buildLane(show: Show, index: number): Lane {
   const d = show.drones[index]
   const leds: Lane['leds'] = []
+  const notes: Lane['notes'] = []
   const stations: number[] = []
   let now = 0
   let rgb: Rgb = [0, 0, 0]
@@ -65,12 +68,25 @@ function buildLane(show: Show, index: number): Lane {
       rgb = s.args.rgb
       name = s.args.color
       from = now
+    } else if (s.kind === 'buzz') {
+      notes.push({ from: now, to: now + s.seconds, note: s.args.note })
     } else if (s.kind === 'takeoff') stations.push(now)
     else if (s.kind === 'code' || s.kind === 'code_z' || s.kind === 'land') stations.push(now + s.seconds)
     now += s.seconds
   }
   if (isLit(rgb)) leds.push({ from, to: Math.max(now, show.duration), rgb, name })
-  return { number: d.number, leds, stations, end: now }
+  return { number: d.number, leds, notes, stations, end: now }
+}
+
+/** Rough pitch height for the note row: a semitone index (B0 = 0) folded into 0..1 across two octaves,
+ * so the row reads as a tiny piano roll without needing the full note table here. */
+function notePitch01(note: string): number {
+  const SEMITONES = ['C', 'CS', 'D', 'DS', 'E', 'F', 'FS', 'G', 'GS', 'A', 'AS', 'B']
+  const m = /^([A-Z]+)(\d+)$/.exec(note)
+  if (!m) return 0.5
+  const semi = SEMITONES.indexOf(m[1])
+  const idx = semi < 0 ? 0 : Number(m[2]) * 12 + semi
+  return Math.min(Math.max((idx % 24) / 24, 0), 1)
 }
 
 interface Props {
@@ -235,6 +251,27 @@ export function Timetable(p: Props) {
                   {lane.stations.map((s, k) => (
                     <i key={k} className="tt-station" style={{ left: `${pct(s)}%`, opacity: mine ? 1 : 0.8 }} />
                   ))}
+                  {lane.notes.map((n, k) => {
+                    const wide = ((n.to - n.from) / Math.max(duration, 1)) * width > LABEL_MIN_W
+                    return (
+                      <span key={k}>
+                        <i
+                          className="tt-note"
+                          style={{
+                            left: `${pct(n.from)}%`,
+                            width: `${Math.max(pct(n.to) - pct(n.from), 0.3)}%`,
+                            bottom: `${6 + notePitch01(n.note) * 14}px`,
+                            opacity: mine ? 1 : DIM,
+                          }}
+                        />
+                        {mine && wide && (
+                          <b className="tt-note-label" style={{ left: `${pct(n.from)}%` }}>
+                            {n.note}
+                          </b>
+                        )}
+                      </span>
+                    )
+                  })}
                 </div>
               </div>
             )
