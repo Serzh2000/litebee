@@ -42,7 +42,8 @@
 
 | Файл | О чём |
 |---|---|
-| [UI_DESIGN.md](UI_DESIGN.md), [DESIGN.md](DESIGN.md) | Дизайн интерфейса |
+| [UI_DESIGN_ELECTRON.md](UI_DESIGN_ELECTRON.md) | Дизайн интерфейса (текущее приложение, Electron) |
+| [UI_DESIGN.md](UI_DESIGN.md), [DESIGN.md](DESIGN.md) | Дизайн интерфейса (устарело: прежнее приложение на PySide6) |
 | [REFERENCES.md](REFERENCES.md) | Размеры дрона и коврика, источники |
 
 ## Книги

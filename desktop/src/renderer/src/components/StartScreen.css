@@ -38,6 +38,12 @@
   line-height: 1.2;
 }
 
+.start-version {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 400;
+}
+
 .start-brand p {
   margin: 0;
   color: var(--ink-2);

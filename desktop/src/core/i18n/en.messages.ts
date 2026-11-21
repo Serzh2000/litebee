@@ -4,6 +4,8 @@
  * message; the page recognises a finished message by these templates (see tr() in ../i18n.ts).
  */
 export const EN_MESSAGES: [ru: string, en: string][] = [
+  ['Коврик в 3D: {n} дронов, вид сверху не выбран', '3D mat: {n} drones, none selected'],
+  ['Коврик в 3D: выбран дрон {n}', '3D mat: drone {n} selected'],
   ['Настройки', 'Settings'],
   ['Инспектор', 'Inspector'],
   ['Вид', 'View'],

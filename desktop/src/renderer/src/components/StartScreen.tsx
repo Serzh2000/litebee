@@ -9,6 +9,7 @@ import { LangSwitch } from './LangSwitch'
 import { ThemeSwitch } from './ThemeSwitch'
 import { Mark } from './Mark'
 import { ShowThumb } from './ShowThumb'
+import { APP_VERSION } from '../version'
 import './StartScreen.css'
 
 interface Props {
@@ -41,7 +42,9 @@ export function StartScreen({ onWizard, onOpen, onOpenRecent, onContinue, projec
         <header className="start-brand">
           <Mark size={34} />
           <div>
-            <h1>Litebee IDE</h1>
+            <h1>
+              Litebee IDE <span className="start-version">v{APP_VERSION}</span>
+            </h1>
             <p>{tr('Шоу для дронов LiteBee Wing: пишите на Python, смотрите на карте, запускайте.')}</p>
           </div>
         </header>

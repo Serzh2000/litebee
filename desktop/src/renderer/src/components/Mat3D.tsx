@@ -539,8 +539,15 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
     if (size.width > 0 && size.height > 0) api.current?.resize(size.width, size.height)
   }, [size.width, size.height])
 
+  // The canvas itself gives a screen reader nothing (WebGL): this label is the only account of the scene it gets.
+  // Dragging a drone to a cell has no keyboard equivalent yet; the 2D view is the accessible way to do that.
+  const sceneLabel =
+    selected === null
+      ? tr('Коврик в 3D: {n} дронов, вид сверху не выбран', { n: show.drones.length })
+      : tr('Коврик в 3D: выбран дрон {n}', { n: selected })
+
   return (
-    <div className="mat3d" ref={host} style={{ width: size.width, height: size.height }}>
+    <div className="mat3d" ref={host} role="img" aria-label={sceneLabel} style={{ width: size.width, height: size.height }}>
       {modelState !== 'ready' && <p className="model-status" role="status">{modelState === 'loading' ? tr('Загрузка 3D-сцены…') : tr('Не удалось загрузить модель. Переключитесь в 2D.')}</p>}
       <p className="mat3d-hint">{tr('Тяните, чтобы повернуть · колесо — масштаб · правая кнопка — сдвиг')}</p>
     </div>
