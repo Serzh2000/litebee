@@ -35,6 +35,8 @@ interface Props {
   size: { width: number; height: number }
   /** the real drones on the link: a ring and a tag at the place they report */
   live?: LiveDrone[]
+  /** IP -> number of the show drone it flies, if any is chosen */
+  roles?: Record<string, number | null>
   /** a drone was dragged to a cell: it now starts there */
   onMove?: (drone: number, cell: number) => void
 }
@@ -193,13 +195,13 @@ interface Fleet {
   plateKey: string
 }
 
-export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMove }: Props) {
+export function Mat3D({ show, t, selected, onSelect, area, size, live = [], roles, onMove }: Props) {
   const [modelState, setModelState] = useState<'loading' | 'ready' | 'error'>('loading')
   const host = useRef<HTMLDivElement | null>(null)
   const { theme } = useTheme()
   // what the animation loop reads: the newest props, without rebuilding the scene for each of them
-  const latest = useRef({ show, t, selected, onSelect, area, theme, live, onMove })
-  latest.current = { show, t, selected, onSelect, area, theme, live, onMove }
+  const latest = useRef({ show, t, selected, onSelect, area, theme, live, roles, onMove })
+  latest.current = { show, t, selected, onSelect, area, theme, live, roles, onMove }
   const api = useRef<{ resize: (w: number, h: number) => void; refit: () => void } | null>(null)
 
   useEffect(() => {
@@ -228,6 +230,11 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
     scene.add(floor)
 
     const fleet = new Map<number, Fleet>()
+    // a dashed ring at the plan's position, shown only for a drone a live one is flying (the model itself moves to the real spot)
+    const ghosts = new Map<number, THREE.Line>()
+    const ghostGeo = new THREE.BufferGeometry().setFromPoints(
+      Array.from({ length: 33 }, (_, i) => new THREE.Vector3(Math.cos((i / 32) * Math.PI * 2) * 13, 0, Math.sin((i / 32) * Math.PI * 2) * 13)),
+    )
     const markers = new Map<string, { group: THREE.Group; dot: THREE.Mesh; pole: THREE.Line; tag: THREE.Sprite; key: string }>()
     const route = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x0b7285 }))
     route.frustumCulled = false
@@ -375,8 +382,12 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
     let raf = 0
     const frame = () => {
       raf = requestAnimationFrame(frame)
-      const { show: sh, t: now, selected: sel, area: ar, theme: th, live: real } = latest.current
+      const { show: sh, t: now, selected: sel, area: ar, theme: th, live: real, roles: rolesNow } = latest.current
       const c = colors()
+
+      // which show drone each live, positioned drone flies now: its model follows the real spot, not the plan
+      const liveByNumber = new Map<number, LiveDrone>()
+      if (rolesNow) for (const d of real) if (d.fix && isAlive(d) && rolesNow[d.ip]) liveByNumber.set(rolesNow[d.ip]!, d)
 
       if (th !== themeKey || JSON.stringify(ar) !== areaKey) {
         themeKey = th
@@ -409,9 +420,25 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
           cellMark.position.set(x, 0.6, -y)
           cellMark.visible = true
         }
-        f.group.position.set(x, Math.max(z, 0), -y)
-        f.shadow.position.set(x, 0.3, -y)
-        const s = Math.max(0.5, 1 - z / 260)
+        // a drone a live one flies: the model goes to where it really reports; the plan keeps a dashed ring where it would be
+        const live = liveByNumber.get(d.number)
+        const [drawX, drawY, drawZ] = live ? [live.x, live.y, live.z] : [x, y, z]
+        let ghost = ghosts.get(d.number)
+        if (live) {
+          if (!ghost) {
+            ghost = new THREE.LineLoop(ghostGeo, new THREE.LineDashedMaterial({ color: 0x1b6c80, dashSize: 3, gapSize: 2.4, transparent: true, opacity: 0.6 }))
+            ghost.computeLineDistances()
+            scene.add(ghost)
+            ghosts.set(d.number, ghost)
+          }
+          ghost.position.set(x, 0.5, -y)
+          ghost.visible = true
+        } else if (ghost) {
+          ghost.visible = false
+        }
+        f.group.position.set(drawX, Math.max(drawZ, 0), -drawY)
+        f.shadow.position.set(drawX, 0.3, -drawY)
+        const s = Math.max(0.5, 1 - drawZ / 260)
         f.shadow.scale.setScalar(s)
         ;(f.shadow.material as THREE.MeshBasicMaterial).opacity = 0.22 * s
         const [, rgb] = colorAt(d.steps, now)
@@ -420,7 +447,7 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
           f.led.emissive = lit ? ledColor(rgb) : new THREE.Color(0, 0, 0)
           f.led.emissiveIntensity = lit ? 2.4 : 0
         }
-        const flying = z > 2
+        const flying = drawZ > 2
         for (const p of f.spins) {
           if (flying) p.rotation.y = elapsed * 16
           const blur = p.getObjectByName('blur')
@@ -441,6 +468,12 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
         if (!sh.drones.some((d) => d.number === n)) {
           scene.remove(f.group, f.shadow)
           fleet.delete(n)
+        }
+      }
+      for (const [n, g] of ghosts) {
+        if (!liveByNumber.has(n) || !sh.drones.some((d) => d.number === n)) {
+          scene.remove(g)
+          ghosts.delete(n)
         }
       }
 
@@ -466,8 +499,9 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
         }
       }
 
-      // real drones: a ring on the floor, a pole up to the height they report and a tag with the end of the address
-      const here = real.filter((d) => d.fix && isAlive(d))
+      // real drones that fly no drone of this show: a ring on the floor, a pole and a tag with the end of the address.
+      // A drone assigned to one of this show's drones is drawn as that drone's model above instead.
+      const here = real.filter((d) => d.fix && isAlive(d) && !(rolesNow && rolesNow[d.ip]))
       for (const d of here) {
         let m = markers.get(d.ip)
         if (!m) {
@@ -528,6 +562,8 @@ export function Mat3D({ show, t, selected, onSelect, area, size, live = [], onMo
       renderer.domElement.removeEventListener('pointerdown', onDown, { capture: true })
       renderer.domElement.removeEventListener('pointermove', onMoveEvent)
       renderer.domElement.removeEventListener('pointerup', onUp)
+      for (const g of ghosts.values()) (g.material as THREE.Material).dispose()
+      ghostGeo.dispose()
       controls.dispose()
       renderer.dispose()
       el.removeChild(renderer.domElement)

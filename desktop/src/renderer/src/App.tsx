@@ -471,7 +471,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
       <div className="mat-box" ref={matRef} style={matPad}>
         {view === '3d' ? (
           <Suspense fallback={<div className="scene-loading" role="status">{tr('Загрузка 3D-сцены…')}</div>}>
-            <Mat3D show={show} t={playback.t} selected={selected} onSelect={pickOnMap} area={area} live={link.drones} onMove={standOn} size={mapSize} />
+            <Mat3D show={show} t={playback.t} selected={selected} onSelect={pickOnMap} area={area} live={link.drones} roles={roles} onMove={standOn} size={mapSize} />
           </Suspense>
         ) : (
           <MatChart
@@ -485,6 +485,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
             onHoverCell={setHoverCell}
             onPick={placing !== null ? placeAt : undefined}
             onMove={standOn}
+            roles={roles}
             size={mapSize}
             showTags={mapTags}
             showRoutes={mapRoutes}

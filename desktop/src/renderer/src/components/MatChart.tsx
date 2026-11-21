@@ -73,6 +73,8 @@ interface Props {
   onMove?: (drone: number, cell: number) => void
   /** drones that are on the link: shown where they really stand */
   live?: LiveDrone[]
+  /** IP -> number of the show drone it flies, if any is chosen */
+  roles?: Record<string, number | null>
   showTags?: boolean
   showRoutes?: boolean
 }
@@ -111,7 +113,16 @@ function buildRuns(d: Show['drones'][number]): Run[] {
   return runs
 }
 
-export function MatChart({ show, t, selected, onSelect, hoverCell, onHoverCell, size, area, live = [], onPick, onMove, showTags = false, showRoutes = true }: Props) {
+export function MatChart({ show, t, selected, onSelect, hoverCell, onHoverCell, size, area, live = [], roles, onPick, onMove, showTags = false, showRoutes = true }: Props) {
+  // Which show drone each live, positioned drone flies now: the model of that drone follows it instead of the plan.
+  const liveByNumber = new Map<number, LiveDrone>()
+  if (roles) {
+    for (const d of live) {
+      if (!d.fix || !isAlive(d)) continue
+      const n = roles[d.ip]
+      if (n !== null && n !== undefined) liveByNumber.set(n, d)
+    }
+  }
   // The shown part of the sheet in user units (y runs down), and the window onto it with room for the numerals.
   const x0 = 40 * area.col0
   const x1 = 40 * (area.col0 + area.cols)
@@ -364,34 +375,44 @@ export function MatChart({ show, t, selected, onSelect, hoverCell, onHoverCell, 
         />
       ))}
 
-      {/* drones */}
+      {/* drones: the plan (ghost, dimmer still when a live drone flies it) and, when one is assigned and has a fix, the real position too */}
       {state.map(({ drone, pos, led }) => {
         const strong = selected === drone.number
         const faded = selected !== null && !strong
+        const flying = liveByNumber.get(drone.number)
         return (
-          <g
-            key={drone.number}
-            className="mat-drone"
-            transform={`translate(${X(pos[0])} ${Y(pos[1])})`}
-            opacity={faded ? 0.5 : 1}
-            data-draggable={onMove ? 'true' : undefined}
-            onMouseDown={(e) => {
-              if (e.button !== 0 || !onMove || onPick) return
-              setDrag({ n: drone.number, x: e.clientX, y: e.clientY, cell: null, moved: false })
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              if (justDragged.current) {
-                justDragged.current = false
-                return
-              }
-              onSelect(strong ? null : drone.number)
-            }}
-          >
-            {strong && <circle r={14 * droneK} fill="none" stroke="var(--accent)" strokeWidth={px(2)} strokeDasharray={`${px(5)} ${px(4)}`} />}
-            <g transform={`scale(${droneK})`}>
-              <DroneArt led={led} />
+          <g key={drone.number}>
+            <g
+              className="mat-drone"
+              transform={`translate(${X(pos[0])} ${Y(pos[1])})`}
+              opacity={flying ? (faded ? 0.22 : 0.4) : faded ? 0.5 : 1}
+              data-draggable={onMove ? 'true' : undefined}
+              onMouseDown={(e) => {
+                if (e.button !== 0 || !onMove || onPick) return
+                setDrag({ n: drone.number, x: e.clientX, y: e.clientY, cell: null, moved: false })
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (justDragged.current) {
+                  justDragged.current = false
+                  return
+                }
+                onSelect(strong ? null : drone.number)
+              }}
+            >
+              {strong && <circle r={14 * droneK} fill="none" stroke="var(--accent)" strokeWidth={px(2)} strokeDasharray={`${px(5)} ${px(4)}`} />}
+              <g transform={`scale(${droneK})`}>
+                <DroneArt led={led} />
+              </g>
             </g>
+            {flying && (
+              <g transform={`translate(${X(flying.x)} ${Y(flying.y)})`} opacity={faded ? 0.6 : 1} pointerEvents="none">
+                <circle r={14 * droneK} fill="none" stroke="var(--accent)" strokeWidth={px(1.4)} />
+                <g transform={`scale(${droneK})`}>
+                  <DroneArt led={led} />
+                </g>
+              </g>
+            )}
           </g>
         )
       })}
@@ -406,21 +427,25 @@ export function MatChart({ show, t, selected, onSelect, hoverCell, onHoverCell, 
         </g>
       )}
 
-      {/* line bullets, drawn after all drones so none is hidden: 22 px, the LED colour, 100 % for the selected one and 70 % for the rest */}
+      {/* line bullets, drawn after all drones so none is hidden: 22 px, the LED colour, 100 % for the selected one and 70 % for the rest.
+          A drone that is flying for real gets its bullet at the real position, not the plan's. */}
       {state.map(({ drone, pos, track, led }) => {
         const strong = selected === drone.number
         const rgb = led ?? track.color
         const o = (DRONE_WIDTH_CM / 2) * droneK * 0.78
+        const flying = liveByNumber.get(drone.number)
+        const at = flying ? ([flying.x, flying.y] as const) : ([pos[0], pos[1]] as const)
         return (
-          <g key={drone.number} transform={`translate(${X(pos[0]) + o} ${Y(pos[1]) + o})`} pointerEvents="none">
+          <g key={drone.number} transform={`translate(${X(at[0]) + o} ${Y(at[1]) + o})`} pointerEvents="none">
             {bullet(drone.number, rgb, strong)}
           </g>
         )
       })}
 
-      {/* real drones on the link: a ring in the accent at the position they report, the IP tail and the battery colour */}
+      {/* real drones on the link that fly no drone of this show: a plain ring, the IP tail and the battery colour.
+          A drone assigned to one of this show's drones is drawn as that drone's model above instead. */}
       {live
-        .filter((d) => d.fix && isAlive(d))
+        .filter((d) => d.fix && isAlive(d) && !(roles && roles[d.ip]))
         .map((d) => {
           const level = batteryLevel(d.batteryV)
           const r = px(15)
