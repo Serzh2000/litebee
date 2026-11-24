@@ -104,4 +104,13 @@ export const EN_REFERENCE: [ru: string, en: string][] = [
   ['Синий', 'Blue'],
   ['То же, что rgb((r, g, b)): тот же шаг RGB. На живых дронах проверены только 8 именованных цветов', 'The same as rgb((r, g, b)): the same RGB step. Only 8 named colours are proven on live drones'],
   ['Значение вне 0..255 даёт ошибку', 'A value outside 0..255 gives an error'],
+  ['Нота на зуммере, подключённом к позиционному модулю', 'A note on the buzzer wired to the position module'],
+  ['нота', 'note'],
+  ["Имя из таблицы LiteBee Go: 'C3', 'CS3' (диез) ... от B0 до DS8", "A name from the LiteBee Go table: 'C3', 'CS3' (sharp) ... from B0 to DS8"],
+  ['Длительность ноты', 'The length of the note'],
+  ['Загрузка в дрон (миссия) отказывает: формат шага на проводе не проверен, как у code_z', 'Uploading to a drone (a mission) is refused: the step layout on the wire is not proven, as for code_z'],
+  ['На живом дроне нота играет через отдельную команду `python -m litebee buzz-live` (litebee/buzzer.py: native_frame, подтверждено на слух 2026-11-16), не через запуск самого шоу', 'On a live drone the note plays through the separate command `python -m litebee buzz-live` (litebee/buzzer.py: native_frame, confirmed by ear on 2026-11-16), not by running the show itself'],
+  ['Неизвестное имя ноты даёт ошибку сразу при вызове', 'An unknown note name gives an error right at the call'],
+  ['docs/firmware/BUZZER_EXTENSION.md, раздел 6', 'docs/firmware/BUZZER_EXTENSION.md, section 6'],
+  ["d.buzz('C3', 1.0)\nd.buzz('E3', 1.0)", "d.buzz('C3', 1.0)\nd.buzz('E3', 1.0)"],
 ]

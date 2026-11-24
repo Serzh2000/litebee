@@ -1,5 +1,5 @@
 .topbar { grid-area: top; display: flex; align-items: center; justify-content: space-between; gap: 18px; min-width: 0; padding: 0 16px; background: var(--ground); border-bottom: 1px solid var(--border); }
-.workspace-project { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.workspace-project { display: flex; align-items: center; gap: 14px; min-width: 0; flex: none; }
 .workspace-product { font-size: 14px; font-weight: 600; white-space: nowrap; }
 .workspace-divider { width: 1px; height: 20px; background: var(--control); }
 .workspace-mode { display: none; }
@@ -10,17 +10,18 @@
 .workspace-project .project-button > svg:last-child { display: block; }
 .workspace-project .project-text { position: static; width: auto; height: auto; clip-path: none; }
 .workspace-project .project-icon { display: none; }
-.topbar-chain { display: flex; align-items: center; flex: none; }
+.topbar-chain { display: flex; align-items: center; gap: 16px; flex: 1 1 auto; min-width: 0; }
+.topbar-rule { width: 1px; height: 20px; margin: 0 4px; background: var(--control); flex: none; }
 .topbar-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex: 0 1 auto; min-width: 0; }
-.finding-chip { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 300px; margin: 0 6px 0 0; color: var(--muted); font-size: 13px; }
+.finding-chip { display: flex; align-items: center; gap: 7px; min-width: 0; margin: 0; color: var(--text); font-size: 13px; font-weight: 500; }
 .finding-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.finding-chip svg { flex: none; }
-.finding-chip[data-tone='negative'] { color: var(--negative); }
-.finding-chip[data-tone='warning'] { color: var(--warning); }
+.finding-chip svg { flex: none; color: var(--muted); }
+.finding-chip[data-tone='next'] svg { color: var(--accent); }
+.finding-chip[data-tone='negative'] svg { color: var(--negative); }
+.finding-chip[data-tone='warning'] svg { color: var(--warning); }
 .topbar .btn.btn-icon { width: 34px; padding: 0; justify-content: center; flex: none; }
 .workspace-project .pill { flex: none; }
-@media (max-width: 1360px) { .finding-chip { max-width: 190px; } }
-@media (max-width: 1240px) { .finding-chip span { display: none; } .finding-chip { margin: 0; } }
+@media (max-width: 1240px) { .finding-chip span { display: none; } }
 @media (max-width: 1200px) { .workspace-product, .workspace-divider { display: none; } .topbar { gap: 10px; } }
 @media (max-width: 760px) {
   .topbar { flex-wrap: wrap; justify-content: space-between; padding: 8px 10px; }

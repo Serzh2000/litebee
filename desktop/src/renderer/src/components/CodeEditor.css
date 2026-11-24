@@ -84,3 +84,36 @@
   color: var(--ink);
   font-family: var(--font-ui);
 }
+
+/* the colour panel under the colour of d.rgb(...) */
+.cm-colors {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+}
+
+.cm-color {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cm-color:hover,
+.cm-color:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.cm-color-free {
+  width: 30px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: none;
+  cursor: pointer;
+}

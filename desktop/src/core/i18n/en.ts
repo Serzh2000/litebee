@@ -201,6 +201,7 @@ const UI: [ru: string, en: string][] = [
   ['Из LiteBee Go', 'From LiteBee Go'],
   // reference tab
   ['Справочник команд', 'Command reference'],
+  ['Свой цвет', 'Custom colour'],
   ['Как течёт время в шоу', 'How time runs in a show'],
   ['У каждого дрона своё время с 0 секунд. Его шаги идут по порядку сверху вниз, один за другим.', 'Each drone has its own time from 0 seconds. Its steps go in order from top to bottom, one after another.'],
   ['Число в команде — сколько длится шаг.', 'The number in a command is how long the step lasts.'],

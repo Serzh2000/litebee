@@ -2,7 +2,7 @@
  * Editing the code of a show for what a person does on the map: stand a drone on another cell, or add one more drone.
  * Both work on the text of the Python file, so the code stays the one truth and Ctrl+Z undoes them.
  */
-import { MAX_DRONES, START_HEIGHT_CM, startCells } from './project'
+import { MAX_DRONES, START_HEIGHT_CM, nearbyCell, startCells } from './project'
 import { joinDrones, splitDrones } from './sections'
 import { FULL, cellInArea, type Area } from './area'
 import type { Show } from './show'
@@ -58,7 +58,9 @@ export function addDrone(source: string, show: Show, area: Area = FULL): Edit {
     `d.takeoff(${START_HEIGHT_CM}, 5)`,
     `d.rgb('${COLORS[(number - 1) % COLORS.length]}')`,
     `d.code(${cell}, 1)`,
-    `d.set_z(${START_HEIGHT_CM}, 5)`,
+    `d.code(${nearbyCell(cell)}, 3)`,
+    `d.code(${cell}, 3)`,
+    `d.set_z(${START_HEIGHT_CM}, 2)`,
     "d.rgb('black')",
     'd.land()',
   ].join('\n')
@@ -67,6 +69,13 @@ export function addDrone(source: string, show: Show, area: Area = FULL): Edit {
   const body = source.endsWith('\n') ? source : source + eol
   return { source: `${body}${eol}${block.replace(/\n/g, eol)}${eol}` }
 }
+
+const CODE_CELL = /^(\s*[A-Za-z_]\w*\.code\(\s*)(\d+)/
+const cellOf = (line: string): number | undefined => {
+  const m = CODE_CELL.exec(line)
+  return m ? Number(m[2]) : undefined
+}
+const setCell = (line: string, cell: number): string => line.replace(CODE_CELL, `$1${cell}`)
 
 /**
  * Stands drone `number` on `cell`: the cell of its first short move is changed, or such a move is put right after the
@@ -84,7 +93,16 @@ export function setStartCell(source: string, number: number, cell: number): Edit
   if (move >= 0) {
     const m = FIRST_MOVE.exec(lines[move])!
     if (m[5] !== undefined && Number(m[5]) <= 1) {
+      const was = Number(m[4])
       lines[move] = lines[move].replace(/(\.(?:code|code_z)\(\s*)\d+/, `$1${cell}`)
+      // the demo flight of a new project (out to the next cell and back to the start) goes with the start: otherwise
+      // the drone would fly back to the cell it was dragged from, across the drones that stand there
+      const out = lines[move + 1]
+      const back = lines[move + 2]
+      if (out !== undefined && back !== undefined && cellOf(out) === nearbyCell(was) && cellOf(back) === was) {
+        lines[move + 1] = setCell(out, nearbyCell(cell))
+        lines[move + 2] = setCell(back, cell)
+      }
       return { source: joinDrones(split, number, lines.join('\n')) }
     }
   }

@@ -4,8 +4,10 @@ import './Preflight.css'
 import { tr } from '@core/i18n'
 
 /**
- * The four steps before a flight as one flat segmented stepper: four real buttons in a 1px group. Done: a check; current:
- * ink text over a 2px accent underline; blocked: muted, with the reason in the title and in text for screen readers.
+ * The four steps before a flight as one sequence: four real buttons on a rail that turns positive behind done steps.
+ * Done: a check; current and possible now: the one filled button of the bar (what to press next); current but waiting
+ * (a load under way): outlined; next but blocked: dashed; later: muted. The reason of a blocked step is in the title and
+ * in text for screen readers.
  */
 export function Preflight({ steps, onStep }: { steps: PreflightStep[]; onStep: (i: number) => void }) {
   return (
@@ -14,7 +16,7 @@ export function Preflight({ steps, onStep }: { steps: PreflightStep[]; onStep: (
         const interactive = canPress(steps, i)
         const reason = s.why ?? (s.state === 'blocked' ? tr('Сначала предыдущие шаги') : undefined)
         return (
-          <li key={s.label} className="pf-item">
+          <li key={s.label} className="pf-item" data-prev={i > 0 ? steps[i - 1].state : undefined}>
             <button
               type="button"
               className="pf-step"

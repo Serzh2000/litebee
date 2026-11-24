@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { addDrone, freeStartCell, setStartCell } from '@core/placement'
+import { nearbyCell, newSource } from '@core/project'
 import { startCell } from '@core/roles'
 import { splitDrones } from '@core/sections'
 import { buildShow, type ShowData } from '@core/show'
@@ -18,6 +19,27 @@ describe('standing a drone on another cell', () => {
     expect(section).not.toContain('d.code(13, 1)')
     // the other drones are not touched
     expect(splitDrones(edit.source)!.sections.slice(1).map((s) => s.text)).toEqual(splitDrones(squareSource)!.sections.slice(1).map((s) => s.text))
+  })
+
+  it('moves the demo flight of a new project with the start, so the drone does not fly back to the old cell', () => {
+    const source = newSource('t', 2)
+    const edit = setStartCell(source, 1, 50)
+    expect(edit.error).toBeUndefined()
+    const lines = splitDrones(edit.source)!.sections[0].text.split('\n')
+    const at = lines.findIndex((l) => l === 'd.code(50, 1)')
+    expect(lines[at + 1]).toBe(`d.code(${nearbyCell(50)}, 3)`)
+    expect(lines[at + 2]).toBe('d.code(50, 3)')
+    expect(edit.source).not.toContain('d.code(0, 3)')
+  })
+
+  it('keeps the demo flight on the mat at its right and top edge', () => {
+    for (const cell of [11, 131, 143, 0]) {
+      const n = nearbyCell(cell)
+      expect(n).toBeGreaterThanOrEqual(0)
+      expect(n).toBeLessThan(144)
+      expect(Math.abs((n % 12) - (cell % 12))).toBe(1)
+      expect(Math.abs(Math.floor(n / 12) - Math.floor(cell / 12))).toBe(1)
+    }
   })
 
   it('puts a start move after the take-off when the first move is a real flight', () => {

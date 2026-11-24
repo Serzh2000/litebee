@@ -46,18 +46,19 @@ export function TopBar({ project, actions, steps, onCheck, onStep, onEmergency, 
       </div>
       <div className="topbar-chain">
         <Preflight steps={steps} onStep={(i) => (i === 0 ? onCheck() : onStep(i))} />
-      </div>
-      <div className="topbar-right">
         <p className="finding-chip" data-tone={finding.tone} title={finding.text}>
           <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
           <span>{finding.text}</span>
         </p>
-        <button type="button" className="btn btn-icon" onClick={onSave} title={tr('Сохранить') + ' (Ctrl S)'} aria-label={tr('Сохранить')}>
+      </div>
+      <div className="topbar-right">
+<button type="button" className="btn btn-icon" onClick={onSave} title={tr('Сохранить') + ' (Ctrl S)'} aria-label={tr('Сохранить')}>
           <Save size={16} aria-hidden="true" />
         </button>
         <button type="button" className="btn btn-icon inspector-toggle" aria-pressed={inspectorOpen} onClick={onInspector} title={tr('Инспектор')} aria-label={tr('Инспектор')}>
           <PanelRight size={16} aria-hidden="true" />
         </button>
+        <span className="topbar-rule" aria-hidden="true" />
         <Emergency onPress={onEmergency} />
       </div>
     </header>

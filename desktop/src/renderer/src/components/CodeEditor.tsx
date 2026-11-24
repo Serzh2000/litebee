@@ -1,14 +1,16 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
 import { HighlightStyle, bracketMatching, indentOnInput, syntaxHighlighting } from '@codemirror/language'
+import { autocompletion, completionKeymap, snippetCompletion, type CompletionContext, type CompletionResult } from '@codemirror/autocomplete'
 import { python } from '@codemirror/lang-python'
 import { setDiagnostics, type Diagnostic } from '@codemirror/lint'
 import { EditorState, StateEffect, StateField, type Range } from '@codemirror/state'
 import reference from '../data/reference.json'
-import { Decoration, type DecorationSet, EditorView, drawSelection, hoverTooltip, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers } from '@codemirror/view'
+import { Decoration, type DecorationSet, EditorView, type Tooltip, drawSelection, hoverTooltip, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, showTooltip } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
 import './CodeEditor.css'
 import { tr } from '@core/i18n'
+import { LED_COLORS, colorText, hexToRgb, parseColorArg, rgbArgAt, rgbToHex, snippetFor } from '@core/hints'
 
 export interface CodeEditorHandle {
   /** Puts the cursor at the start of a line (1-based), scrolls to it and focuses the editor. */
@@ -31,6 +33,8 @@ interface Props {
 }
 
 interface RefEntry {
+  owner: string
+  kind: string
   name: string
   signature: string
   summary: string
@@ -82,6 +86,102 @@ const referenceTooltip = hoverTooltip((view, pos) => {
   }
   return null
 })
+
+
+const translated = (text: string): string => tr(text)
+
+/**
+ * Suggestions while typing: after `d.` the commands of a drone (after `show.` those of the show) with their signature and
+ * the same explanation as the hover help; inside `d.rgb(` the names of the colours. A command is inserted with a place for
+ * every argument (Tab goes to the next).
+ */
+function suggest(context: CompletionContext): CompletionResult | null {
+  const line = context.state.doc.lineAt(context.pos)
+  const col = context.pos - line.from
+  if (rgbArgAt(line.text, col)) {
+    const word = context.matchBefore(/['"]?\w*/)
+    if (!word || (word.from === word.to && !context.explicit)) return null
+    const quote = /^['"]/.exec(word.text)?.[0] ?? "'"
+    return {
+      from: word.from,
+      options: LED_COLORS.map((c, i) => ({ label: `${quote}${c.name}${quote}`, type: 'constant', detail: String(i), boost: -i })),
+      validFor: /^['"]?\w*$/,
+    }
+  }
+  const dot = context.matchBefore(/[A-Za-z_]\w*\.\w*/)
+  if (!dot) return null
+  const receiver = dot.text.slice(0, dot.text.indexOf('.'))
+  const owner = receiver === 'show' ? 'Show' : 'Drone'
+  const from = dot.from + dot.text.indexOf('.') + 1
+  const options = (reference.entries as RefEntry[])
+    .filter((e) => e.owner === owner && e.kind === 'method')
+    .map((e) => ({
+      ...snippetCompletion(snippetFor(e.signature), { label: e.name, type: 'method', detail: e.signature.slice(e.name.length), info: () => helpNode(e) }),
+    }))
+  return { from, options, validFor: /^\w*$/ }
+}
+
+function helpNode(entry: RefEntry): HTMLElement {
+  const dom = el('div', 'cm-ref')
+  dom.append(el('p', 'cm-ref-sum', translated(entry.summary)), el('p', 'cm-ref-status', `${entry.icon} ${translated(entry.status)}`))
+  return dom
+}
+
+/**
+ * The colour panel: while the cursor stands inside the colour of `d.rgb(...)`, the eight colours of the LEDs and a free
+ * choice sit under it. A click writes the colour into the code, so the code stays the one truth and Ctrl+Z takes it back.
+ */
+const colorPanel = StateField.define<Tooltip | null>({
+  create: () => null,
+  update(prev, tr) {
+    if (!tr.docChanged && !tr.selection && prev !== null) return prev
+    const head = tr.state.selection.main.head
+    const line = tr.state.doc.lineAt(head)
+    const arg = rgbArgAt(line.text, head - line.from)
+    if (!arg) return null
+    const pos = line.from + arg.from
+    // the same panel while the colour is being changed: rebuilding it would close the open colour chooser
+    if (prev && prev.pos === pos) return prev
+    return { pos, above: false, strictSide: true, arrow: false, create: createColorPanel }
+  },
+  provide: (f) => showTooltip.from(f),
+})
+
+function createColorPanel(view: EditorView) {
+  const dom = el('div', 'cm-colors')
+  // the editor keeps the cursor while a swatch is pressed
+  dom.addEventListener('mousedown', (e) => {
+    if ((e.target as HTMLElement).tagName !== 'INPUT') e.preventDefault()
+  })
+  const put = (text: string) => {
+    const head = view.state.selection.main.head
+    const line = view.state.doc.lineAt(head)
+    const arg = rgbArgAt(line.text, head - line.from)
+    if (!arg) return
+    view.dispatch({ changes: { from: line.from + arg.from, to: line.from + arg.to, insert: text }, selection: { anchor: line.from + arg.from + text.length } })
+  }
+  for (const c of LED_COLORS) {
+    const b = el('button', 'cm-color') as HTMLButtonElement
+    b.type = 'button'
+    b.title = c.name
+    b.setAttribute('aria-label', c.name)
+    b.style.background = `rgb(${c.rgb.join(' ')})`
+    b.addEventListener('click', () => put(colorText(c.rgb)))
+    dom.append(b)
+  }
+  const free = el('input', 'cm-color-free') as HTMLInputElement
+  free.type = 'color'
+  free.title = tr('Свой цвет')
+  free.setAttribute('aria-label', tr('Свой цвет'))
+  const head = view.state.selection.main.head
+  const line = view.state.doc.lineAt(head)
+  const arg = rgbArgAt(line.text, head - line.from)
+  free.value = rgbToHex(parseColorArg(arg ? line.text.slice(arg.from, arg.to) : '') ?? [255, 128, 0])
+  free.addEventListener('input', () => put(colorText(hexToRgb(free.value))))
+  free.addEventListener('change', () => view.focus())
+  dom.append(free)
+  return { dom }
+}
 
 const setNow = StateEffect.define<{ run: number[]; light: number[] }>()
 
@@ -150,7 +250,9 @@ export const CodeEditor = forwardRef<CodeEditorHandle, Props>(function CodeEdito
           syntaxHighlighting(highlight),
           nowField,
           referenceTooltip,
-          keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
+          autocompletion({ override: [suggest], icons: false }),
+          colorPanel,
+          keymap.of([...completionKeymap, indentWithTab, ...defaultKeymap, ...historyKeymap]),
           theme,
           EditorView.contentAttributes.of({ 'aria-label': tr('Код шоу на Python'), spellcheck: 'false' }),
           EditorView.updateListener.of((u) => u.docChanged && change.current(u.state.doc.toString())),

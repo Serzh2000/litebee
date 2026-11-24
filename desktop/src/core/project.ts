@@ -17,7 +17,19 @@ export function startCells(count: number): number[] {
   return cells.slice(0, count).map((c) => c.cell)
 }
 
-/** A new project: every drone calibrates, takes off, shows its colour and lands where it stands (cell = its number). */
+/**
+ * A short out-and-back from `cell`, diagonal by one cell (40 cm each way, so ~57 cm of flight): a cell a drone
+ * standing on the lattice of `startCells` never starts on (those are all even column, even row; this is always
+ * odd, odd), so the little demo flight below never aims a drone at a cell another one stands on or passes.
+ * At the right or the top edge of the mat it goes the other way, so it never leaves the mat (or wraps to the next row).
+ */
+export function nearbyCell(cell: number): number {
+  const col = cell % 12
+  const row = Math.floor(cell / 12)
+  return (col < 11 ? col + 1 : col - 1) + 12 * (row < 11 ? row + 1 : row - 1)
+}
+
+/** A new project: every drone calibrates, takes off, shows its colour, flies out and back to where it stands, and lands. */
 export function newProject(name: string, count: number): ShowData {
   const n = Math.min(Math.max(Math.round(count), 1), MAX_DRONES)
   const palette: [string, [number, number, number]][] = [
@@ -31,12 +43,15 @@ export function newProject(name: string, count: number): ShowData {
   const starts = startCells(n)
   for (let i = 1; i <= n; i++) {
     const [color, rgb] = palette[(i - 1) % palette.length]
+    const start = starts[i - 1]
     drones[String(i)] = [
       { kind: 'calibrate', seconds: 5, args: {}, line: null },
       { kind: 'takeoff', seconds: 5, args: { z: START_HEIGHT_CM }, line: null },
       { kind: 'rgb', seconds: 0, args: { color, rgb }, line: null },
-      { kind: 'code', seconds: 1, args: { cell: starts[i - 1] }, line: null },
-      { kind: 'set_z', seconds: 5, args: { z: START_HEIGHT_CM }, line: null },
+      { kind: 'code', seconds: 1, args: { cell: start }, line: null }, // where the drone stands: dragging it on the map rewrites only this
+      { kind: 'code', seconds: 3, args: { cell: nearbyCell(start) }, line: null }, // the actual demo flight: out
+      { kind: 'code', seconds: 3, args: { cell: start }, line: null }, // ... and back
+      { kind: 'set_z', seconds: 2, args: { z: START_HEIGHT_CM }, line: null },
       { kind: 'rgb', seconds: 0, args: { color: 'black', rgb: [0, 0, 0] }, line: null },
       { kind: 'land', seconds: 3, args: {}, line: null },
     ]
@@ -50,18 +65,21 @@ export function newSource(name: string, count: number): string {
   const title = (name.trim() || 'Новый проект').replace(/\\/g, '\\\\').replace(/'/g, "\\'")
   const colors = ['green', 'blue', 'yellow', 'red', 'cyan']
   const starts = startCells(n)
-  const blocks = Array.from({ length: n }, (_, i) =>
-    [
+  const blocks = Array.from({ length: n }, (_, i) => {
+    const start = starts[i]
+    return [
       `d = show.drone(${i + 1})`,
       'd.calibrate(5)',
       `d.takeoff(${START_HEIGHT_CM}, 5)`,
       `d.rgb('${colors[i % colors.length]}')`,
-      `d.code(${starts[i]}, 1)`,
-      `d.set_z(${START_HEIGHT_CM}, 5)`,
+      `d.code(${start}, 1)`,
+      `d.code(${nearbyCell(start)}, 3)`,
+      `d.code(${start}, 3)`,
+      `d.set_z(${START_HEIGHT_CM}, 2)`,
       "d.rgb('black')",
       'd.land()',
-    ].join('\n'),
-  )
+    ].join('\n')
+  })
   return `from litebee_show import Show\n\nshow = Show('${title}')\n\n${blocks.join('\n\n')}\n`
 }
 

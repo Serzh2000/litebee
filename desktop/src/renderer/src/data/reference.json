@@ -457,6 +457,37 @@
     "Значение вне 0..255 даёт ошибку"
    ],
    "command": "RGB"
+  },
+  {
+   "owner": "Drone",
+   "name": "buzz",
+   "kind": "method",
+   "signature": "buzz(note, seconds)",
+   "summary": "Нота на зуммере, подключённом к позиционному модулю",
+   "topic": "light",
+   "status": "только симулятор",
+   "icon": "△",
+   "params": [
+    {
+     "name": "note",
+     "unit": "нота",
+     "text": "Имя из таблицы LiteBee Go: 'C3', 'CS3' (диез) ... от B0 до DS8"
+    },
+    {
+     "name": "seconds",
+     "unit": "с",
+     "text": "Длительность ноты"
+    }
+   ],
+   "example": "d.buzz('C3', 1.0)\nd.buzz('E3', 1.0)",
+   "context": "drone",
+   "notes": [
+    "Загрузка в дрон (миссия) отказывает: формат шага на проводе не проверен, как у code_z",
+    "На живом дроне нота играет через отдельную команду `python -m litebee buzz-live` (litebee/buzzer.py: native_frame, подтверждено на слух 2026-11-16), не через запуск самого шоу",
+    "Неизвестное имя ноты даёт ошибку сразу при вызове",
+    "docs/firmware/BUZZER_EXTENSION.md, раздел 6"
+   ],
+   "command": null
   }
  ]
 }
