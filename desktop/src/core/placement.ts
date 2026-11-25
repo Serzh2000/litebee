@@ -70,7 +70,36 @@ export function addDrone(source: string, show: Show, area: Area = FULL): Edit {
   return { source: `${body}${eol}${block.replace(/\n/g, eol)}${eol}` }
 }
 
-const CODE_CELL = /^(\s*[A-Za-z_]\w*\.code\(\s*)(\d+)/
+/**
+ * One more note for the buzzer of drone `number` at `time` (seconds on the score): `d.buzz('C3', 0.5)` goes on a line of
+ * its own after the last step that is over by then (before the first step when it is earlier than all of them). The note
+ * takes its seconds in the order of the steps, like every step, so what follows it starts later. `line` is where it landed.
+ */
+export function addNote(source: string, show: Show, number: number, time: number, note = 'C3', seconds = 0.5): Edit & { line?: number } {
+  const drone = show.drones.find((d) => d.number === number)
+  const placed = drone?.steps.filter((s) => s.line !== null) ?? []
+  if (!drone || placed.length === 0) return { source, error: 'У дрона нет шагов в коде: сначала добавьте команды полёта' }
+  let end = 0
+  let after = -1
+  placed.forEach((s, k) => {
+    end += s.seconds
+    if (end <= time + 1e-6) after = k
+  })
+  const eol = source.includes('\r\n') ? '\r\n' : '\n'
+  const lines = source.split('\n')
+  const anchor = placed[Math.max(after, 0)].line as number
+  const text = lines[anchor - 1] ?? ''
+  const m = /^(\s*)([A-Za-z_]\w*)\./.exec(text)
+  const indent = m?.[1] ?? ''
+  const name = m?.[2] ?? 'd'
+  const row = `${indent}${name}.buzz('${note}', ${seconds})${eol === '\r\n' ? '\r' : ''}`
+  // after the anchor line, or before it when the note comes first
+  const at = after < 0 ? anchor - 1 : anchor
+  lines.splice(at, 0, row)
+  return { source: lines.join('\n'), line: at + 1 }
+}
+
+const CODE_CELL =/^(\s*[A-Za-z_]\w*\.code\(\s*)(\d+)/
 const cellOf = (line: string): number | undefined => {
   const m = CODE_CELL.exec(line)
   return m ? Number(m[2]) : undefined

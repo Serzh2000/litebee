@@ -98,6 +98,8 @@ interface Props {
   onHover: (text: string | null) => void
   /** one more drone (null: the limit is reached) */
   onAdd: (() => void) | null
+  /** a note for the buzzer of a drone at a time of the score */
+  onNote: (drone: number, time: number) => void
 }
 
 export function Timetable(p: Props) {
@@ -130,7 +132,10 @@ export function Timetable(p: Props) {
     const tag = (e.target as HTMLElement).tagName
     if (tag === 'SELECT' || tag === 'INPUT') return
     const big = e.shiftKey ? 10 : 1
-    if (e.key === 'ArrowLeft') onSeek(t - big)
+    if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (selected === null) return
+      p.onNote(selected, t)
+    } else if (e.key === 'ArrowLeft') onSeek(t - big)
     else if (e.key === 'ArrowRight') onSeek(t + big)
     else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const numbers = show.drones.map((d) => d.number)
@@ -183,7 +188,7 @@ export function Timetable(p: Props) {
 
       <div className="tt-scroll" tabIndex={0} role="group" aria-label={tr('Строки расписания: по одной на борт')} aria-describedby="tt-keys">
         <p id="tt-keys" className="sr-only">
-          {tr('Тяните по линии или ← → (Shift: по 10 с), ↑ ↓ выбирают борт')}
+          {tr('Тяните по линии или ← → (Shift: по 10 с), ↑ ↓ выбирают борт. Двойной щелчок по линии или N добавляют ноту зуммера')}
         </p>
         <div className="tt-rows" role="table" aria-label={tr('Расписание')}>
           {lanes.map((lane, i) => {
@@ -223,6 +228,7 @@ export function Timetable(p: Props) {
                   }}
                   onPointerUp={() => (dragging.current = false)}
                   onPointerLeave={() => onHover(null)}
+                  onDoubleClick={(e) => p.onNote(lane.number, timeAt(e.clientX, e.currentTarget))}
                 >
                   <i className="tt-track" style={{ width: `${pct(lane.end)}%` }} />
                   {lane.leds.map((seg, k) => {

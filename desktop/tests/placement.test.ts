@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDrone, freeStartCell, setStartCell } from '@core/placement'
+import { addDrone, addNote, freeStartCell, setStartCell } from '@core/placement'
 import { nearbyCell, newSource } from '@core/project'
 import { startCell } from '@core/roles'
 import { splitDrones } from '@core/sections'
@@ -99,5 +99,33 @@ describe('adding a drone', () => {
   it('stops at ten drones', () => {
     const many = buildShow({ name: 'm', drones: Object.fromEntries(Array.from({ length: 10 }, (_, i) => [String(i + 1), []])) } as unknown as ShowData)
     expect(addDrone('x\n', many).error).toMatch(/10 дронов/)
+  })
+})
+
+describe('a note of the buzzer on the score', () => {
+  const rows = (t: string) => t.split('\n')
+  const d = show.drones[0]
+  const first = d.steps.find((s) => s.line !== null)!
+
+  it('puts d.buzz on a line of its own after the step that is over by then', () => {
+    const edit = addNote(squareSource, show, d.number, first.seconds + 0.01, 'E3', 1)
+    expect(edit.error).toBeUndefined()
+    const out = rows(edit.source)
+    expect(out.length).toBe(rows(squareSource).length + 1)
+    expect(out[edit.line! - 1].trim()).toMatch(/^[A-Za-z_]\w*\.buzz\('E3', 1\)\r?$/)
+    expect(out[edit.line! - 2]).toBe(rows(squareSource)[first.line! - 1])
+  })
+
+  it('goes before the first step when the time is before everything', () => {
+    const edit = addNote(squareSource, show, d.number, 0)
+    expect(edit.line).toBe(first.line)
+    expect(rows(edit.source)[first.line! - 1]).toContain('.buzz(')
+  })
+
+  it('keeps the line ends of a Windows file and refuses an unknown drone', () => {
+    const crlf = squareSource.replace(/\r?\n/g, '\r\n')
+    const edit = addNote(crlf, show, d.number, 1)
+    expect(edit.source.replace(/\r\n/g, '').includes('\n')).toBe(false)
+    expect(addNote(squareSource, show, 99, 1).error).toBeDefined()
   })
 })

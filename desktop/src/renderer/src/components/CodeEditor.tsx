@@ -391,7 +391,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, Props>(function CodeEdito
     reveal(line) {
       const v = view.current
       if (!v || line < 1 || line > v.state.doc.lines) return
-      const at = v.state.doc.line(line).from
+      const l = v.state.doc.line(line)
+      // a note line opens with the cursor inside its note, so the piano is there at once
+      const buzz = /\.buzz\(\s*['"]?/.exec(l.text)
+      const at = buzz ? l.from + buzz.index + buzz[0].length : l.from
       v.dispatch({ selection: { anchor: at }, effects: EditorView.scrollIntoView(at, { y: 'center' }) })
       v.focus()
     },

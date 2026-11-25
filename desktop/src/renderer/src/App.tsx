@@ -19,7 +19,7 @@ import { fitMap, MatChart } from './components/MatChart'
 const Mat3D = lazy(() => import('./components/Mat3D').then((m) => ({ default: m.Mat3D })))
 import { MAX_DRONES } from '@core/project'
 import { sectionAt, splitDrones } from '@core/sections'
-import { addDrone, freeStartCell, setStartCell, type Edit } from '@core/placement'
+import { addDrone, addNote, freeStartCell, setStartCell, type Edit } from '@core/placement'
 import { autoRoles, startCell } from '@core/roles'
 import { batteryLevel, fmtVolts, useLink } from './state/useLink'
 import { compileDrone, unprovenSteps, UploadUnsupported } from '@core/mission'
@@ -234,6 +234,16 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
     if (!apply(addDrone(project.source, show, area))) return
     setSelected(number)
     setNotice(tr('Дрон {n} добавлен на клетку {c}. Поставьте его туда на коврике.', { n: number, c: cell }))
+  }
+
+  /** A note on the score: the line goes into the code of the drone and the editor opens with the piano under it. */
+  const addNoteAt = (number: number, time: number) => {
+    const edit = addNote(project.source, show, number, time)
+    if (!apply(edit)) return
+    setSelected(number)
+    if (edit.line) setGotoLine(edit.line)
+    setTab('code')
+    setNotice(tr('Нота добавлена дрону {n}: выберите её на пианино под строкой.', { n: number }))
   }
 
   const placeAt = (cell: number) => {
@@ -570,6 +580,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
                   onSeek={playback.seek}
                   onHover={setHint}
                   onAdd={show.drones.length < MAX_DRONES ? addOne : null}
+                  onNote={addNoteAt}
                 />
               }
               code={inspector}
