@@ -53,6 +53,24 @@ export function Reference({ onInsert }: { onInsert: (code: string) => void }) {
           <li>{tr('Длина шоу — время самого долгого дрона. Время на карте и в партитуре одно: тяните по партитуре, и код подсветит строки.')}</li>
         </ul>
       </details>
+      <details className="ref-time">
+        <summary>{tr('Как читать названия нот')}</summary>
+        <ul>
+          <li>
+            {tr('Нота пишется латинской буквой и числом в кавычках:')} <code>d.buzz('C3', 0.5)</code>. {tr('Число после буквы — октава, второе число команды — секунды.')}
+          </li>
+          <li>
+            <code>C</code> {tr('до')}, <code>D</code> {tr('ре')}, <code>E</code> {tr('ми')}, <code>F</code> {tr('фа')}, <code>G</code> {tr('соль')}, <code>A</code> {tr('ля')},{' '}
+            <code>B</code> {tr('си')}.
+          </li>
+          <li>
+            {tr('Диез добавляет букву S:')} <code>CS3</code> — {tr('до-диез третьей октавы,')} <code>FS3</code> — {tr('фа-диез.')} {tr('Бемолей нет: ми-бемоль пишется как')} <code>DS</code>.
+          </li>
+          <li>
+            <code>C4</code> {tr('звучит выше')} <code>C3</code> {tr('ровно на октаву. Таблица зуммера идёт от B0 до DS8, на слух проверены ноты от C3 до G4.')}
+          </li>
+        </ul>
+      </details>
       <label className="ref-search">
         <Search size={15} strokeWidth={1.9} aria-hidden="true" />
         <input type="search" placeholder={tr('Найти команду: взлёт, круг, цвет…')} value={query} onChange={(e) => setQuery(e.target.value)} />

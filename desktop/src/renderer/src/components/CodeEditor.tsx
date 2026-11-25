@@ -10,7 +10,7 @@ import { Decoration, type DecorationSet, EditorView, type Tooltip, drawSelection
 import { tags } from '@lezer/highlight'
 import './CodeEditor.css'
 import { tr } from '@core/i18n'
-import { LED_COLORS, colorText, hexToRgb, parseColorArg, rgbArgAt, rgbToHex, snippetFor } from '@core/hints'
+import { LED_COLORS, NOTE_SECONDS, PIANO, buzzArgsAt, colorText, hexToRgb, parseColorArg, rgbArgAt, rgbToHex, snippetFor } from '@core/hints'
 
 export interface CodeEditorHandle {
   /** Puts the cursor at the start of a line (1-based), scrolls to it and focuses the editor. */
@@ -108,6 +108,17 @@ function suggest(context: CompletionContext): CompletionResult | null {
       validFor: /^['"]?\w*$/,
     }
   }
+  const buzz = buzzArgsAt(line.text, col)
+  if (buzz && buzz.args.length <= 1) {
+    const word = context.matchBefore(/['"]?[A-Za-z]*\d?/)
+    if (!word || (word.from === word.to && !context.explicit)) return null
+    const quote = /^['"]/.exec(word.text)?.[0] ?? "'"
+    return {
+      from: word.from,
+      options: PIANO.map((k, i) => ({ label: `${quote}${k.name}${quote}`, type: 'constant', detail: String(k.index), boost: -i })),
+      validFor: /^['"]?[A-Za-z]*\d?$/,
+    }
+  }
   const dot = context.matchBefore(/[A-Za-z_]\w*\.\w*/)
   if (!dot) return null
   const receiver = dot.text.slice(0, dot.text.indexOf('.'))
@@ -183,6 +194,85 @@ function createColorPanel(view: EditorView) {
   return { dom }
 }
 
+/**
+ * The note panel: while the cursor stands inside `d.buzz(...)`, a small piano (C3 to G4, the notes that were checked by
+ * ear) and the usual lengths sit under it. A key writes the note into the code, a length writes the seconds; the code
+ * stays the one truth and Ctrl+Z takes the change back.
+ */
+const notePanel = StateField.define<Tooltip | null>({
+  create: () => null,
+  update(prev, tr) {
+    if (!tr.docChanged && !tr.selection && prev !== null) return prev
+    const head = tr.state.selection.main.head
+    const line = tr.state.doc.lineAt(head)
+    const call = buzzArgsAt(line.text, head - line.from)
+    if (!call) return null
+    const pos = line.from + call.from
+    if (prev && prev.pos === pos) return prev
+    return { pos, above: false, strictSide: true, arrow: false, create: createNotePanel }
+  },
+  provide: (f) => showTooltip.from(f),
+})
+
+const KEY_W = 22
+
+function createNotePanel(view: EditorView) {
+  const dom = el('div', 'cm-notes')
+  dom.addEventListener('mousedown', (e) => e.preventDefault())
+  /** Writes `text` over argument `n` of the call under the cursor (or adds it after the previous one). */
+  const put = (n: 0 | 1, text: string) => {
+    const head = view.state.selection.main.head
+    const line = view.state.doc.lineAt(head)
+    const call = buzzArgsAt(line.text, head - line.from)
+    if (!call) return
+    const base = line.from
+    const arg = call.args[n]
+    if (arg) {
+      view.dispatch({ changes: { from: base + arg.from, to: base + arg.to, insert: text }, selection: { anchor: base + arg.from + text.length } })
+    } else if (n === 1 && call.args[0]) {
+      const at = base + call.args[0].to
+      view.dispatch({ changes: { from: at, insert: `, ${text}` }, selection: { anchor: at + 2 + text.length } })
+    } else {
+      view.dispatch({ changes: { from: base + call.from, to: base + call.to, insert: text }, selection: { anchor: base + call.from + text.length } })
+    }
+  }
+  const keys = el('div', 'cm-piano')
+  let whites = 0
+  keys.style.width = `${PIANO.filter((k) => !k.black).length * KEY_W}px`
+  for (const k of PIANO) {
+    const b = el('button', k.black ? 'cm-key cm-key-black' : 'cm-key') as HTMLButtonElement
+    b.type = 'button'
+    b.title = k.name
+    b.setAttribute('aria-label', tr('Нота {n}', { n: k.name }))
+    if (k.black) b.style.left = `${whites * KEY_W - 7}px`
+    else {
+      b.style.left = `${whites * KEY_W}px`
+      if (k.name.startsWith('C')) b.textContent = k.name
+      whites++
+    }
+    b.addEventListener('click', () => {
+      const head = view.state.selection.main.head
+      const line = view.state.doc.lineAt(head)
+      const call = buzzArgsAt(line.text, head - line.from)
+      put(0, `'${k.name}'`)
+      // a new call gets a length too, so it is complete at once
+      if (call && call.args.length < 2) put(1, '0.5')
+    })
+    keys.append(b)
+  }
+  const lengths = el('div', 'cm-lengths')
+  for (const s of NOTE_SECONDS) {
+    const b = el('button', 'cm-length', `${s}`) as HTMLButtonElement
+    b.type = 'button'
+    b.title = tr('Длительность {s} с', { s })
+    b.setAttribute('aria-label', tr('Длительность {s} с', { s }))
+    b.addEventListener('click', () => put(1, `${s}`))
+    lengths.append(b)
+  }
+  dom.append(keys, lengths)
+  return { dom }
+}
+
 const setNow = StateEffect.define<{ run: number[]; light: number[] }>()
 
 /** Highlights of the lines that run now. They live in the editor state, so typing moves them with the text. */
@@ -252,6 +342,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, Props>(function CodeEdito
           referenceTooltip,
           autocompletion({ override: [suggest], icons: false }),
           colorPanel,
+          notePanel,
           keymap.of([...completionKeymap, indentWithTab, ...defaultKeymap, ...historyKeymap]),
           theme,
           EditorView.contentAttributes.of({ 'aria-label': tr('Код шоу на Python'), spellcheck: 'false' }),

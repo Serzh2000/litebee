@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LED_COLORS, colorText, hexToRgb, parseColorArg, rgbArgAt, rgbToHex, snippetFor } from '@core/hints'
+import { LED_COLORS, NOTE_SECONDS, PIANO, buzzArgsAt, colorText, hexToRgb, noteName, parseColorArg, rgbArgAt, rgbToHex, snippetFor } from '@core/hints'
 import missionPy from '../../litebee/mission.py?raw'
 
 describe('the colour of d.rgb(...)', () => {
@@ -58,5 +58,51 @@ describe('snippets of commands', () => {
     expect(snippetFor('code(cell, seconds)')).toBe('code(${cell}, ${seconds})')
     expect(snippetFor('land()')).toBe('land()')
     expect(snippetFor("circle(count, cell1, cell2, seconds, rotate='cw')")).toBe('circle(${count}, ${cell1}, ${cell2}, ${seconds})')
+  })
+})
+
+describe('the note of d.buzz(...)', () => {
+  const at = (line: string) => buzzArgsAt(line.replace('|', ''), line.indexOf('|'))
+  const text = (line: string) => {
+    const clean = line.replace('|', '')
+    return at(line)?.args.map((a) => clean.slice(a.from, a.to))
+  }
+
+  it('finds both arguments, with or without spaces', () => {
+    expect(text("d.buzz('C|3', 0.5)")).toEqual(["'C3'", '0.5'])
+    expect(text("d.buzz( 'C3' ,0.5 |)")).toEqual(["'C3'", '0.5'])
+  })
+
+  it('finds what is written so far', () => {
+    expect(text('d.buzz(|)')).toEqual([])
+    expect(text("d.buzz('E3'|")).toEqual(["'E3'"])
+    expect(text("d.buzz('E3', |")).toEqual(["'E3'"])
+  })
+
+  it('is null outside the call and in other calls', () => {
+    expect(at("d.buzz('C3', 0.5)|")).toBeNull()
+    expect(at("d.rgb('re|d')")).toBeNull()
+    expect(at("|d.buzz('C3', 0.5)")).toBeNull()
+  })
+
+  it('does not split at a comma inside a string or brackets', () => {
+    expect(text("d.buzz('C,3', max(1, |2))")).toEqual(["'C,3'", 'max(1, 2)'])
+  })
+})
+
+describe('the notes of the buzzer', () => {
+  it('names the notes as the table of the buzzer does', () => {
+    expect([0, 1, 2, 25, 26, 29, 37, 44].map(noteName)).toEqual(['B0', 'C1', 'CS1', 'C3', 'CS3', 'E3', 'C4', 'G4'])
+  })
+
+  it('offers the notes that were checked by ear: C3 to G4, twenty keys, seven black ones', () => {
+    expect(PIANO.map((k) => k.name).slice(0, 3)).toEqual(['C3', 'CS3', 'D3'])
+    expect(PIANO).toHaveLength(20)
+    expect(PIANO[PIANO.length - 1].name).toBe('G4')
+    expect(PIANO.filter((k) => k.black)).toHaveLength(8)
+  })
+
+  it('offers lengths of a note in seconds', () => {
+    expect(NOTE_SECONDS).toEqual([0.25, 0.5, 1, 2])
   })
 })

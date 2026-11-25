@@ -17,15 +17,15 @@ export const LED_COLORS: { name: string; rgb: Rgb }[] = [
   { name: 'white', rgb: [255, 255, 255] },
 ]
 
-const RGB_CALL = /\.rgb\(/g
 
 /**
- * The argument of the `.rgb(` call that the cursor (a column of the line) is inside: where it starts and ends in the line.
- * An argument that is not closed yet runs to the end of the line. Null when the cursor is not inside such a call.
+ * What stands between the brackets of the `.name(` call that the cursor (a column of the line) is inside: where it starts
+ * and ends in the line. A call that is not closed yet runs to the end of the line. Null when the cursor is not inside
+ * such a call.
  */
-export function rgbArgAt(line: string, col: number): { from: number; to: number } | null {
+export function callArgAt(line: string, col: number, name: string): { from: number; to: number } | null {
   let found: { from: number; to: number } | null = null
-  for (const m of line.matchAll(RGB_CALL)) {
+  for (const m of line.matchAll(new RegExp(`\\.${name}\\(`, 'g'))) {
     const from = (m.index ?? 0) + m[0].length
     if (from > col) break
     let depth = 0
@@ -52,6 +52,62 @@ export function rgbArgAt(line: string, col: number): { from: number; to: number 
   }
   return found
 }
+
+/** The colour of `.rgb(...)` under the cursor. */
+export const rgbArgAt = (line: string, col: number) => callArgAt(line, col, 'rgb')
+
+/**
+ * The arguments of the `.buzz(note, seconds)` call that the cursor is inside: the whole span between the brackets and the
+ * span of each argument that is written (trimmed of spaces). Null when the cursor is not inside such a call.
+ */
+export function buzzArgsAt(line: string, col: number): { from: number; to: number; args: { from: number; to: number }[] } | null {
+  const span = callArgAt(line, col, 'buzz')
+  if (!span) return null
+  const args: { from: number; to: number }[] = []
+  let depth = 0
+  let quote = ''
+  let start = span.from
+  const close = (end: number) => {
+    let a = start
+    let b = end
+    while (a < b && line[a] === ' ') a++
+    while (b > a && line[b - 1] === ' ') b--
+    if (b > a) args.push({ from: a, to: b })
+  }
+  for (let i = span.from; i < span.to; i++) {
+    const c = line[i]
+    if (quote) {
+      if (c === quote) quote = ''
+    } else if (c === "'" || c === '"') quote = c
+    else if (c === '(') depth++
+    else if (c === ')') depth--
+    else if (c === ',' && depth === 0) {
+      close(i)
+      start = i + 1
+    }
+  }
+  close(span.to)
+  return { ...span, args }
+}
+
+const SEMITONES = ['C', 'CS', 'D', 'DS', 'E', 'F', 'FS', 'G', 'GS', 'A', 'AS', 'B']
+
+/** The name of a note of the buzzer table: 0 is B0, 25 is C3, 26 is CS3 (litebee/buzzer.py NOTE_NAMES). */
+export function noteName(index: number): string {
+  if (index <= 0) return 'B0'
+  const i = index - 1
+  return `${SEMITONES[i % 12]}${Math.floor(i / 12) + 1}`
+}
+
+/** The notes that were checked by ear on a live buzzer: C3 (25) to G4 (44). */
+export const PIANO: { name: string; index: number; black: boolean }[] = Array.from({ length: 20 }, (_, k) => {
+  const index = 25 + k
+  const name = noteName(index)
+  return { name, index, black: name.includes('S') }
+})
+
+/** The lengths of a note offered as buttons, seconds. */
+export const NOTE_SECONDS = [0.25, 0.5, 1, 2]
 
 /** How a colour is written in the code: its name when it is one of the eight, otherwise the triple. */
 export function colorText(rgb: Rgb): string {
