@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('litebee', {
   link: {
     adapters: () => ipcRenderer.invoke('link:adapters'),
     state: () => ipcRenderer.invoke('link:state'),
+    allow: (on: boolean) => ipcRenderer.invoke('link:allow', on),
     start: (pcIp: string) => ipcRenderer.invoke('link:start', pcIp),
     stop: () => ipcRenderer.invoke('link:stop'),
     upload: (args: unknown) => ipcRenderer.invoke('link:upload', args),

@@ -6,6 +6,7 @@ import { app, BrowserWindow, dialog, ipcMain, nativeTheme, net, protocol, shell 
 import type { Step } from '../core/show'
 import { setLang, tr } from '../core/i18n'
 import { adapters, Link } from './link'
+import { loadAllowed, saveAllowed } from './allow'
 
 // The window background is the desk colour, so a slow first paint does not flash white or black.
 const DESK = '#EEF3F6'
@@ -102,12 +103,31 @@ ipcMain.handle('project:save', async (_e, args: { text: string; path: string | n
 const link = new Link()
 ipcMain.handle('link:adapters', () => adapters())
 ipcMain.handle('link:state', () => link.state())
+// Polling the drones is off until the person allows it, and the choice is kept: with several computers on one router, each
+// one that polls announces itself to the drones, so only the computer that flies should do it.
+const allowFile = () => join(app.getPath('userData'), 'link-settings.json')
+const allow = (on: boolean) => {
+  link.allowed = on
+  saveAllowed(allowFile(), on)
+}
+ipcMain.handle('link:allow', async (_e, on: boolean) => {
+  allow(on)
+  if (!on) link.stop()
+  else {
+    // on the drone network the link starts by itself, as LiteBee Go does; elsewhere the person picks the adapter
+    const drones = adapters().find((a) => a.ip.startsWith('192.168.13.'))
+    if (drones) await link.start(drones.ip)
+  }
+  return link.state()
+})
 ipcMain.handle('link:start', async (_e, pcIp: string) => {
   if (!adapters().some((a) => a.ip === pcIp)) return link.state()
+  allow(true)
   await link.start(pcIp)
   return link.state()
 })
 ipcMain.handle('link:stop', () => {
+  allow(false)
   link.stop()
   return link.state()
 })
@@ -153,9 +173,11 @@ app.whenReady().then(() => {
     return net.fetch(pathToFileURL(file).toString())
   })
   createWindow()
-  // On the drone network (192.168.13.x) the link starts by itself, as LiteBee Go does; elsewhere the person picks the adapter.
+  // Only when the person has allowed polling: then, on the drone network (192.168.13.x), the link starts by itself, as
+  // LiteBee Go does; elsewhere the person picks the adapter. Otherwise nothing is sent to the network.
+  link.allowed = loadAllowed(allowFile())
   const drones = adapters().find((a) => a.ip.startsWith('192.168.13.'))
-  if (drones && !SHOT) void link.start(drones.ip)
+  if (link.allowed && drones && !SHOT) void link.start(drones.ip)
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })

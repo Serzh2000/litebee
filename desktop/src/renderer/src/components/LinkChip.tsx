@@ -33,26 +33,41 @@ export function LinkChip({ link }: { link: Link }) {
   }
 
   const listening = link.state?.pcIp ?? null
+  const allowed = link.state?.allowed ?? false
   const alive = link.drones.filter(isAlive).length
-  const label = alive > 0 ? tr('Дронов на связи: {n}', { n: alive }) : listening ? tr('Ждём дроны') : tr('Подключить дроны')
+  const label = !allowed
+    ? tr('Опрос выключен')
+    : alive > 0
+      ? tr('Дронов на связи: {n}', { n: alive })
+      : listening
+        ? tr('Ждём дроны')
+        : tr('Подключить дроны')
 
   return (
     <div className="link-chip" ref={box}>
       <button type="button" className="quiet" aria-expanded={open} data-on={alive > 0} onClick={() => setOpen((o) => !o)}>
-        <span className="lc-dot" data-on={alive > 0} data-wait={alive === 0 && Boolean(listening)} aria-hidden="true" />
+        <span className="lc-dot" data-on={alive > 0} data-wait={allowed && alive === 0 && Boolean(listening)} aria-hidden="true" />
         <span className="lc-text">{label}</span>
       </button>
       {open && (
         <div className="popover link-pop" role="dialog" aria-label={tr('Связь с дронами')}>
           <strong>{tr('Связь с дронами')}</strong>
+          <button type="button" role="switch" aria-checked={allowed} className="allow" onClick={() => void link.allow(!allowed)}>
+            <span className="allow-track" aria-hidden="true">
+              <span className="allow-knob" />
+            </span>
+            <span>{tr('Опрашивать дроны')}</span>
+          </button>
           <p className="hint">
-            {listening
-              ? tr('Приложение слушает на {ip}. Включите дроны: они найдут компьютер сами.', { ip: listening })
-              : tr('Выберите сетевой адаптер, который подключён к Wi-Fi дронов (адрес 192.168.13.x).')}
+            {!allowed
+              ? tr('Выключено: компьютер ничего не рассылает по сети и не отбирает дронов у другого компьютера. Включайте только на том, с которого летите.')
+              : listening
+                ? tr('Приложение слушает на {ip}. Включите дроны: они найдут компьютер сами. Если в сети есть другой компьютер с этой программой, на нём опрос должен быть выключен.', { ip: listening })
+                : tr('Выберите сетевой адаптер, который подключён к Wi-Fi дронов (адрес 192.168.13.x).')}
           </p>
-          {link.state?.error && <p className="hint bad">{tr(link.state.error)}</p>}
-          {link.adapters.length === 0 && <p className="hint bad">{tr('Сетевых адаптеров не найдено.')}</p>}
-          <ul className="adapters">
+          {allowed && link.state?.error && <p className="hint bad">{tr(link.state.error)}</p>}
+          {allowed && link.adapters.length === 0 && <p className="hint bad">{tr('Сетевых адаптеров не найдено.')}</p>}
+          <ul className="adapters" hidden={!allowed}>
             {link.adapters.map((a) => (
               <li key={a.ip}>
                 <button type="button" aria-pressed={listening === a.ip} onClick={() => void (listening === a.ip ? link.stop() : link.start(a.ip))}>

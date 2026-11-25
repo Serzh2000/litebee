@@ -309,7 +309,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
   useEffect(() => setUploads({}), [show, maxHeight])
   const assigned = link.active.filter((d) => roles[d.ip])
   const loadBlock = useMemo(() => {
-    if (!link.connected) return 'Нет дронов на связи'
+    if (!link.connected) return link.state && !link.state.allowed ? 'Опрос дронов выключен: включите его в панели «Связь с дронами»' : 'Нет дронов на связи'
     if (assigned.length === 0) return 'Назначьте бортам дроны на связи в расписании'
     for (const d of assigned) {
       const model = show.drones.find((m) => m.number === roles[d.ip])

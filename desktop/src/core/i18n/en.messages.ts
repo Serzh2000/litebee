@@ -130,6 +130,7 @@ export const EN_MESSAGES: [ru: string, en: string][] = [
   ['Миссия на борту. Нажмите «Взвести»: это разрешает старт', 'The mission is on board. Press “Arm”: this allows the start'],
   ['Взведено. Нажмите «Старт»: дроны полетят после вашего подтверждения. Снять взвод: ещё раз «Взвести»', 'Armed. Press “Start”: the drones fly after you confirm. To disarm press “Arm” again'],
   ['Нет дронов на связи', 'No drones on the link'],
+  ['Опрос дронов выключен: включите его в панели «Связь с дронами»', 'Polling of the drones is off: turn it on in the «Link to drones» panel'],
 
   ['В шоу нет дрона {n}', 'The show has no drone {n}'],
   // ---- running the Python source (worker, litebee/show.py)

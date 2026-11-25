@@ -46,7 +46,6 @@ const UI: [ru: string, en: string][] = [
   ['Ждём дроны', 'Waiting for drones'],
   ['Подключить дроны', 'Connect drones'],
   ['Связь с дронами', 'Link to drones'],
-  ['Приложение слушает на {ip}. Включите дроны: они найдут компьютер сами.', 'The app listens on {ip}. Switch the drones on: they will find the computer by themselves.'],
   ['Выберите сетевой адаптер, который подключён к Wi-Fi дронов (адрес 192.168.13.x).', 'Pick the network adapter that is on the drones’ Wi-Fi (address 192.168.13.x).'],
   ['Сетевых адаптеров не найдено.', 'No network adapters found.'],
   ['Отключить', 'Disconnect'],
@@ -202,6 +201,10 @@ const UI: [ru: string, en: string][] = [
   // reference tab
   ['Справочник команд', 'Command reference'],
   ['Свой цвет', 'Custom colour'],
+  ['Опрос выключен', 'Polling is off'],
+  ['Опрашивать дроны', 'Poll the drones'],
+  ['Выключено: компьютер ничего не рассылает по сети и не отбирает дронов у другого компьютера. Включайте только на том, с которого летите.', 'Off: this computer sends nothing to the network and does not take drones from another computer. Turn it on only on the one you fly from.'],
+  ['Приложение слушает на {ip}. Включите дроны: они найдут компьютер сами. Если в сети есть другой компьютер с этой программой, на нём опрос должен быть выключен.', 'The app listens on {ip}. Switch the drones on: they find the computer by themselves. If another computer on the network runs this program, polling must be off on it.'],
   ['Как течёт время в шоу', 'How time runs in a show'],
   ['У каждого дрона своё время с 0 секунд. Его шаги идут по порядку сверху вниз, один за другим.', 'Each drone has its own time from 0 seconds. Its steps go in order from top to bottom, one after another.'],
   ['Число в команде — сколько длится шаг.', 'The number in a command is how long the step lasts.'],

@@ -24,6 +24,8 @@ interface LinkState {
   loaded: string[]
   armed: boolean
   flying: boolean
+  /** polling of the drones is allowed (the person's switch); off: nothing is sent to the network */
+  allowed: boolean
 }
 
 interface Window {
@@ -37,6 +39,7 @@ interface Window {
     link: {
       adapters: () => Promise<{ name: string; ip: string }[]>
       state: () => Promise<LinkState>
+      allow: (on: boolean) => Promise<LinkState>
       start: (pcIp: string) => Promise<LinkState>
       stop: () => Promise<LinkState>
       upload: (args: { ip: string; steps: unknown[]; maxHeightCm: number }) => Promise<{ ok: boolean; message: string }>

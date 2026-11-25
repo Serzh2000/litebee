@@ -24,6 +24,7 @@ const FAKE: LinkState = {
   loaded: [],
   armed: false,
   flying: false,
+  allowed: true,
   drones: [
     { ip: '192.168.13.104', droneId: '1', batteryV: 7.9, x: 40, y: 40, z: 0, cell: 13, fix: true, running: false, lost: false, silentMs: 80 },
     { ip: '192.168.13.108', droneId: '2', batteryV: 7.3, x: 200, y: 160, z: 0, cell: 5 + 12 * 4, fix: true, running: false, lost: false, silentMs: 60 },
@@ -51,6 +52,10 @@ export function useLink() {
     }
   }, [bridge])
 
+  const allow = useCallback(
+    (on: boolean) => (WANT_FAKE ? setState((s) => (s ? { ...s, allowed: on } : s)) : bridge?.allow(on).then(setState)),
+    [bridge],
+  )
   const start = useCallback((ip: string) => bridge?.start(ip).then(setState), [bridge])
   const stop = useCallback(() => bridge?.stop().then(setState), [bridge])
   const refresh = useCallback(() => bridge?.state().then(setState), [bridge])
@@ -73,6 +78,7 @@ export function useLink() {
     archive: drones.filter((d) => !isAlive(d)),
     /** at least one drone is talking to us */
     connected: drones.some(isAlive),
+    allow,
     start,
     stop,
     arm,

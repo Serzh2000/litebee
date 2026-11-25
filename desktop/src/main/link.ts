@@ -64,6 +64,8 @@ export interface LinkState {
   loaded: string[]
   armed: boolean
   flying: boolean
+  /** the person allowed polling the drones; off: nothing is sent to the network */
+  allowed: boolean
 }
 
 interface Conn {
@@ -110,6 +112,8 @@ export class Link {
   private conns = new Map<string, Conn>()
   /** the mission that is on board each drone, as it was uploaded */
   private loaded = new Map<string, Mission>()
+  /** the person allowed polling the drones; the link is only ever started while this is on (see main/index.ts) */
+  allowed = false
   private armed = false
   private flying = false
   private abort = false
@@ -422,6 +426,6 @@ export class Link {
         }
       })
       .sort((p, q) => p.ip.localeCompare(q.ip, undefined, { numeric: true }))
-    return { pcIp: this.pcIp, error: this.error, drones, loaded: [...this.loaded.keys()], armed: this.armed, flying: this.flying }
+    return { pcIp: this.pcIp, error: this.error, drones, loaded: [...this.loaded.keys()], armed: this.armed, flying: this.flying, allowed: this.allowed }
   }
 }
