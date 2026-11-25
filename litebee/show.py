@@ -15,12 +15,13 @@ Model assumptions (they are guesses, not measured):
 """
 import sys
 from bisect import bisect_left
+import struct
 from dataclasses import dataclass, field
 from itertools import combinations
 from math import atan2, cos, dist, pi, sin
 from typing import List, Optional
 
-from .mission import (CELL_CM, CMD_AUTOLAND, CMD_CALIBRATE, CMD_MOVEXY, CMD_RGB, CMD_TAKEOFF, CMD_MOVEZ,
+from .mission import (CELL_CM, CMD_AUTOLAND, CMD_CALIBRATE, CMD_CIRCLEALT, CMD_MOVEXY, CMD_MOVEXYZ, CMD_RGB, CMD_TAKEOFF, CMD_MOVEZ,
                       COLOR_BY_INDEX, COLORS, GRID_CELLS, GRID_W, Mission, MissionStep, rgb_data, ticks,
                       xy_data, z_data)
 
@@ -312,11 +313,12 @@ class Show:
 def drone_to_mission(drone: Drone) -> Mission:
     """Compile a drone's program into a mission, using only step layouts proven on live drones.
 
-    `code` (cell move) becomes a moveXY step. Raises UploadUnsupported for code_z, circle and
-    circle_z (the wire layout of moveXYZ / circle has not been verified), for a cell outside the
+    `code` (cell move) becomes a moveXY step, `code_z` a moveXYZ step and `circle_z` a circleAlt step (both flown 2026-11-25). Raises
+    UploadUnsupported for circle (not packed here), for a cell outside the
     mat and for more steps than the one-byte step counter of the protocol can number.
     """
     now, steps = 0, []
+    height = None          # the height the drone has after the steps so far (None before the take-off)
     for s in drone.steps:
         if s.kind == "calibrate":
             now += ticks(s.seconds)
@@ -324,9 +326,11 @@ def drone_to_mission(drone: Drone) -> Mission:
         elif s.kind == "takeoff":
             now += ticks(s.seconds)
             steps.append(MissionStep(CMD_TAKEOFF, now, z_data(s.args["z"])))
+            height = s.args["z"]
         elif s.kind == "set_z":
             now += ticks(s.seconds)
             steps.append(MissionStep(CMD_MOVEZ, now, z_data(s.args["z"])))
+            height = s.args["z"]
         elif s.kind == "rgb":
             r, g, b = s.args["rgb"]
             steps.append(MissionStep(CMD_RGB, now, rgb_data(r, g, b)))
@@ -335,12 +339,36 @@ def drone_to_mission(drone: Drone) -> Mission:
                 raise UploadUnsupported(f"Клетка {s.args['cell']} (строка {s.line}) вне коврика 0-{GRID_CELLS - 1}")
             now += ticks(s.seconds)
             steps.append(MissionStep(CMD_MOVEXY, now, xy_data(s.args["cell"])))
+        elif s.kind == "code_z":
+            if not 0 <= s.args["cell"] < GRID_CELLS:
+                raise UploadUnsupported(f"Клетка {s.args['cell']} (строка {s.line}) вне коврика 0-{GRID_CELLS - 1}")
+            now += ticks(s.seconds)
+            row, col = divmod(int(s.args["cell"]), GRID_W)
+            data = struct.pack("<hhh", CELL_CM * row, CELL_CM * col, int(round(s.args["z"]))) + bytes(6)
+            steps.append(MissionStep(CMD_MOVEXYZ, now, data))
+            height = s.args["z"]
+        elif s.kind == "circle_z":
+            for c in (s.args["cell1"], s.args["cell2"]):
+                if not 0 <= c < GRID_CELLS:
+                    raise UploadUnsupported(f"Клетка {c} (строка {s.line}) вне коврика 0-{GRID_CELLS - 1}")
+            if height is None:
+                raise UploadUnsupported(f"circle_z (строка {s.line}): сначала нужен взлёт, от высоты считается подъём")
+            # the half turn takes the whole step, the drone orbits through its current position; the height on the
+            # wire is ABSOLUTE (the DSL's dz is a rise: current height + dz)
+            t = ticks(s.seconds)
+            (r1, c1), (r2, c2) = divmod(int(s.args["cell1"]), GRID_W), divmod(int(s.args["cell2"]), GRID_W)
+            now += t
+            height += s.args["dz"]
+            data = struct.pack("<hhHhB", CELL_CM * (r1 + r2) // 2, CELL_CM * (c1 + c2) // 2, t, int(round(height)),
+                               1 if s.args["rotate"] == "ccw" else 0) + bytes(3)
+            steps.append(MissionStep(CMD_CIRCLEALT, now, data))
         elif s.kind == "land":
             steps.append(MissionStep(CMD_AUTOLAND, now, bytes(12)))
+            height = None
         else:
             raise UploadUnsupported(
                 f"Шаг {s.kind!r} (строка {s.line}) пока нельзя загрузить: его формат не проверен на живом дроне "
-                "(загружаются калибровка, взлёт, высота, посадка, цвет и движение по клеткам code)")
+                "(загружаются калибровка, взлёт, высота, посадка, цвет, движение по клеткам code, code_z и круг с подъёмом circle_z)")
     if not steps:
         raise UploadUnsupported("У дрона нет шагов")
     if len(steps) > 255:

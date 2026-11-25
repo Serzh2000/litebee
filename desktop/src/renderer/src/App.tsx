@@ -377,7 +377,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
       }).length,
     [show],
   )
-  const notes = honestyNotes(show.drones.length, unproven)
+  const notes = honestyNotes(unproven)
   const { steps, reason } = preflight({ check, errors, connected: link.connected, loadBlock, loading, loaded, armed, flying })
 
   // Underlines in the code: the error of the run first, then one per finding that points at a line.

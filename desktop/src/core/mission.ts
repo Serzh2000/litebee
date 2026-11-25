@@ -8,10 +8,10 @@ import { DEFAULT_MAX_HEIGHT_CM, MAX_START_DISTANCE_CM } from './checks'
 import { frame } from './protocol'
 import { CELL_CM, GRID_CELLS, GRID_W, cellFromXY, type Step } from './show'
 
-export const CMD = { calibrate: 0, takeoff: 1, autoland: 2, moveXY: 3, moveZ: 5, moveXYZ: 10, circle: 12, rgb: 50 } as const
+export const CMD = { calibrate: 0, takeoff: 1, autoland: 2, moveXY: 3, moveZ: 5, moveXYZ: 10, circle: 12, circleAlt: 13, rgb: 50 } as const
 
-/** Commands that have flown on a live drone; moveXYZ is packed as LiteBee Go packs it but has not been flown yet. */
-export const PROVEN_CMDS: ReadonlySet<number> = new Set([CMD.calibrate, CMD.takeoff, CMD.autoland, CMD.moveXY, CMD.moveZ, CMD.circle, CMD.rgb])
+/** Commands that have flown on a live drone (moveXYZ and circleAlt on 2026-11-25: see docs/PROTOCOL_STEPS.md, 11.2.1). */
+export const PROVEN_CMDS: ReadonlySet<number> = new Set([CMD.calibrate, CMD.takeoff, CMD.autoland, CMD.moveXY, CMD.moveXYZ, CMD.moveZ, CMD.circle, CMD.circleAlt, CMD.rgb])
 /** The longest wait in one place. Official shows hold drones 12-18 s while others fly; this catches typos like 600 s. */
 export const MAX_HOVER_S = 60
 export const MIN_VOLTS = 7.0
@@ -57,9 +57,11 @@ const goTicks = (seconds: number) => Math.floor(10 * seconds)
 /** RGB step data; the wire order is g, r, b. */
 const rgbData = (r: number, g: number, b: number) => Uint8Array.from([5, 0, 2, 255, g, r, b, 0, 0, 0, 0, 0])
 
-/** Compile a drone's program. Throws UploadUnsupported for steps whose wire layout is not verified (circle, code_z). */
+/** Compile a drone's program. Throws UploadUnsupported for steps whose wire layout is not verified (none at the moment). */
 export function compileDrone(steps: Step[]): Mission {
   let now = 0
+  /** the height after the steps so far (null before the take-off): circle_z goes to an absolute height on the wire */
+  let height: number | null = null
   const out: Mission = []
   for (const s of steps) {
     if (s.kind === 'calibrate') {
@@ -68,9 +70,11 @@ export function compileDrone(steps: Step[]): Mission {
     } else if (s.kind === 'takeoff') {
       now += ticks(s.seconds)
       out.push({ cmd: CMD.takeoff, tEnd: now, data: zData(s.args.z) })
+      height = s.args.z
     } else if (s.kind === 'set_z') {
       now += ticks(s.seconds)
       out.push({ cmd: CMD.moveZ, tEnd: now, data: zData(s.args.z) })
+      height = s.args.z
     } else if (s.kind === 'rgb') {
       const [r, g, b] = s.args.rgb
       out.push({ cmd: CMD.rgb, tEnd: now, data: rgbData(r, g, b) })
@@ -88,6 +92,7 @@ export function compileDrone(steps: Step[]): Mission {
       now += goTicks(s.seconds)
       const [row, col] = rowCol(s.args.cell)
       out.push({ cmd: CMD.moveXYZ, tEnd: now, data: dataI16([0, row], [2, col], [4, Math.round(s.args.z)]) })
+      height = s.args.z
     } else if (s.kind === 'circle') {
       const { count, cell1, cell2 } = s.args
       for (const c of [cell1, cell2]) {
@@ -107,12 +112,31 @@ export function compileDrone(steps: Step[]): Mission {
       data[8] = s.args.rotate === 'ccw' ? 1 : 0
       now += t * count
       out.push({ cmd: CMD.circle, tEnd: now, data })
+    } else if (s.kind === 'circle_z') {
+      const { cell1, cell2, dz } = s.args
+      for (const c of [cell1, cell2]) {
+        if (!(c >= 0 && c < GRID_CELLS)) throw new UploadUnsupported(`Клетка ${c} (строка ${s.line}) вне коврика 0-${GRID_CELLS - 1}`)
+      }
+      if (height === null) throw new UploadUnsupported(`circle_z (строка ${s.line}): сначала нужен взлёт, от высоты считается подъём`)
+      // One half turn takes the whole step; the drone orbits through its current position (flown 2026-11-25). The height
+      // on the wire is ABSOLUTE: the current height plus dz.
+      const t = goTicks(s.seconds)
+      if (t < 1 || t > 0xffff) throw new UploadUnsupported(`circle_z: время полуоборота ${s.seconds} с (строка ${s.line}) не подходит`)
+      const [r1, c1] = rowCol(cell1)
+      const [r2, c2] = rowCol(cell2)
+      height += dz
+      const data = dataI16([0, Math.floor(0.5 * (r1 + r2))], [2, Math.floor(0.5 * (c1 + c2))], [6, Math.round(height)])
+      new DataView(data.buffer).setUint16(4, t, true)
+      data[8] = s.args.rotate === 'ccw' ? 1 : 0
+      now += t
+      out.push({ cmd: CMD.circleAlt, tEnd: now, data })
     } else if (s.kind === 'land') {
       out.push({ cmd: CMD.autoland, tEnd: now, data: new Uint8Array(12) })
+      height = null
     } else {
       throw new UploadUnsupported(
         `Шаг «${s.kind}» (строка ${s.line}) пока нельзя загрузить: его раскладка байтов не известна ` +
-          '(загружаются калибровка, взлёт, высота, посадка, цвет, движение по клеткам code и code_z и круги circle)',
+          '(загружаются калибровка, взлёт, высота, посадка, цвет, движение по клеткам code и code_z и круги circle и circle_z)',
       )
     }
   }
@@ -133,7 +157,7 @@ export const missionChecksum = (m: Mission) => m.reduce((n, s) => n + s.cmd, 0) 
 export const clearMissionFrame = () => frame([1, 0, 3, 0, 1])
 
 const heightOf = (s: MissionStep) =>
-  s.cmd === CMD.takeoff || s.cmd === CMD.moveZ ? u16(s.data, 0) : s.cmd === CMD.moveXYZ ? u16(s.data, 4) : 0
+  s.cmd === CMD.takeoff || s.cmd === CMD.moveZ ? u16(s.data, 0) : s.cmd === CMD.moveXYZ ? u16(s.data, 4) : s.cmd === CMD.circleAlt ? u16(s.data, 6) : 0
 
 export const missionMaxHeight = (m: Mission) => m.reduce((h, s) => Math.max(h, heightOf(s)), 0)
 
@@ -145,7 +169,7 @@ export function missionMaxHover(m: Mission): number {
   for (const s of m) {
     const dur = (s.tEnd - prev) / 10
     if (s.cmd === CMD.moveZ && heightOf(s) === z) longest = Math.max(longest, dur)
-    if (s.cmd === CMD.takeoff || s.cmd === CMD.moveZ || s.cmd === CMD.moveXYZ) z = heightOf(s)
+    if (s.cmd === CMD.takeoff || s.cmd === CMD.moveZ || s.cmd === CMD.moveXYZ || s.cmd === CMD.circleAlt) z = heightOf(s)
     else if (s.cmd === CMD.autoland) z = 0
     prev = s.tEnd
   }
@@ -209,6 +233,6 @@ export const missionSeconds = (m: Mission) => (m.length ? m[m.length - 1].tEnd :
 
 /** Names of the steps of a mission that nobody has flown yet (empty: everything is proven). */
 export function unprovenSteps(m: Mission): string[] {
-  const name: Record<number, string> = { [CMD.moveXYZ]: 'code_z', [CMD.circle]: 'circle' }
+  const name: Record<number, string> = { [CMD.moveXYZ]: 'code_z', [CMD.circle]: 'circle', [CMD.circleAlt]: 'circle_z' }
   return [...new Set(m.filter((s) => !PROVEN_CMDS.has(s.cmd)).map((s) => name[s.cmd] ?? String(s.cmd)))]
 }

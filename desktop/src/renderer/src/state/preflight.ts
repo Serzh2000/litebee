@@ -108,12 +108,12 @@ export function nextStep(steps: PreflightStep[], flying: boolean): number | null
 }
 
 /**
- * Quiet notes about what nobody has flown yet, shown under the chain. `drones` is the number of drones of the show,
- * `unproven` the number of drones holding a step that is not proven on a real drone (see core/mission.ts unprovenSteps).
+ * Quiet notes about what nobody has flown yet, shown under the chain. `unproven` is the number of drones holding a step
+ * that is not proven on a real drone (see core/mission.ts unprovenSteps). Several drones from one start have flown from
+ * this app (the owner, 2026-11-25), so that is no longer a note.
  */
-export function honestyNotes(drones: number, unproven: number): string[] {
+export function honestyNotes(unproven: number): string[] {
   const out: string[] = []
-  if (drones > 1) out.push('Несколько дронов вместе пока не проверены в полёте')
   if (unproven > 0) out.push('В шоу есть шаги, не проверенные на дроне')
   return out
 }

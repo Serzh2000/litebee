@@ -552,8 +552,8 @@ def test_start_is_refused_when_the_drone_was_moved_after_upload(win, qapp):
         assert "клетке 130" in win.log_view.toPlainText()
 
 
-def test_code_z_and_circle_are_still_not_uploadable(win, qapp):
-    for call in ("d.code_z(97, 80, 4)", "d.circle(2, 66, 77, 13, 'cw')"):
+def test_circle_is_still_not_uploadable(win, qapp):
+    for call in ("d.circle(2, 66, 77, 13, 'cw')",):
         port = free_port()
         text = ("from litebee import Show\nshow = Show('x')\nd = show.drone(1)\nd.takeoff(50, 5)\n"
                 f"d.code(97, 4)\n{call}\nd.land()\n")

@@ -35,10 +35,18 @@ describe('mission', () => {
     expect([z2.cmd, z2.tEnd, hex(z2.data)]).toEqual([10, 3, '280028005a00000000000000'])
   })
 
-  it('compiles the whole of My Dream and flags only the step nobody has flown (code_z; circle has flown)', () => {
+  it('packs circle_z as circleAlt: an absolute height (the current one plus dz), one half turn per step, flown 2026-11-25', () => {
+    const [, c] = compileDrone([step('takeoff', 5, { z: 100 }), step('circle_z', 8, { cell1: 14, cell2: 16, dz: 30, rotate: 'cw' })])
+    expect([c.cmd, c.tEnd, hex(c.data)]).toEqual([13, 130, '2800780050008200' + '00000000'])
+    const [, ccw] = compileDrone([step('takeoff', 5, { z: 100 }), step('circle_z', 8, { cell1: 14, cell2: 16, dz: 30, rotate: 'ccw' })])
+    expect(hex(ccw.data)).toBe('2800780050008200' + '01000000')
+    expect(() => compileDrone([step('circle_z', 8, { cell1: 14, cell2: 16, dz: 30, rotate: 'cw' })])).toThrow(/взлёт/)
+  })
+
+  it('compiles the whole of My Dream and flags no step as unflown (code_z and circle have flown)', () => {
     for (const n of Object.keys(dream.drones)) {
       const m = compileDrone(drone(dream, n))
-      expect(unprovenSteps(m).sort()).toEqual(['code_z'])
+      expect(unprovenSteps(m)).toEqual([])
     }
     expect(unprovenSteps(compileDrone(drone(square, '1')))).toEqual([])
   })
@@ -110,7 +118,7 @@ describe('the gallery', () => {
         const steps = show.drones[k] as Step[]
         const mission = compileDrone(steps)
         const unproven = unprovenSteps(mission)
-        expect(unproven, `${file} ${k}`).toEqual([]) // circle has flown, the gallery has no code_z
+        expect(unproven, `${file} ${k}`).toEqual([]) // circle and code_z have flown
         expect(missionChecksum(mission), `${file} ${k}`).toBeGreaterThan(0)
         expect(mission[mission.length - 1].tEnd / 10, `${file} ${k}`).toBeLessThanOrEqual(310)
       }

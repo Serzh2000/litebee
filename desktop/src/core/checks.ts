@@ -12,12 +12,12 @@ export const DEFAULT_MAX_HEIGHT_CM = 150
 export const MIN_TAKEOFF_CM = 20
 export const HARD_MAX_HEIGHT_CM = 200
 
-/** Steps the Python app lets through (proven on a live drone before the circle was flown). */
-const PROVEN_PY = new Set(['calibrate', 'takeoff', 'rgb', 'code', 'set_z', 'land'])
+/** Steps the Python app lets through (proven on a live drone before the circle was flown; code_z and circle_z since 2026-11-25). */
+const PROVEN_PY = new Set(['calibrate', 'takeoff', 'rgb', 'code', 'code_z', 'circle_z', 'set_z', 'land'])
 /** Steps that have flown: the ones above and circle. */
 const FLOWN = new Set([...PROVEN_PY, 'circle'])
-/** Steps the new app also packs, the way LiteBee Go does (the official examples use them), but nobody has flown yet. */
-const OFFICIAL = new Set(['code_z'])
+/** Steps the new app also packs, the way LiteBee Go does, but nobody has flown yet (none at the moment). */
+const OFFICIAL = new Set<string>()
 
 export type Level = 'error' | 'warn' | 'info'
 
@@ -133,8 +133,8 @@ export function checkShow(
         finding(
           'info',
           `Дрон ${n}: загрузка в дрон недоступна. Шаг '${blocked.kind}' (строка ${blocked.line}) пока нельзя загрузить: ` +
-            'его формат не проверен на живом дроне (загружаются калибровка, взлёт, высота, посадка, цвет и ' +
-            'движение по клеткам code)',
+            'его формат не проверен на живом дроне (загружаются калибровка, взлёт, высота, посадка, цвет, ' +
+            'движение по клеткам code, code_z и круг с подъёмом circle_z)',
           { drone: n },
         ),
       )

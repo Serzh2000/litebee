@@ -7,6 +7,8 @@ import type { Step } from '../core/show'
 import { setLang, tr } from '../core/i18n'
 import { adapters, Link } from './link'
 import { loadAllowed, saveAllowed } from './allow'
+import { askToLaunch } from './confirmWindow'
+import type { LaunchInfo } from './confirm'
 
 // The window background is the desk colour, so a slow first paint does not flash white or black.
 const DESK = '#EEF3F6'
@@ -137,20 +139,8 @@ ipcMain.handle('link:upload', (_e, args: { ip: string; steps: Step[]; maxHeightC
 ipcMain.handle('link:arm', (_e, on: boolean) => link.arm(on))
 ipcMain.handle('link:go', async (_e, args: { ips: string[]; maxHeightCm: number }) => {
   const parent = BrowserWindow.getFocusedWindow() ?? undefined
-  // The last word is a native dialog, outside the page: nothing in the page can answer it.
-  const confirm = async (lines: string[], flies: boolean) => {
-    const options: Electron.MessageBoxOptions = {
-      type: 'warning',
-      title: tr('Старт'),
-      message: flies ? tr('Дроны полетят') : tr('Миссия только со светодиодами'),
-      detail: lines.join('\n'),
-      buttons: [flies ? tr('Взлететь') : tr('Запустить'), tr('Отмена')],
-      defaultId: 1,
-      cancelId: 1,
-    }
-    const r = parent ? await dialog.showMessageBox(parent, options) : await dialog.showMessageBox(options)
-    return r.response === 0
-  }
+  // The last word is a window of its own, outside the page: nothing in the page can answer it.
+  const confirm = (info: LaunchInfo) => askToLaunch(parent, info)
   return link.launch(args.ips, args.maxHeightCm, confirm)
 })
 ipcMain.handle('link:forget', () => {

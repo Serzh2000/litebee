@@ -1,3 +1,4 @@
+import type { LaunchDrone, LaunchInfo } from './confirm'
 import { createSocket, type Socket } from 'node:dgram'
 import { createServer, type Server, type Socket as TcpSocket } from 'node:net'
 import { networkInterfaces } from 'node:os'
@@ -289,14 +290,14 @@ export class Link {
   async launch(
     ips: string[],
     maxHeightCm: number,
-    confirm: (lines: string[], flies: boolean) => Promise<boolean>,
+    confirm: (info: LaunchInfo) => Promise<boolean>,
   ): Promise<UploadResult> {
     if (this.flying) return { ok: false, message: 'Полёт уже идёт' }
     if (!this.armed) return { ok: false, message: 'Дрон не взведён, старт отменён' }
     const targets = ips.filter((ip) => this.loaded.has(ip) && this.conns.get(ip) && !this.conns.get(ip)!.lost)
     if (targets.length === 0) return { ok: false, message: 'Миссия не загружена, старт отменён' }
 
-    const lines: string[] = []
+    const drones: LaunchDrone[] = []
     let flies = false
     for (const ip of targets) {
       const m = this.loaded.get(ip)!
@@ -307,15 +308,18 @@ export class Link {
       flies ||= missionCanFly(m)
       const first = firstMoveCell(m)
       const cell = hasFix(t) ? cellFromXY(t.x, t.y) : null
-      const unproven = unprovenSteps(m)
-      if (unproven.length) lines.push(`Дрон ${ip}: ВНИМАНИЕ, не проверены на живом дроне шаги ${unproven.join(', ')}. Будьте готовы к аварийной посадке (Esc)`)
-      lines.push(
-        `Дрон ${ip}: контрольная сумма ${missionChecksum(m)} совпала, высота до ${missionMaxHeight(m)} см (лимит ${maxHeightCm} см), ` +
-          `~${missionSeconds(m).toFixed(0)} с` +
-          (first !== null ? `, стоит на ${cell !== null ? `клетке ${cell}` : 'неизвестной клетке'}, первое движение к клетке ${first}` : ''),
-      )
+      drones.push({
+        ip,
+        checksum: missionChecksum(m),
+        maxHeightCm: missionMaxHeight(m),
+        limitCm: maxHeightCm,
+        seconds: missionSeconds(m),
+        cell,
+        firstCell: first,
+        unproven: unprovenSteps(m),
+      })
     }
-    if (!(await confirm(lines, flies))) return { ok: false, message: 'Старт отменён' }
+    if (!(await confirm({ flies, drones }))) return { ok: false, message: 'Старт отменён' }
     if (!this.armed || this.flying) return { ok: false, message: 'Старт отменён: состояние изменилось' }
 
     this.abort = false

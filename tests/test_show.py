@@ -8,7 +8,7 @@ import pytest
 
 from litebee.lbg import lbg_to_show, lbg_to_source
 from litebee.loader import ShowLoadError, load_show, load_show_source
-from litebee.mission import (CMD_CIRCLE, CMD_MOVEXY, CMD_MOVEXYZ, CMD_MOVEZ, CMD_RGB, CMD_TAKEOFF,
+from litebee.mission import (CMD_CIRCLE, CMD_CIRCLEALT, CMD_MOVEXY, CMD_MOVEXYZ, CMD_MOVEZ, CMD_RGB, CMD_TAKEOFF,
                              DEFAULT_MAX_HEIGHT_CM, PROVEN_CMDS, xy_data,
                              HARD_MAX_HEIGHT_CM, MIN_TAKEOFF_CM, Mission, MissionStep, hop_mission,
                              resolve_max_height, z_data)
@@ -81,13 +81,12 @@ def test_compile_to_mission():
     assert CMD_RGB in m.cmds
 
 
-def test_cell_moves_are_uploadable_but_code_z_and_circles_are_not():
+def test_cell_moves_are_uploadable_but_circle_is_not():
     s = Show("x")
     s.drone(1).takeoff(100, 5).code(25, 4)
     m = drone_to_mission(s.drones[1])
     assert [x.cmd for x in m.steps] == [CMD_TAKEOFF, CMD_MOVEXY] and m.steps[1].cell == 25
-    for build in (lambda d: d.code_z(25, 100, 4), lambda d: d.circle(2, 66, 77, 13),
-                  lambda d: d.circle_z(14, 16, 50, 4)):
+    for build in (lambda d: d.circle(2, 66, 77, 13),):
         s = Show("x")
         d = s.drone(1)
         d.takeoff(100, 5)
@@ -244,10 +243,44 @@ def test_raising_the_limit_does_not_bypass_other_checks():
     # a mission: hover limit and unproven steps are still checked at the highest limit
     long_hover = Mission([MissionStep(CMD_TAKEOFF, 50, z_data(100)), MissionStep(CMD_MOVEZ, 160, z_data(100))])
     assert any("Зависание" in f.message for f in check_mission(long_hover, 200))
-    for cmd in (CMD_MOVEXYZ,):                              # still not proven: refused at any limit (circle was flown, see PROVEN_CMDS)
+    for cmd in (7,):                                       # local360: not proven, refused at any limit (circle, moveXYZ and circleAlt were flown, see PROVEN_CMDS)
         unproven = Mission([MissionStep(cmd, 50, bytes(12))])
         assert any("не проверен" in f.message for f in check_mission(unproven, 200))
     assert not _height_errors(check_mission(hop_mission(160, 3, max_height_cm=170), 170))
+
+
+def test_code_z_is_packed_as_moveXYZ_and_counts_for_the_height_limit():
+    """code_z flew on a live drone on 2026-11-25: i16 row, i16 col, i16 height, six zero bytes."""
+    s = Show("x")
+    s.drone(1).takeoff(100, 5).code_z(27, 130, 8)
+    m = drone_to_mission(s.drones[1])
+    step = m.steps[1]
+    assert step.cmd == CMD_MOVEXYZ and step.t_end == 130
+    assert step.data == bytes([80, 0, 120, 0, 130, 0, 0, 0, 0, 0, 0, 0])      # row 80 cm, col 120 cm, z 130 cm
+    assert step.cell == 27 and step.height_cm == 130 and m.max_height_cm == 130
+    assert m.first_move_xy == (120, 80)
+    assert not check_mission(m, 150)
+    high = Show("x")
+    high.drone(1).takeoff(100, 5).code_z(27, 190, 8)
+    assert any("Высота" in f.message for f in check_mission(drone_to_mission(high.drones[1]), 150))
+
+
+def test_circle_z_is_packed_as_circleAlt_with_an_absolute_height():
+    """circle_z flew on a live drone on 2026-11-25: i16 centre row, i16 centre col, u16 T, i16 absolute z, dir, 3 zeros."""
+    s = Show("x")
+    s.drone(1).takeoff(100, 5).circle_z(14, 16, 30, 8)           # centre between 14 (row 1, col 2) and 16 (row 1, col 4)
+    m = drone_to_mission(s.drones[1])
+    step = m.steps[1]
+    assert step.cmd == CMD_CIRCLEALT and step.t_end == 50 + 80   # one half turn takes the whole step (8 s after the 5 s take-off)
+    assert step.data == bytes([40, 0, 120, 0, 80, 0, 130, 0, 0, 0, 0, 0])   # row 40, col 120, T 80, z 100 + 30, cw
+    assert step.height_cm == 130 and m.max_height_cm == 130
+    ccw = Show("x")
+    ccw.drone(1).takeoff(100, 5).circle_z(14, 16, 30, 8, "ccw")
+    assert drone_to_mission(ccw.drones[1]).steps[1].data[8] == 1
+    no_takeoff = Show("x")
+    no_takeoff.drone(1).circle_z(14, 16, 30, 8)
+    with pytest.raises(UploadUnsupported, match="взлёт"):
+        drone_to_mission(no_takeoff.drones[1])
 
 
 def test_check_mission_and_hop_mission_use_the_limit():
@@ -301,7 +334,7 @@ def test_xy_data_covers_the_mat_and_refuses_the_rest():
 
 
 def test_only_proven_steps_can_be_packed():
-    assert PROVEN_CMDS == {0, 1, 2, 3, 5, 12, 50}      # calibrate, takeOff, autoLand, moveXY, moveZ, circle, RGB
+    assert PROVEN_CMDS == {0, 1, 2, 3, 5, 10, 12, 13, 50}  # calibrate, takeOff, autoLand, moveXY, moveZ, moveXYZ, circle, circleAlt, RGB
     off_cell = Mission([MissionStep(CMD_MOVEXY, 50, bytes([1, 0, 40, 0]) + bytes(8))])   # y = 1 cm
     assert any("не лежит на клетке" in f.message for f in check_mission(off_cell))
     assert check_mission(Mission([MissionStep(CMD_TAKEOFF, 50, z_data(50)), MissionStep(CMD_MOVEXY, 90, xy_data(97))])) == []

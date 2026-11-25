@@ -25,7 +25,6 @@ export const EN_REFERENCE: [ru: string, en: string][] = [
   ['Номер дрона. В LiteBee Go номера от 1 до 16', 'The number of the drone. In LiteBee Go the numbers go from 1 to 16'],
   ['Повторный вызов с тем же номером возвращает того же дрона', 'A second call with the same number returns the same drone'],
   ['Методы дрона можно соединять в цепочку: каждый возвращает самого дрона', 'Drone methods can be chained: each returns the drone itself'],
-  ['Загружается в дрон один дрон за раз: несколько дронов не проверялись на живых', 'Loaded into a drone one drone at a time: several drones have not been proven on live ones'],
   ['Калибровка дрона перед взлётом', 'Calibration of the drone before take-off'],
   ['Длительность шага. В примерах LiteBee Go — 5 с', 'The duration of the step. 5 s in the LiteBee Go examples'],
   ['Обычно первый шаг программы дрона', 'Usually the first step of a drone program'],
@@ -113,4 +112,10 @@ export const EN_REFERENCE: [ru: string, en: string][] = [
   ['Неизвестное имя ноты даёт ошибку сразу при вызове', 'An unknown note name gives an error right at the call'],
   ['docs/firmware/BUZZER_EXTENSION.md, раздел 6', 'docs/firmware/BUZZER_EXTENSION.md, section 6'],
   ["d.buzz('C3', 1.0)\nd.buzz('E3', 1.0)", "d.buzz('C3', 1.0)\nd.buzz('E3', 1.0)"],
+  ['Проверено на живом дроне 2026-11-25: подъём на месте и полёт в клетку 27 с подъёмом до 130 см (долетел с промахом 3 см, порядок «строка, столбец» верный)', 'Flown on a live drone on 2026-11-25: a climb on the spot and a flight to cell 27 climbing to 130 cm (it arrived 3 cm off, the order «row, column» is right)'],
+  ['Дрон набирает высоту не всегда до конца: за 3 с из 130 см поднялся до 123, за 8 с до 127 см. Для точной высоты оставьте больше времени', 'The drone does not always climb all the way: in 3 s it reached 123 of 130 cm, in 8 s 127 cm. For an exact height leave more time'],
+  ['z — итоговая высота. Шоу из LiteBee Go чередуют 130 и 80 см, значит это не прирост', 'z is the final height. The LiteBee Go shows alternate 130 and 80 cm, so it is not an increase'],
+  ['Проверено на живом дроне 2026-11-25 (один полёт): полукруг радиусом 40 см вокруг точки между клетками 14 и 16 с подъёмом до ~126 см из 130 запрошенных, центр и радиус прошивка прочитала верно', 'Flown on a live drone on 2026-11-25 (one flight): a half circle of radius 40 cm around the point between cells 14 and 16, climbing to ~126 of the 130 cm asked; the firmware read the centre and the radius right'],
+  ['За короткое время дрон может не дойти до конца дуги: шаг заканчивается по расписанию, а подъём отстаёт. Оставьте больше времени', 'In a short time the drone may not reach the end of the arc: the step ends on schedule while the climb lags. Leave more time'],
+  ['На провод идёт абсолютная высота: текущая высота плюс dz. Перед шагом нужен взлёт', 'The wire carries an absolute height: the current height plus dz. A take-off must come before the step'],
 ]

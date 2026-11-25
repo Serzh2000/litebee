@@ -6,8 +6,18 @@ bytes. The drone reports a checksum (telemetry bytes 8-9) that must equal the
 sum of the cmd bytes of the steps we sent.
 
 Only step layouts proven on live drones are packed (calibrate, takeOff, moveZ,
-autoLand, RGB, moveXY). moveXYZ / circle ids are known but their data layout
-is NOT verified, so they are never packed.
+autoLand, RGB, moveXY, moveXYZ, circleAlt). circle is proven on a drone but not packed by this module.
+
+moveXYZ (flown on a live drone 2026-11-25, one Wing-class formation drone, two flights): data = i16 LE row_cm,
+i16 LE col_cm, i16 LE absolute height in cm, 6 zero bytes. Flown: straight up and down over cell 0 (100 -> ~123 cm
+of 130 asked in 3 s), and from cell 0 to cell 27 (row 80, col 120) climbing to ~127 cm of 130 in 8 s: landed at
+x=123 y=80 cm, so the order row, col is right. A flight to cell 39 snagged and is not counted.
+
+circleAlt (flown 2026-11-25, one flight; the owner counted the test as passed because the height changed):
+data = i16 LE centre row_cm, i16 LE centre col_cm, u16 LE T (ONE half turn, 0.1 s), i16 LE ABSOLUTE height in cm,
+u8 direction (0 cw / 1 ccw), 3 zero bytes. Flown from cell 14 around the point between cells 14 and 16 (radius 40 cm),
+T=80, z=130: climbed to ~126 cm and landed 36 cm from the centre, on the circle but short of the end of the half
+turn (the step ends on time, as the climb lags). Absolute z fits: a relative 130 would have been 230 cm.
 
 moveXY (verified on live drones): data = u16 LE row_cm, u16 LE col_cm, 8 zero bytes,
 absolute mat coordinates (cell = col + 12 * row, 40 cm cells); the first value is
@@ -20,14 +30,14 @@ from typing import List
 from .protocol import frame
 
 CMD_CALIBRATE, CMD_TAKEOFF, CMD_AUTOLAND = 0, 1, 2
-CMD_MOVEXY, CMD_MOVEZ, CMD_MOVEXYZ, CMD_CIRCLE, CMD_RGB = 3, 5, 10, 12, 50
+CMD_MOVEXY, CMD_MOVEZ, CMD_MOVEXYZ, CMD_CIRCLE, CMD_CIRCLEALT, CMD_RGB = 3, 5, 10, 12, 13, 50
 
-PROVEN_CMDS = frozenset({CMD_CALIBRATE, CMD_TAKEOFF, CMD_AUTOLAND, CMD_MOVEZ, CMD_RGB, CMD_MOVEXY, CMD_CIRCLE})
+PROVEN_CMDS = frozenset({CMD_CALIBRATE, CMD_TAKEOFF, CMD_AUTOLAND, CMD_MOVEZ, CMD_RGB, CMD_MOVEXY, CMD_MOVEXYZ, CMD_CIRCLE, CMD_CIRCLEALT})
 
 CELL_CM, GRID_W = 40, 12                 # QR mat: 12 x 12 cells of 40 cm, cell = col + 12 * row
 GRID_CELLS = GRID_W * GRID_W
 CMD_NAMES = {CMD_CALIBRATE: "calibrate", CMD_TAKEOFF: "takeOff", CMD_AUTOLAND: "autoLand",
-             CMD_MOVEXY: "moveXY", CMD_MOVEZ: "moveZ", CMD_MOVEXYZ: "moveXYZ",
+             CMD_MOVEXY: "moveXY", CMD_MOVEZ: "moveZ", CMD_MOVEXYZ: "moveXYZ", CMD_CIRCLEALT: "circleAlt",
              CMD_CIRCLE: "circle", CMD_RGB: "RGB"}
 
 COLORS = {"black": (0, 0, 0), "red": (255, 0, 0), "green": (0, 255, 0), "yellow": (255, 255, 0),
@@ -74,22 +84,26 @@ class MissionStep:
 
     @property
     def height_cm(self):
-        """Target height for takeOff/moveZ steps, else None."""
+        """Target height for takeOff/moveZ/moveXYZ/circleAlt steps, else None."""
         if self.cmd in (CMD_TAKEOFF, CMD_MOVEZ):
             return struct.unpack_from("<H", self.data, 0)[0]
+        if self.cmd == CMD_MOVEXYZ:
+            return struct.unpack_from("<h", self.data, 4)[0]
+        if self.cmd == CMD_CIRCLEALT:
+            return struct.unpack_from("<h", self.data, 6)[0]
         return None
 
     @property
     def xy_cm(self):
-        """(x, y) target of a moveXY step in cm on the mat, else None."""
-        if self.cmd == CMD_MOVEXY:
-            y, x = struct.unpack_from("<HH", self.data, 0)
+        """(x, y) target of a moveXY / moveXYZ step in cm on the mat, else None."""
+        if self.cmd in (CMD_MOVEXY, CMD_MOVEXYZ):
+            y, x = struct.unpack_from("<hh", self.data, 0)
             return x, y
         return None
 
     @property
     def cell(self):
-        """Mat cell of a moveXY step, or None when it is not one or the target is not a cell centre."""
+        """Mat cell of a moveXY / moveXYZ step, or None when it is not one or the target is not a cell centre."""
         xy = self.xy_cm
         if xy is None or xy[0] % CELL_CM or xy[1] % CELL_CM:
             return None
@@ -125,8 +139,8 @@ class Mission:
 
     @property
     def moves(self) -> List[MissionStep]:
-        """The moveXY steps (cell moves) in order."""
-        return [s for s in self.steps if s.cmd == CMD_MOVEXY]
+        """The moveXY and moveXYZ steps (cell moves) in order."""
+        return [s for s in self.steps if s.cmd in (CMD_MOVEXY, CMD_MOVEXYZ)]
 
     @property
     def has_moves(self) -> bool:
@@ -134,7 +148,7 @@ class Mission:
 
     @property
     def first_move_xy(self):
-        """(x, y) cm of the first moveXY step, else None."""
+        """(x, y) cm of the first moveXY / moveXYZ step, else None."""
         return self.moves[0].xy_cm if self.moves else None
 
     @property
