@@ -1,0 +1,108 @@
+% Преамбула раздатки мастер-класса. Сборка: latexmk -xelatex masterclass.tex
+% Оформление то же, что у учебника (docs/uchebnik/preamble.tex).
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{russian}
+\setotherlanguage{english}
+\setmainfont{Charis SIL}[Scale=0.93]
+\setsansfont{Fira Sans}
+\setmonofont{JetBrains Mono}[Scale=0.84, RawFeature={-calt;-liga}]
+\newfontfamily\cyrillicfonttt{JetBrains Mono}[Scale=0.84, RawFeature={-calt;-liga}]
+
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{0B7285}
+\definecolor{accentdark}{HTML}{095C6B}
+\definecolor{accentsoft}{HTML}{E3F1F4}
+\definecolor{ink}{HTML}{1F2933}
+\definecolor{inkgray}{HTML}{5B6770}
+\definecolor{rule}{HTML}{C9D2D6}
+\definecolor{paper}{HTML}{F5F7F8}
+\definecolor{warnfill}{HTML}{FBF3E4}
+\definecolor{warnedge}{HTML}{B7791F}
+\definecolor{stopfill}{HTML}{FAECEC}
+\definecolor{stopedge}{HTML}{A33A3A}
+\definecolor{ledred}{HTML}{D64545}
+\definecolor{ledgreen}{HTML}{3C9D5A}
+\definecolor{ledblue}{HTML}{3465C4}
+\definecolor{ledyellow}{HTML}{D9B22B}
+\definecolor{ledcyan}{HTML}{2AA0B8}
+
+\usepackage{geometry}
+\geometry{a4paper, top=22mm, bottom=24mm, left=22mm, right=22mm, headsep=8mm}
+\KOMAoptions{parskip=half-}
+\linespread{1.06}
+
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\setlist{itemsep=2pt, topsep=4pt, parsep=0pt}
+\setlist[enumerate,1]{leftmargin=1.9em}
+\setlist[itemize,1]{leftmargin=1.3em}
+\usepackage{caption}
+\captionsetup{font={small,color=inkgray}, labelfont={bf,color=ink}, labelsep=period, justification=raggedright, singlelinecheck=false, skip=6pt}
+\usepackage{fvextra}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, calc, positioning}
+\usepackage{float}
+\usepackage{needspace}
+\raggedbottom
+
+% ---------- заголовки
+\addtokomafont{disposition}{\sffamily\color{ink}}
+\setkomafont{section}{\sffamily\bfseries\Large\color{accentdark}}
+\setkomafont{subsection}{\sffamily\bfseries\large\color{ink}}
+\RedeclareSectionCommand[beforeskip=1.4\baselineskip plus 4pt, afterskip=.5\baselineskip]{section}
+\RedeclareSectionCommand[beforeskip=1.0\baselineskip plus 3pt, afterskip=.3\baselineskip]{subsection}
+
+\usepackage[headsepline]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+\clearpairofpagestyles
+\ihead{Мастер-класс: шоу из четырёх дронов}
+\ohead{\pagemark}
+\setkomafont{pagehead}{\sffamily\small\color{inkgray}}
+\setkomafont{pagenumber}{\sffamily\small\bfseries\color{ink}}
+\setkomafont{headsepline}{\color{rule}}
+
+\usepackage[unicode, pdftitle={Мастер-класс: шоу из четырёх дронов}, pdfauthor={Litebee IDE}]{hyperref}
+\hypersetup{colorlinks=true, linkcolor=accent, urlcolor=accent}
+
+% ---------- листинги
+\fvset{fontsize=\small, breaklines=true, numbers=left, numbersep=7pt, xleftmargin=16pt, tabsize=4}
+\renewcommand{\theFancyVerbLine}{\textcolor{inkgray}{\scriptsize\arabic{FancyVerbLine}}}
+
+\tcbset{
+  codebox/.style={enhanced, breakable, colback=paper, colframe=paper, boxrule=0pt, sharp corners, frame hidden,
+    borderline west={2.5pt}{0pt}{accent}, left=9pt, right=6pt, top=3pt, bottom=3pt,
+    before skip=4pt, after skip=10pt},
+  note/.style={enhanced, breakable, colback=accentsoft, colframe=accentsoft, frame hidden, sharp corners,
+    borderline west={3pt}{0pt}{accent}, left=9pt, right=8pt, top=5pt, bottom=5pt, before skip=8pt, after skip=10pt},
+  warn/.style={enhanced, breakable, colback=warnfill, colframe=warnfill, frame hidden, sharp corners,
+    borderline west={3pt}{0pt}{warnedge}, left=9pt, right=8pt, top=5pt, bottom=5pt, before skip=8pt, after skip=10pt},
+  stop/.style={enhanced, breakable, colback=stopfill, colframe=stopfill, frame hidden, sharp corners,
+    borderline west={3pt}{0pt}{stopedge}, left=9pt, right=8pt, top=5pt, bottom=5pt, before skip=8pt, after skip=10pt},
+  task/.style={enhanced, breakable, colback=white, colframe=accent, boxrule=0.9pt, arc=3pt,
+    left=10pt, right=10pt, top=6pt, bottom=6pt, before skip=12pt, after skip=10pt,
+    fonttitle=\sffamily\bfseries\normalsize, coltitle=white, colbacktitle=accent, toptitle=3pt, bottomtitle=3pt},
+}
+
+\newenvironment{kod*}{\VerbatimEnvironment\begin{tcolorbox}[codebox]\begin{Verbatim}}{\end{Verbatim}\end{tcolorbox}}
+
+\newenvironment{zametka}[1][Запомните]{\begin{tcolorbox}[note]{\sffamily\bfseries\small\color{accentdark}#1}\par\smallskip}{\end{tcolorbox}}
+\newenvironment{vnimanie}[1][Осторожно]{\begin{tcolorbox}[warn]{\sffamily\bfseries\small\color{warnedge}#1}\par\smallskip}{\end{tcolorbox}}
+\newenvironment{opasno}[1][Безопасность]{\begin{tcolorbox}[stop]{\sffamily\bfseries\small\color{stopedge}#1}\par\smallskip}{\end{tcolorbox}}
+
+\newcounter{zadanie}
+\newenvironment{zadanie}[1]{\refstepcounter{zadanie}\begin{tcolorbox}[task, title={Задание \thezadanie. #1}]}{\end{tcolorbox}}
+
+\newcommand{\kod}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\knopka}[1]{\textsf{«#1»}}
+\newcommand{\klavisha}[1]{\tcbox[on line, colback=paper, colframe=rule, boxrule=0.4pt, arc=2pt, boxsep=1pt, left=2pt, right=2pt, top=0pt, bottom=0pt]{\sffamily\small #1}}
+\newcommand{\galka}{\tikz[baseline=0pt]\draw[ink, line width=0.6pt] (0,0) rectangle (0.27,0.27);}
+\usepackage{xspace}
+\newcommand{\cm}{\,см\xspace}
+\newcommand{\sek}{\,с\xspace}
+
+\hfuzz=1.5pt
