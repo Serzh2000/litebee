@@ -6,7 +6,7 @@ import { getLang, plural, setLang, tr } from '@core/i18n'
 import { EN } from '@core/i18n/en'
 import { groupFindings } from '@core/groups'
 import { stepText } from '@core/labels'
-import { compileDrone, UploadUnsupported, uploadProblems } from '@core/mission'
+import { compileDrone, firstLegProblem, swappedStarts, UploadUnsupported, uploadProblems } from '@core/mission'
 import { preflight } from '../src/renderer/src/state/preflight'
 import { buildShow, type ShowData, type Step } from '@core/show'
 import catalog from '../src/renderer/src/data/catalog.json'
@@ -129,6 +129,15 @@ describe('what the app shows in English has no Russian left', () => {
     const problems = uploadProblems(compileDrone(hold(190)), { batteryV: 6.5, x: 0, y: 0 })
     expect(problems.length).toBeGreaterThan(2)
     expect(left(problems.map((p) => tr(p)))).toEqual([])
+    const start = [
+      firstLegProblem(compileDrone(hold(100)), 400, 400),
+      ...swappedStarts([
+        { ip: 'a', x: 160, y: 40, firstCell: 13 },
+        { ip: 'b', x: 40, y: 40, firstCell: 16 },
+      ]),
+    ].filter((x): x is string => x !== null)
+    expect(start).toHaveLength(3)
+    expect(left(start.map((p) => tr(p)))).toEqual([])
     const refused: string[] = []
     for (const steps of [
       [{ kind: 'circle_z', seconds: 3, args: { cell1: 1, cell2: 2, dz: 5, rotate: 'cw' }, line: 4 }],

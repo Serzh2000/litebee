@@ -67,6 +67,8 @@ export const EN_MESSAGES: [ru: string, en: string][] = [
   ['У дрона нет позиции по коврику. Поставьте его на коврик и сделайте короткий взлёт на 50 см, затем повторите', 'The drone has no position on the mat. Put it on the mat and make a short take-off to 50 cm, then try again'],
   ['Дрон стоит {where}, а шоу ждёт его на клетке {c}: расстояние {d} см больше {m} см. Переставьте дрон ближе к клетке {c2} и повторите', 'The drone stands {where}, but the show expects it on cell {c}: the distance {d} cm is more than {m} cm. Move the drone closer to cell {c2} and try again'],
   ['на клетке {c}', 'on cell {c}'],
+  ['Первый перелёт к клетке {c}: {d} см за {s} с, это {v} см/с, быстрее {m} см/с. Поставьте дрон на клетку {c2} и повторите', 'The first flight to cell {c}: {d} cm in {s} s, that is {v} cm/s, faster than {m} cm/s. Put the drone on cell {c2} and try again'],
+  ['Дрон {ip} стоит ближе к клетке {a} (старт дрона {o}), чем к своей клетке {b}. Переставьте дроны на свои клетки и повторите', 'Drone {ip} stands nearer to cell {a} (the start of drone {o}) than to its own cell {b}. Put the drones on their own cells and try again'],
   ['Высота {h} см больше лимита {l} см', 'Height {h} cm is above the {l} cm limit'],
   ['Зависание {s} с больше лимита {m} с', 'Hovering for {s} s is above the {m} s limit'],
   ['Батарея {v} В ниже {m} В, полёт отменён', 'Battery {v} V is below {m} V, the flight is cancelled'],

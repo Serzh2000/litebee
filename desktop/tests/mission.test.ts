@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
-import { compileDrone, missionChecksum, missionFrames, missionMaxHeight, missionMaxHover, unprovenSteps, UploadUnsupported, uploadProblems } from '@core/mission'
+import { compileDrone, firstLegProblem, missionChecksum, missionFrames, missionMaxHeight, missionMaxHover, unprovenSteps, swappedStarts, UploadUnsupported, uploadProblems } from '@core/mission'
 import type { Step } from '@core/show'
 import square from '../shows/quarter_square.json'
 import dream from '../shows/my_dream.json'
@@ -63,6 +63,51 @@ describe('mission', () => {
     expect(uploadProblems(m, { batteryV: 7.9, x: 0, y: 0 })[0]).toMatch(/нет позиции/)
     expect(uploadProblems(m, { batteryV: 7.9, x: 440, y: 440 })[0]).toMatch(/Переставьте дрон/)
     expect(uploadProblems(m, { batteryV: 7.9, x: 40, y: 40 }, 80)[0]).toMatch(/больше лимита 80/)
+  })
+})
+
+describe('the start on the real mat', () => {
+  // as the masterclass: take-off, then 1 s to the own cell 13 (40, 40)
+  const m = compileDrone([
+    { kind: 'calibrate', seconds: 5, args: {}, line: 1 },
+    { kind: 'takeoff', seconds: 5, args: { z: 100 }, line: 2 },
+    { kind: 'code', seconds: 1, args: { cell: 13 }, line: 3 },
+    { kind: 'code', seconds: 3, args: { cell: 16 }, line: 4 },
+  ] as Step[])
+
+  it('lets a drone that stands on its cell or near it go', () => {
+    expect(firstLegProblem(m, 40, 40)).toBeNull()
+    expect(firstLegProblem(m, 80, 40)).toBeNull() // one cell off: 40 cm in 1 s
+    expect(uploadProblems(m, { batteryV: 7.9, x: 80, y: 40 })).toEqual([])
+  })
+
+  it('stops a drone that would rush to its cell faster than the checks allow', () => {
+    // three cells off: within the 200 cm of the distance rule, but 120 cm in 1 s
+    expect(firstLegProblem(m, 160, 40)).toMatch(/120 см за 1 с.*быстрее 100/)
+    expect(uploadProblems(m, { batteryV: 7.9, x: 160, y: 40 })).toHaveLength(1)
+  })
+
+  it('finds two drones put on the places of each other', () => {
+    // drone a must start on 13 (40, 40), drone b on 16 (160, 40)
+    const right = [
+      { ip: 'a', x: 40, y: 40, firstCell: 13 },
+      { ip: 'b', x: 160, y: 40, firstCell: 16 },
+    ]
+    expect(swappedStarts(right)).toEqual([])
+    const swapped = [
+      { ip: 'a', x: 160, y: 40, firstCell: 13 },
+      { ip: 'b', x: 40, y: 40, firstCell: 16 },
+    ]
+    expect(swappedStarts(swapped)).toHaveLength(2)
+    expect(swappedStarts(swapped)[0]).toMatch(/Дрон a стоит ближе к клетке 16/)
+  })
+
+  it('does not blame a drone without a position or a cell move', () => {
+    expect(swappedStarts([
+      { ip: 'a', x: 0, y: 0, firstCell: 13 },
+      { ip: 'b', x: 40, y: 40, firstCell: 16 },
+      { ip: 'c', x: 40, y: 40, firstCell: null },
+    ])).toEqual([])
   })
 })
 

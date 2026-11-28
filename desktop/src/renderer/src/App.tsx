@@ -20,7 +20,7 @@ const Mat3D = lazy(() => import('./components/Mat3D').then((m) => ({ default: m.
 import { MAX_DRONES } from '@core/project'
 import { sectionAt, splitDrones } from '@core/sections'
 import { addDrone, addNote, freeStartCell, setStartCell, type Edit } from '@core/placement'
-import { autoRoles, startCell } from '@core/roles'
+import { assignRole, autoRoles, missionsReady, resolveRoles, rolesFrozen, startCell, type Upload } from '@core/roles'
 import { batteryLevel, fmtVolts, useLink } from './state/useLink'
 import { compileDrone, unprovenSteps, UploadUnsupported } from '@core/mission'
 import { Inspector } from './components/Inspector'
@@ -304,16 +304,16 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
   // Which drone of the show each drone on the link is. The person chooses; nothing is uploaded to a drone without a role.
   // What the person picked wins; a drone they left alone gets its number from the cell it stands on.
   const [manual, setManual] = useState<Record<string, number | null>>({})
-  const auto = useMemo(() => autoRoles(show, link.active), [show, link.active])
-  const roles = useMemo(() => {
-    const taken = new Set(Object.values(manual).filter((n): n is number => n !== null))
-    const out: Record<string, number | null> = {}
-    for (const d of link.active) {
-      out[d.ip] = d.ip in manual ? manual[d.ip] : auto[d.ip] && !taken.has(auto[d.ip]) ? auto[d.ip] : null
-    }
-    return out
-  }, [manual, auto, link.active])
-  const [uploads, setUploads] = useState<Record<string, { ok: boolean; message: string }>>({})
+  // Numbers from cells are read on the ground before the upload only: after it, and in flight, the drones change
+  // cells and every number would move to another drone at once. The last numbers stay until the missions are done.
+  const frozen = rolesFrozen(link.state)
+  const lastAuto = useRef<Record<string, number>>({})
+  const auto = useMemo(() => {
+    if (!frozen) lastAuto.current = autoRoles(show, link.active)
+    return lastAuto.current
+  }, [show, link.active, frozen])
+  const roles = useMemo(() => resolveRoles(manual, auto, link.active.map((d) => d.ip)), [manual, auto, link.active])
+  const [uploads, setUploads] = useState<Record<string, Upload>>({})
   const [loading, setLoading] = useState(false)
   // A changed show or limit makes what is on board out of date.
   useEffect(() => setUploads({}), [show, maxHeight])
@@ -334,7 +334,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
     return null
   }, [link.connected, assigned, roles, show])
   const onBoard = new Set(link.state?.loaded ?? [])
-  const loaded = assigned.length > 0 && assigned.every((d) => uploads[d.ip]?.ok && onBoard.has(d.ip))
+  const loaded = missionsReady(link.active.map((d) => d.ip), roles, uploads, onBoard)
   const armed = Boolean(link.state?.armed)
   const flying = Boolean(link.state?.flying)
 
@@ -346,7 +346,8 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
     for (const d of assigned) {
       const model = show.drones.find((m) => m.number === roles[d.ip])!
       const r = await window.litebee.link.upload({ ip: d.ip, steps: model.steps, maxHeightCm: maxHeight })
-      setUploads((u) => ({ ...u, [d.ip]: r }))
+      const role = roles[d.ip]
+      setUploads((u) => ({ ...u, [d.ip]: { ...r, role } }))
       if (r.ok) done++
     }
     link.refresh()
@@ -423,13 +424,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
   const now = useMemo(() => linesAt(show, playback.t, selected), [show, playback.t, selected])
 
   // The person's choice of the drone on the link that flies drone `number`: whoever had that number gives it up.
-  const assign = (number: number, ip: string | null) =>
-    setManual((m) => {
-      const next = { ...m }
-      for (const d of link.active) if (roles[d.ip] === number) next[d.ip] = null
-      if (ip) next[ip] = number
-      return next
-    })
+  const assign = (number: number, ip: string | null) => setManual((m) => assignRole(m, roles, number, ip))
 
   // The one finding of the screen, read first under the title: what most needs attention before a flight.
   const weak = link.active
@@ -598,7 +593,7 @@ function Workspace({ project, actions, onSource, note, first, inactive }: Worksp
                       roles={roles}
                       autoIps={new Set(Object.keys(roles).filter((ip) => roles[ip] && !(ip in manual)))}
                       onRole={(ip, n) => (n === null ? assign(roles[ip] ?? -1, null) : assign(n, ip))}
-                      uploads={uploads}
+                      uploads={Object.fromEntries(Object.entries(uploads).filter(([ip, u]) => u.role === roles[ip]))}
                       onForget={() => void link.forget()}
                     />
                   </div>

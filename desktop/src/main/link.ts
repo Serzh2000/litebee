@@ -6,6 +6,7 @@ import {
   clearMissionFrame,
   compileDrone,
   firstMoveCell,
+  swappedStarts,
   type Mission,
   missionCanFly,
   missionChecksum,
@@ -319,6 +320,13 @@ export class Link {
         unproven: unprovenSteps(m),
       })
     }
+    const swapped = swappedStarts(
+      targets.map((ip) => {
+        const t = this.conns.get(ip)!.telemetry!
+        return { ip, x: t.x, y: t.y, firstCell: firstMoveCell(this.loaded.get(ip)!) }
+      }),
+    )
+    if (swapped.length) return { ok: false, message: swapped[0] }
     if (!(await confirm({ flies, drones }))) return { ok: false, message: 'Старт отменён' }
     if (!this.armed || this.flying) return { ok: false, message: 'Старт отменён: состояние изменилось' }
 

@@ -4,7 +4,7 @@
  *
  * Times are cumulative, in 0.1 s, u16 little endian; moveXY data is (row_cm, col_cm) as u16 LE + 8 zero bytes.
  */
-import { DEFAULT_MAX_HEIGHT_CM, MAX_START_DISTANCE_CM } from './checks'
+import { DEFAULT_MAX_HEIGHT_CM, MAX_LEG_SPEED_CM_S, MAX_START_DISTANCE_CM } from './checks'
 import { frame } from './protocol'
 import { CELL_CM, GRID_CELLS, GRID_W, cellFromXY, type Step } from './show'
 
@@ -200,6 +200,56 @@ export function positionProblem(firstCell: number, x: number, y: number): string
   )
 }
 
+const cellXY = (cell: number) => ({ x: (cell % GRID_W) * CELL_CM, y: Math.floor(cell / GRID_W) * CELL_CM })
+
+/**
+ * The first cell move starts where the drone really stands, not on its cell: the show checks never see this leg. A drone
+ * put a few cells away would rush to its cell in the second the show gives it, faster than any leg the checks allow.
+ */
+export function firstLegProblem(m: Mission, x: number, y: number): string | null {
+  const i = m.findIndex((s) => s.cmd === CMD.moveXY || s.cmd === CMD.moveXYZ)
+  if (i < 0 || (!x && !y)) return null
+  const first = firstMoveCell(m)!
+  const t = cellXY(first)
+  const d = Math.hypot(x - t.x, y - t.y)
+  const seconds = (m[i].tEnd - (i > 0 ? m[i - 1].tEnd : 0)) / 10
+  if (seconds <= 0 || d / seconds <= MAX_LEG_SPEED_CM_S) return null
+  return (
+    `Первый перелёт к клетке ${first}: ${d.toFixed(0)} см за ${seconds} с, это ${(d / seconds).toFixed(0)} см/с, быстрее ` +
+    `${MAX_LEG_SPEED_CM_S} см/с. Поставьте дрон на клетку ${first} и повторите`
+  )
+}
+
+/** A drone on the link at the start: where it stands and the first cell of the mission on board. */
+export interface StartPlace {
+  ip: string
+  x: number
+  y: number
+  firstCell: number | null
+}
+
+/**
+ * Drones that stand nearer to the start of another drone than to their own: two drones put on each other's places.
+ * Each passes the distance rule alone (the corners of a small square are closer than it), but together they would
+ * cross on the way to their cells.
+ */
+export function swappedStarts(drones: StartPlace[]): string[] {
+  const out: string[] = []
+  const placed = drones.filter((d) => d.firstCell !== null && (d.x || d.y))
+  for (const d of placed) {
+    const dist = (cell: number) => Math.hypot(d.x - cellXY(cell).x, d.y - cellXY(cell).y)
+    const own = dist(d.firstCell!)
+    const other = placed.find((o) => o !== d && o.firstCell !== d.firstCell && dist(o.firstCell!) < own)
+    if (other) {
+      out.push(
+        `Дрон ${d.ip} стоит ближе к клетке ${other.firstCell} (старт дрона ${other.ip}), чем к своей клетке ${d.firstCell}. ` +
+          `Переставьте дроны на свои клетки и повторите`,
+      )
+    }
+  }
+  return out
+}
+
 export interface DroneState {
   batteryV: number
   x: number
@@ -222,6 +272,10 @@ export function uploadProblems(m: Mission, drone: DroneState, maxHeightCm = DEFA
   if (first !== null) {
     const why = positionProblem(first, drone.x, drone.y)
     if (why) out.push(why)
+    else {
+      const fast = firstLegProblem(m, drone.x, drone.y)
+      if (fast) out.push(fast)
+    }
   }
   return out
 }
